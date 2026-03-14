@@ -1,0 +1,146 @@
+/* ===============================
+   FUENTE
+================================ */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+/* ===============================
+   TOP BAR
+================================ */
+
+.top-bar {
+    background: #D32F2F;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.top-link {
+    color: white;
+    text-decoration: none;
+}
+
+    .top-link:hover {
+        text-decoration: underline;
+    }
+
+/* ===============================
+   LOGO
+================================ */
+
+.logo-nexosoft {
+    max-height: 50px;
+}
+
+/* ===============================
+   SEARCH
+================================ */
+
+.search-box {
+    display: flex;
+}
+
+.search-input {
+    border-radius: 30px 0 0 30px;
+}
+
+.search-btn {
+    border-radius: 0 30px 30px 0;
+}
+
+/* ===============================
+   HEADER ICONS
+================================ */
+
+.header-icon {
+    color: #37474F;
+    font-weight: 500;
+}
+
+.cart-badge {
+    background: #D32F2F;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 7px;
+    font-size: 12px;
+    position: absolute;
+    top: -8px;
+    right: -12px;
+}
+
+/* ===============================
+   CATEGORY NAV
+================================ */
+
+.category-menu {
+    gap: 12px;
+}
+
+.category-nav {
+    background: #37474F;
+}
+
+.category-menu .nav-link {
+    color: white;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 8px 14px;
+}
+
+    .category-menu .nav-link:hover {
+        background: #D32F2F;
+        color: white;
+    }
+
+/* ===============================
+   FOOTER
+================================ */
+
+.site-footer {
+    background: #263238;
+    margin-top: 0 !important;
+}
+
+.footer-brand {
+    font-weight: 700;
+}
+
+.footer-title {
+    font-weight: 600;
+}
+
+.footer-links a {
+    color: #cfd8dc;
+    text-decoration: none;
+}
+
+    .footer-links a:hover {
+        color: white;
+    }
+
+.footer-contact li {
+    color: #cfd8dc;
+}
+
+.footer-line {
+    border-color: #455a64;
+}
+
+.footer-copy {
+    color: #b0bec5;
+}
