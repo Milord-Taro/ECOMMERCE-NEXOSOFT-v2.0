@@ -1,8 +1,227 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero-section">
+    <div class="container py-5">
+        <div class="hero-banner position-relative overflow-hidden rounded-4">
+            <img src="https://images.unsplash.com/photo-1649691594234-525b1bfe01f2?auto=format&fit=crop&w=1400&q=80"
+                 alt="Banner principal"
+                 class="hero-image" />
+
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content position-absolute top-50 start-0 translate-middle-y text-white px-4 px-md-5">
+                <div class="col-lg-7">
+                    <h1 class="hero-title mb-3">
+                        Innovación en <span class="text-danger">Ferretería</span>
+                    </h1>
+                    <p class="hero-text mb-4">
+                        Las mejores herramientas y equipos profesionales para tus proyectos.
+                        Calidad garantizada y tecnología de punta.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <a href="#" class="btn btn-danger btn-lg px-4">Ver catálogo</a>
+                        <a href="#" class="btn btn-outline-light btn-lg px-4">Ofertas especiales</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="benefits-section py-4">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="benefit-card text-center">
+                    <h5>Envío Gratis</h5>
+                    <p>En compras superiores a $150.000</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="benefit-card text-center">
+                    <h5>Garantía Extendida</h5>
+                    <p>Hasta 2 años en productos seleccionados</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="benefit-card text-center">
+                    <h5>Pago Seguro</h5>
+                    <p>Múltiples métodos de pago disponibles</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="benefit-card text-center">
+                    <h5>Soporte 24/7</h5>
+                    <p>Asesoría técnica especializada</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="categories-section py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title">Categorías destacadas</h2>
+            <a href="#" class="section-link">Ver todas →</a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1770763233593-74dfd0da7bf0?auto=format&fit=crop&w=600&q=80" alt="Herramientas eléctricas" />
+                    <div class="category-info">
+                        <h6>Herramientas Eléctricas</h6>
+                        <span>245 productos</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1770386582823-3a7094e35b22?auto=format&fit=crop&w=600&q=80" alt="Herramientas manuales" />
+                    <div class="category-info">
+                        <h6>Herramientas Manuales</h6>
+                        <span>567 productos</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1588014328208-de6c5973a014?auto=format&fit=crop&w=600&q=80" alt="Pintura y acabados" />
+                    <div class="category-info">
+                        <h6>Pintura y Acabados</h6>
+                        <span>189 productos</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1742828721926-6010895aa72d?auto=format&fit=crop&w=600&q=80" alt="Construcción" />
+                    <div class="category-info">
+                        <h6>Construcción</h6>
+                        <span>432 productos</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1703756291638-b1774ae3c186?auto=format&fit=crop&w=600&q=80" alt="Medición" />
+                    <div class="category-info">
+                        <h6>Medición</h6>
+                        <span>156 productos</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1755925193287-275aa7fe64f0?auto=format&fit=crop&w=600&q=80" alt="Seguridad industrial" />
+                    <div class="category-info">
+                        <h6>Seguridad Industrial</h6>
+                        <span>298 productos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="featured-products py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title">Productos destacados</h2>
+            <a href="#" class="section-link">Ver todos →</a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="product-card">
+                    <div class="product-image-wrap">
+                        <span class="product-badge">-20%</span>
+                        <img src="https://images.unsplash.com/photo-1770763233593-74dfd0da7bf0?auto=format&fit=crop&w=700&q=80" alt="Taladro" />
+                    </div>
+                    <div class="product-body">
+                        <h6>Taladro Percutor Profesional 800W</h6>
+                        <div class="product-price">
+                            <span class="price-current">$289.000</span>
+                            <span class="price-old">$359.000</span>
+                        </div>
+                        <a href="#" class="btn btn-dark w-100">Agregar al carrito</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="product-card">
+                    <div class="product-image-wrap">
+                        <span class="product-badge">-15%</span>
+                        <img src="https://images.unsplash.com/photo-1770386582823-3a7094e35b22?auto=format&fit=crop&w=700&q=80" alt="Destornilladores" />
+                    </div>
+                    <div class="product-body">
+                        <h6>Set de Destornilladores Magnéticos</h6>
+                        <div class="product-price">
+                            <span class="price-current">$89.000</span>
+                            <span class="price-old">$125.000</span>
+                        </div>
+                        <a href="#" class="btn btn-dark w-100">Agregar al carrito</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="product-card">
+                    <div class="product-image-wrap">
+                        <img src="https://images.unsplash.com/photo-1588014328208-de6c5973a014?auto=format&fit=crop&w=700&q=80" alt="Pintura" />
+                    </div>
+                    <div class="product-body">
+                        <h6>Kit de Pintura Profesional</h6>
+                        <div class="product-price">
+                            <span class="price-current">$156.000</span>
+                        </div>
+                        <a href="#" class="btn btn-dark w-100">Agregar al carrito</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="product-card">
+                    <div class="product-image-wrap">
+                        <span class="product-badge">-25%</span>
+                        <img src="https://images.unsplash.com/photo-1742828721926-6010895aa72d?auto=format&fit=crop&w=700&q=80" alt="Martillo" />
+                    </div>
+                    <div class="product-body">
+                        <h6>Martillo de Carpintero Profesional</h6>
+                        <div class="product-price">
+                            <span class="price-current">$67.000</span>
+                            <span class="price-old">$89.000</span>
+                        </div>
+                        <a href="#" class="btn btn-dark w-100">Agregar al carrito</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="promo-section py-5">
+    <div class="container">
+        <div class="promo-banner">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h2>¡Ofertas Especiales de Marzo!</h2>
+                    <p>
+                        Hasta 40% de descuento en herramientas eléctricas y accesorios.
+                        Aprovecha nuestras promociones especiales este mes.
+                    </p>
+                    <a href="#" class="btn btn-light btn-lg">Ver ofertas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
