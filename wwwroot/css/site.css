@@ -144,3 +144,245 @@ main {
 .footer-copy {
     color: #b0bec5;
 }
+
+                /* ===============================
+                       ESTILOS HOMEPAGE
+                 ================================ */
+
+.main-header {
+    background: #ffffff;
+}
+
+main {
+    flex: 1;
+}
+
+/* ===============================
+   HOME - HERO
+================================ */
+.hero-banner {
+    min-height: 460px;
+    background: #263238;
+}
+
+.hero-image {
+    width: 100%;
+    height: 460px;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(38, 50, 56, 0.92), rgba(38, 50, 56, 0.55));
+}
+
+.hero-content {
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.hero-text {
+    font-size: 1.1rem;
+    max-width: 650px;
+}
+
+/* ===============================
+   BENEFITS
+================================ */
+.benefit-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    height: 100%;
+}
+
+    .benefit-card h5 {
+        color: #37474F;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .benefit-card p {
+        color: #607d8b;
+        margin-bottom: 0;
+    }
+
+/* ===============================
+   SECTION TITLES
+================================ */
+.section-title {
+    color: #37474F;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.section-link {
+    color: #D32F2F;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+    .section-link:hover {
+        text-decoration: underline;
+    }
+
+/* ===============================
+   CATEGORY CARDS
+================================ */
+.category-card {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+
+    .category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .category-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+.category-info {
+    padding: 14px;
+}
+
+    .category-info h6 {
+        color: #37474F;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .category-info span {
+        color: #78909c;
+        font-size: 14px;
+    }
+
+/* ===============================
+   PRODUCTS
+================================ */
+.featured-products {
+    background: #f8f9fa;
+}
+
+.product-card {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+.product-image-wrap {
+    position: relative;
+}
+
+    .product-image-wrap img {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+    }
+
+.product-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #D32F2F;
+    color: #fff;
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.product-body {
+    padding: 18px;
+}
+
+    .product-body h6 {
+        color: #37474F;
+        font-weight: 700;
+        min-height: 48px;
+    }
+
+.product-price {
+    margin: 14px 0;
+}
+
+.price-current {
+    color: #D32F2F;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-right: 10px;
+}
+
+.price-old {
+    color: #9e9e9e;
+    text-decoration: line-through;
+    font-size: 0.95rem;
+}
+
+/* ===============================
+   PROMO
+================================ */
+.promo-banner {
+    background: linear-gradient(135deg, #D32F2F, #ef5350);
+    color: white;
+    border-radius: 18px;
+    padding: 50px 40px;
+}
+
+    .promo-banner h2 {
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .promo-banner p {
+        font-size: 1.1rem;
+        margin-bottom: 22px;
+        max-width: 750px;
+    }
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.1rem;
+    }
+
+    .hero-text {
+        font-size: 1rem;
+    }
+
+    .hero-banner,
+    .hero-image {
+        height: 400px;
+        min-height: 400px;
+    }
+
+    .promo-banner {
+        padding: 32px 24px;
+    }
+}
+
