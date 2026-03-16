@@ -120,9 +120,18 @@
             <hr class="footer-line my-4" />
 
             <div class="text-center footer-copy">
+
                 &copy; 2026 NEXOSOFT SAS. Todos los derechos reservados.
+
+                <div class="mt-2">
+                    <a asp-controller="Home"
+                       asp-action="Error500"
+                       class="btn btn-sm btn-outline-light">
+                        Test Error 500
+                    </a>
+                </div>
+
             </div>
-        </div>
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
