@@ -12,6 +12,9 @@ builder.Services.AddDbContext<NexosoftDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("NexosoftConnection"))
     ));
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,6 +27,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(

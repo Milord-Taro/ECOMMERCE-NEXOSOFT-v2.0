@@ -1,0 +1,19 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.Pedido
+
+@{
+    ViewData["Title"] = "Pedido confirmado";
+}
+
+<section class="container py-5">
+    <div class="alert alert-success">
+        <h2 class="mb-3">¡Pedido registrado correctamente!</h2>
+        <p class="mb-2"><strong>ID del pedido:</strong> @Model.IdPedido</p>
+        <p class="mb-2"><strong>Código del pedido:</strong> @Model.CodPedido</p>
+        <p class="mb-2"><strong>Total:</strong> $@Model.Total.ToString("N2")</p>
+        <p class="mb-0"><strong>Estado:</strong> @Model.EstadoPedido</p>
+    </div>
+
+    <a asp-controller="Productos" asp-action="Index" class="btn btn-danger">
+        Volver al catálogo
+    </a>
+</section>

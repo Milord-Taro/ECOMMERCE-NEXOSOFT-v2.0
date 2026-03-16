@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@using ECOMMERCE_NEXOSOFT.Helpers
+@using ECOMMERCE_NEXOSOFT.Models
+
+@{
+    var carrito = Context.Session.GetObjectFromJson<List<CarritoItem>>("CARRITO") ?? new List<CarritoItem>();
+    var cantidadCarrito = CarritoHelper.ObtenerCantidadItems(carrito);
+}
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -12,7 +20,7 @@
     <header>
         <div class="top-bar text-white py-2">
             <div class="container text-center">
-                <div class="small fw-semibold">
+                <div class="big fw-semibold">
                     Envío gratis en compras superiores a $150.000
                 </div>
             </div>
@@ -37,9 +45,12 @@
                     <div class="col-12 col-md-3">
                         <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-3">
                             <a href="#" class="header-icon text-decoration-none">Mi cuenta</a>
-                            <a href="#" class="header-icon text-decoration-none position-relative">
+                            <a asp-controller="Carrito" asp-action="Index" class="header-icon text-decoration-none position-relative">
                                 Carrito
-                                <span class="cart-badge">3</span>
+                                @if (cantidadCarrito > 0)
+                                {
+                                    <span class="cart-badge">@cantidadCarrito</span>
+                                }
                             </a>
                         </div>
                     </div>
