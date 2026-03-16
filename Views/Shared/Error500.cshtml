@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Error del servidor";
+}
+
+<section class="container text-center py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-6">
+
+            <h1 class="display-3 text-danger fw-bold">500</h1>
+
+            <h3 class="mb-3">Error interno del servidor</h3>
+
+            <p class="text-muted mb-4">
+                Algo salió mal en nuestro servidor.
+                Estamos trabajando para solucionarlo.
+            </p>
+
+            <div class="d-flex justify-content-center gap-2">
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="btn btn-danger">
+                    Volver al inicio
+                </a>
+
+                <a asp-controller="Productos"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Ir al catálogo
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

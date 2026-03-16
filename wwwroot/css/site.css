@@ -367,22 +367,123 @@ main {
    RESPONSIVE
 ================================ */
 @media (max-width: 768px) {
+
+    .product-image-wrap img {
+        height: 200px;
+    }
+
+    .product-body h6 {
+        font-size: 14px;
+    }
+
+    .price-current {
+        font-size: 1.1rem;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+    }
+
     .hero-title {
-        font-size: 2.1rem;
+        font-size: 2rem;
     }
 
-    .hero-text {
-        font-size: 1rem;
-    }
-
-    .hero-banner,
-    .hero-image {
-        height: 400px;
-        min-height: 400px;
-    }
-
-    .promo-banner {
-        padding: 32px 24px;
+    .hero-banner {
+        height: 360px;
     }
 }
+/* 404 PAGE */
 
+.error-404 {
+    padding: 120px 0;
+}
+
+    .error-404 h1 {
+        font-size: 6rem;
+    }
+/* ERROR PAGES */
+
+.error-page {
+    padding: 120px 0;
+}
+
+    .error-page h1 {
+        font-size: 6rem;
+    }
+body {
+    background-color: #f4f6f9;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+h3 {
+    font-weight: bold;
+}
+/* ===============================
+   LOGIN / REGISTER
+================================ */
+
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    background: #f4f6f9;
+}
+
+.login-card {
+    width: 400px;
+    background: #ffffff;
+    padding: 35px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.logo-login {
+    width: 120px;
+    margin-bottom: 15px;
+}
+
+.login-card h3 {
+    color: #37474F;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+    .form-group label {
+        font-weight: 600;
+        color: #37474F;
+    }
+
+.form-control {
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+    .form-control:focus {
+        border-color: #D32F2F;
+        box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+    }
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: #D32F2F;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+    .btn-login:hover {
+        background: #b71c1c;
+    }

@@ -12,19 +12,26 @@ builder.Services.AddDbContext<NexosoftDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("NexosoftConnection"))
     ));
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Home/Error500");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthorization();
+app.UseStatusCodePagesWithReExecute("/Home/Error404");
 
 app.MapControllerRoute(
     name: "default",
