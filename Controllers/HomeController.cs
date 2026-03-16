@@ -25,8 +25,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .ToListAsync();
 
             var productos = await _context.Productos
-                .Take(8)
-                .ToListAsync();
+     .Where(p => p.Favorito)
+     .Take(8)
+     .ToListAsync();
 
             var viewModel = new HomeViewModel
             {
@@ -46,6 +47,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+        public IActionResult Error404()
+        {
+            return View("Error404");
+        }
+        public IActionResult Error500()
+        {
+            return View("Error500");
         }
     }
 }

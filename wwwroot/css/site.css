@@ -367,22 +367,47 @@ main {
    RESPONSIVE
 ================================ */
 @media (max-width: 768px) {
+
+    .product-image-wrap img {
+        height: 200px;
+    }
+
+    .product-body h6 {
+        font-size: 14px;
+    }
+
+    .price-current {
+        font-size: 1.1rem;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+    }
+
     .hero-title {
-        font-size: 2.1rem;
+        font-size: 2rem;
     }
 
-    .hero-text {
-        font-size: 1rem;
-    }
-
-    .hero-banner,
-    .hero-image {
-        height: 400px;
-        min-height: 400px;
-    }
-
-    .promo-banner {
-        padding: 32px 24px;
+    .hero-banner {
+        height: 360px;
     }
 }
+/* 404 PAGE */
+
+.error-404 {
+    padding: 120px 0;
+}
+
+    .error-404 h1 {
+        font-size: 6rem;
+    }
+/* ERROR PAGES */
+
+.error-page {
+    padding: 120px 0;
+}
+
+    .error-page h1 {
+        font-size: 6rem;
+    }
 

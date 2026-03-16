@@ -1,0 +1,58 @@
+﻿@model List<ECOMMERCE_NEXOSOFT.Models.CarritoItem>
+
+@{
+    ViewData["Title"] = "Checkout";
+    decimal total = Model.Sum(x => x.Precio * x.Cantidad);
+}
+
+<section class="container py-5">
+    <h2 class="section-title mb-4">Resumen de compra</h2>
+
+    @if (TempData["MensajeCheckout"] != null)
+    {
+        <div class="alert alert-warning">
+            @TempData["MensajeCheckout"]
+        </div>
+    }
+
+    <div class="table-responsive mb-4">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.NombreProducto</td>
+                        <td>$@item.Precio.ToString("N2")</td>
+                        <td>@item.Cantidad</td>
+                        <td>$@((item.Precio * item.Cantidad).ToString("N2"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a asp-controller="Carrito" asp-action="Index" class="btn btn-outline-secondary">
+            Volver al carrito
+        </a>
+
+        <div class="text-end">
+            <h4>Total: $@total.ToString("N2")</h4>
+
+            <form asp-controller="Checkout" asp-action="Confirmar" method="post" class="mt-3">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">
+                    Confirmar pedido
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
