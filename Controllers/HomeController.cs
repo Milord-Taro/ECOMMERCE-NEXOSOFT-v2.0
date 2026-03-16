@@ -1,21 +1,40 @@
 using System.Diagnostics;
 using ECOMMERCE_NEXOSOFT.Models;
+using ECOMMERCE_NEXOSOFT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using ECOMMERCE_NEXOSOFT.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly NexosoftDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, NexosoftDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var categorias = await _context.Categoria
+                .Take(6)
+                .ToListAsync();
+
+            var productos = await _context.Productos
+                .Take(8)
+                .ToListAsync();
+
+            var viewModel = new HomeViewModel
+            {
+                Categorias = categorias,
+                ProductosDestacados = productos
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult Privacy()
