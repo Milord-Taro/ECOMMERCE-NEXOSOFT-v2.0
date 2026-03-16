@@ -48,9 +48,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        public IActionResult NotFoundPage()
+        public IActionResult Error404()
         {
-            return View("NotFound");
+            return View("Error404");
         }
         public IActionResult Error500()
         {

@@ -30,7 +30,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
-app.UseStatusCodePagesWithReExecute("/Home/NotFoundPage");
+app.UseStatusCodePagesWithReExecute("/Home/Error404");
 
 app.MapControllerRoute(
     name: "default",
