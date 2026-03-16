@@ -1,4 +1,5 @@
-﻿@{
+﻿@model ECOMMERCE_NEXOSOFT.ViewModels.HomeViewModel
+@{
     ViewData["Title"] = "Inicio";
 }
 
@@ -65,69 +66,29 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="section-title">Categorías destacadas</h2>
-            <a href="#" class="section-link">Ver todas →</a>
+            <a asp-controller="Productos" asp-action="Index" class="section-link">Ver todas →</a>
         </div>
 
         <div class="row g-4">
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1770763233593-74dfd0da7bf0?auto=format&fit=crop&w=600&q=80" alt="Herramientas eléctricas" />
-                    <div class="category-info">
-                        <h6>Herramientas Eléctricas</h6>
-                        <span>245 productos</span>
-                    </div>
-                </div>
-            </div>
+            @foreach (var categoria in Model.Categorias)
+            {
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="category-card">
+                        <img src="/img/categoria-default.jpg" alt="@categoria.NombreCategoria" />
 
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1770386582823-3a7094e35b22?auto=format&fit=crop&w=600&q=80" alt="Herramientas manuales" />
-                    <div class="category-info">
-                        <h6>Herramientas Manuales</h6>
-                        <span>567 productos</span>
-                    </div>
-                </div>
-            </div>
+                        <div class="category-info">
+                            <h6>@categoria.NombreCategoria</h6>
 
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1588014328208-de6c5973a014?auto=format&fit=crop&w=600&q=80" alt="Pintura y acabados" />
-                    <div class="category-info">
-                        <h6>Pintura y Acabados</h6>
-                        <span>189 productos</span>
+                            <a asp-controller="Productos"
+                               asp-action="Index"
+                               asp-route-categoria="@categoria.IdCategoria"
+                               class="section-link">
+                                Explorar categoría
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1742828721926-6010895aa72d?auto=format&fit=crop&w=600&q=80" alt="Construcción" />
-                    <div class="category-info">
-                        <h6>Construcción</h6>
-                        <span>432 productos</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1703756291638-b1774ae3c186?auto=format&fit=crop&w=600&q=80" alt="Medición" />
-                    <div class="category-info">
-                        <h6>Medición</h6>
-                        <span>156 productos</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1755925193287-275aa7fe64f0?auto=format&fit=crop&w=600&q=80" alt="Seguridad industrial" />
-                    <div class="category-info">
-                        <h6>Seguridad Industrial</h6>
-                        <span>298 productos</span>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
@@ -140,71 +101,45 @@
         </div>
 
         <div class="row g-4">
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="product-card">
-                    <div class="product-image-wrap">
-                        <span class="product-badge">-20%</span>
-                        <img src="https://images.unsplash.com/photo-1770763233593-74dfd0da7bf0?auto=format&fit=crop&w=700&q=80" alt="Taladro" />
-                    </div>
-                    <div class="product-body">
-                        <h6>Taladro Percutor Profesional 800W</h6>
-                        <div class="product-price">
-                            <span class="price-current">$289.000</span>
-                            <span class="price-old">$359.000</span>
-                        </div>
-                        <a href="#" class="btn btn-dark w-100">Agregar al carrito</a>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="product-card">
-                    <div class="product-image-wrap">
-                        <span class="product-badge">-15%</span>
-                        <img src="https://images.unsplash.com/photo-1770386582823-3a7094e35b22?auto=format&fit=crop&w=700&q=80" alt="Destornilladores" />
-                    </div>
-                    <div class="product-body">
-                        <h6>Set de Destornilladores Magnéticos</h6>
-                        <div class="product-price">
-                            <span class="price-current">$89.000</span>
-                            <span class="price-old">$125.000</span>
-                        </div>
-                        <a href="#" class="btn btn-dark w-100">Agregar al carrito</a>
-                    </div>
-                </div>
-            </div>
+            @foreach (var producto in Model.ProductosDestacados)
+            {
+                <div class="col-lg-3 col-md-4 col-6">
 
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="product-card">
-                    <div class="product-image-wrap">
-                        <img src="https://images.unsplash.com/photo-1588014328208-de6c5973a014?auto=format&fit=crop&w=700&q=80" alt="Pintura" />
-                    </div>
-                    <div class="product-body">
-                        <h6>Kit de Pintura Profesional</h6>
-                        <div class="product-price">
-                            <span class="price-current">$156.000</span>
-                        </div>
-                        <a href="#" class="btn btn-dark w-100">Agregar al carrito</a>
-                    </div>
-                </div>
-            </div>
+                    <div class="product-card">
 
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="product-card">
-                    <div class="product-image-wrap">
-                        <span class="product-badge">-25%</span>
-                        <img src="https://images.unsplash.com/photo-1742828721926-6010895aa72d?auto=format&fit=crop&w=700&q=80" alt="Martillo" />
-                    </div>
-                    <div class="product-body">
-                        <h6>Martillo de Carpintero Profesional</h6>
-                        <div class="product-price">
-                            <span class="price-current">$67.000</span>
-                            <span class="price-old">$89.000</span>
+                        <div class="product-image-wrap">
+
+                            <img src="/img/producto-default.jpg" alt="@producto.NombreProducto">
+
+                            @if (producto.Favorito)
+                            {
+                                <span class="product-badge">Destacado</span>
+                            }
+
                         </div>
-                        <a href="#" class="btn btn-dark w-100">Agregar al carrito</a>
+
+                        <div class="product-body">
+
+                            <h6>@producto.NombreProducto</h6>
+
+                            <div class="product-price">
+                                <span class="price-current">
+                                    $@producto.PrecioVentaProducto.ToString("N2")
+                                </span>
+                            </div>
+
+                            <button class="btn btn-danger w-100">
+                                Ver producto
+                            </button>
+
+                        </div>
+
                     </div>
+
                 </div>
-            </div>
+            }
+
         </div>
     </div>
 </section>

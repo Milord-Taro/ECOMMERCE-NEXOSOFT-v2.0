@@ -1,0 +1,72 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.Producto
+
+@{
+    ViewData["Title"] = "Detalle del producto";
+}
+
+<section class="container py-5">
+    <div class="row g-5 align-items-start">
+
+        <div class="col-md-5">
+            <div class="product-card">
+                <div class="product-image-wrap">
+                    <img src="/img/producto-default.jpg" alt="@Model.NombreProducto" />
+                    @if (Model.Favorito)
+                    {
+                        <span class="product-badge">Destacado</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <h2 class="section-title mb-3">@Model.NombreProducto</h2>
+
+            <p class="text-muted mb-2">
+                Categoría: @Model.IdCategoriaNavigation.NombreCategoria
+            </p>
+
+            @if (!string.IsNullOrEmpty(Model.MarcaProducto))
+            {
+                <p class="text-muted mb-2">
+                    Marca: @Model.MarcaProducto
+                </p>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.DescripcionCorta))
+            {
+                <p class="mb-3">
+                    @Model.DescripcionCorta
+                </p>
+            }
+
+            <h3 class="price-current mb-3">
+                $@Model.PrecioVentaProducto.ToString("N2")
+            </h3>
+
+            <p class="mb-2">
+                <strong>Unidad:</strong> @Model.UnidadMedidaProducto
+            </p>
+
+            @if (Model.Stock != null)
+            {
+                <p class="mb-4">
+                    <strong>Stock disponible:</strong> @Model.Stock.StockActual
+                </p>
+            }
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-danger">
+                    Agregar al carrito
+                </button>
+
+                <a asp-controller="Productos"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Volver al catálogo
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
