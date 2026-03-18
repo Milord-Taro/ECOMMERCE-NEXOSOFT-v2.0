@@ -29,29 +29,53 @@
         <div class="main-header py-3 bg-white shadow-sm">
             <div class="container">
                 <div class="row align-items-center g-3">
-                    <div class="col-12 col-md-3 text-center text-md-start">
-                        <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
-                            <img src="~/img/logo-nexosoft.png" alt="Nexosoft" class="logo-nexosoft img-fluid" />
+
+                    <!-- LOGO -->
+                    <div class="col-12 col-md-3">
+                        <a asp-controller="Home" asp-action="Index">
+                            <img src="/img/logo-nexosoft.png" alt="Nexosoft" height="40">
                         </a>
                     </div>
 
+                    <!-- BUSCADOR -->
                     <div class="col-12 col-md-6">
-                        <form class="d-flex search-box" role="search">
-                            <input class="form-control search-input" type="search" placeholder="Buscar productos, marcas o categorías..." />
+                        <form asp-controller="Productos" asp-action="Index" method="get" class="d-flex search-box" role="search">
+                            <input class="form-control search-input"
+                                   type="search"
+                                   name="buscar"
+                                   value="@(ViewBag.Busqueda ?? "")"
+                                   placeholder="Buscar productos, marcas o categorías..." />
+
                             <button class="btn btn-danger search-btn" type="submit">Buscar</button>
                         </form>
                     </div>
 
                     <div class="col-12 col-md-3">
                         <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-3">
-                            <a href="#" class="header-icon text-decoration-none">Mi cuenta</a>
-                            <a asp-controller="Carrito" asp-action="Index" class="header-icon text-decoration-none position-relative">
+
+                            <a href="#" class="header-icon text-decoration-none">
+                                Mi cuenta
+                            </a>
+
+                            <a asp-controller="MisPedidos"
+                               asp-action="Index"
+                               class="header-icon text-decoration-none">
+                                Mis pedidos
+                            </a>
+
+                            <a asp-controller="Carrito"
+                               asp-action="Index"
+                               class="header-icon text-decoration-none position-relative">
+
                                 Carrito
+
                                 @if (cantidadCarrito > 0)
                                 {
                                     <span class="cart-badge">@cantidadCarrito</span>
                                 }
+
                             </a>
+
                         </div>
                     </div>
                 </div>
@@ -132,6 +156,7 @@
                 </div>
 
             </div>
+        </div>
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

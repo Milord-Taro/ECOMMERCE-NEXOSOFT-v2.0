@@ -1,0 +1,56 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.Pedido
+
+@{
+    ViewData["Title"] = "Detalle del pedido";
+}
+
+<section class="container py-5">
+    <h2 class="section-title mb-4">Detalle del pedido</h2>
+
+    <div class="mb-4">
+        <p><strong>ID Pedido:</strong> @Model.IdPedido</p>
+        <p><strong>Código:</strong> @Model.CodPedido</p>
+        <p><strong>Fecha:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
+        <p><strong>Estado:</strong> @Model.EstadoPedido</p>
+        <p><strong>Total:</strong> $@Model.Total.ToString("N2")</p>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio unitario</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Detallepedidos)
+                {
+                    <tr>
+                        <td>@item.IdProductoNavigation.NombreProducto</td>
+                        <td>$@item.PrecioUnitario.ToString("N2")</td>
+                        <td>@item.Cantidad</td>
+                        <td>$@item.Subtotal.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+        <a asp-controller="MisPedidos"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Volver a mis pedidos
+        </a>
+
+        <a asp-controller="MisPedidos"
+           asp-action="Comprobante"
+           asp-route-id="@Model.IdPedido"
+           class="btn btn-danger">
+            Ver comprobante
+        </a>
+    </div>
+</section>

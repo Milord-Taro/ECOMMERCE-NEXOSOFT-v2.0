@@ -13,7 +13,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int? categoria)
+        public async Task<IActionResult> Index(int? categoria, string? buscar, string? marca)
         {
             var query = _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
@@ -24,9 +24,41 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 query = query.Where(p => p.IdCategoria == categoria.Value);
             }
 
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                var texto = buscar.Trim().ToLower();
+
+                query = query.Where(p =>
+                    p.NombreProducto.ToLower().Contains(texto) ||
+                    (p.MarcaProducto != null && p.MarcaProducto.ToLower().Contains(texto)) ||
+                    p.IdCategoriaNavigation.NombreCategoria.ToLower().Contains(texto)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(marca))
+            {
+                var marcaTexto = marca.Trim().ToLower();
+                query = query.Where(p => p.MarcaProducto != null && p.MarcaProducto.ToLower() == marcaTexto);
+            }
+
             var productos = await query.ToListAsync();
 
+            var categorias = await _context.Categoria
+                .OrderBy(c => c.NombreCategoria)
+                .ToListAsync();
+
+            var marcas = await _context.Productos
+                .Where(p => p.MarcaProducto != null && p.MarcaProducto != "")
+                .Select(p => p.MarcaProducto!)
+                .Distinct()
+                .OrderBy(m => m)
+                .ToListAsync();
+
+            ViewBag.Categorias = categorias;
+            ViewBag.Marcas = marcas;
             ViewBag.CategoriaSeleccionada = categoria;
+            ViewBag.Busqueda = buscar;
+            ViewBag.MarcaSeleccionada = marca;
 
             return View(productos);
         }

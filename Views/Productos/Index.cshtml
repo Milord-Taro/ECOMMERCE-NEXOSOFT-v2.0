@@ -4,47 +4,124 @@
     ViewData["Title"] = "Productos";
 }
 
+<form asp-controller="Productos" asp-action="Index" method="get" class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <input type="text"
+               name="buscar"
+               value="@(ViewBag.Busqueda ?? "")"
+               class="form-control"
+               placeholder="Buscar producto, marca o categoría" />
+    </div>
+
+    <div class="col-12 col-md-3">
+        <select name="categoria" class="form-select">
+            <option value="">Todas las categorías</option>
+
+            @foreach (var categoria in ViewBag.Categorias)
+            {
+                if (ViewBag.CategoriaSeleccionada != null && ViewBag.CategoriaSeleccionada == categoria.IdCategoria)
+                {
+                    <option value="@categoria.IdCategoria" selected>
+                        @categoria.NombreCategoria
+                    </option>
+                }
+                else
+                {
+                    <option value="@categoria.IdCategoria">
+                        @categoria.NombreCategoria
+                    </option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="col-12 col-md-3">
+        <select name="marca" class="form-select">
+            <option value="">Todas las marcas</option>
+
+            @foreach (var marca in ViewBag.Marcas)
+            {
+                if (ViewBag.MarcaSeleccionada != null && ViewBag.MarcaSeleccionada.ToString() == marca)
+                {
+                    <option value="@marca" selected>@marca</option>
+                }
+                else
+                {
+                    <option value="@marca">@marca</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="col-12 col-md-2 d-grid">
+        <button type="submit" class="btn btn-danger">
+            Filtrar
+        </button>
+    </div>
+</form>
+
+<div class="mb-4">
+    <a asp-controller="Productos" asp-action="Index" class="btn btn-outline-secondary">
+        Limpiar filtros
+    </a>
+</div>
+
 <section class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="section-title">Catálogo de productos</h2>
-    </div>
-
-    <div class="row g-4">
-        @foreach (var producto in Model)
+        @if (ViewBag.Busqueda != null && !string.IsNullOrWhiteSpace(ViewBag.Busqueda.ToString()))
         {
-            <div class="col-lg-3 col-md-4 col-6">
-                <div class="product-card">
-                    <div class="product-image-wrap">
-                        <img src="/img/producto-default.jpg" alt="@producto.NombreProducto" />
-
-                        @if (producto.Favorito)
-                        {
-                            <span class="product-badge">Destacado</span>
-                        }
-                    </div>
-
-                    <div class="product-body">
-                        <h6>@producto.NombreProducto</h6>
-
-                        <p class="mb-1 text-muted">
-                            @producto.IdCategoriaNavigation.NombreCategoria
-                        </p>
-
-                        <div class="product-price">
-                            <span class="price-current">
-                                $@producto.PrecioVentaProducto.ToString("N2")
-                            </span>
-                        </div>
-
-                        <a asp-controller="Productos"
-                           asp-action="Detalle"
-                           asp-route-id="@producto.IdProducto"
-                           class="btn btn-danger w-100">
-                            Ver producto
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <p class="text-muted mb-4">
+                Resultados para: <strong>@ViewBag.Busqueda</strong>
+            </p>
         }
     </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No se encontraron productos con los filtros o búsqueda aplicada.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var producto in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-6">
+                    <div class="product-card">
+                        <div class="product-image-wrap">
+                            <img src="/img/producto-default.jpg" alt="@producto.NombreProducto" />
+
+                            @if (producto.Favorito)
+                            {
+                                <span class="product-badge">Destacado</span>
+                            }
+                        </div>
+
+                        <div class="product-body">
+                            <h6>@producto.NombreProducto</h6>
+
+                            <p class="mb-1 text-muted">
+                                @producto.IdCategoriaNavigation.NombreCategoria
+                            </p>
+
+                            <div class="product-price">
+                                <span class="price-current">
+                                    $@producto.PrecioVentaProducto.ToString("N2")
+                                </span>
+                            </div>
+
+                            <a asp-controller="Productos"
+                               asp-action="Detalle"
+                               asp-route-id="@producto.IdProducto"
+                               class="btn btn-danger w-100">
+                                Ver producto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </section>
