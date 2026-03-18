@@ -63,7 +63,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Home");
         }
 
         // ================= REGISTER =================
