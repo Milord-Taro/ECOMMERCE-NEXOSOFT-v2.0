@@ -1,12 +1,14 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ECOMMERCE_NEXOSOFT.Models;
 using ECOMMERCE_NEXOSOFT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using ECOMMERCE_NEXOSOFT.Data;
 using Microsoft.EntityFrameworkCore;
+using ECOMMERCE_NEXOSOFT.Filters; // 👈 IMPORTANTE
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(1, 2, 3)] // 🔒 PROTEGIDO
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -52,6 +54,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         {
             return View("Error404");
         }
+
         public IActionResult Error500()
         {
             return View("Error500");
