@@ -1,95 +1,160 @@
 ﻿@model IEnumerable<ECOMMERCE_NEXOSOFT.Models.Producto>
+@using ECOMMERCE_NEXOSOFT.Models
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Productos";
+
+    var categorias = ViewBag.Categorias as List<Categorium> ?? new List<Categorium>();
+    string busqueda = ViewBag.Busqueda as string ?? "";
+    int? categoriaSeleccionada = ViewBag.CategoriaSeleccionada as int?;
+    bool soloStockBajo = ViewBag.SoloStockBajo != null && (bool)ViewBag.SoloStockBajo;
 }
 
-<h1>Index</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Productos</h2>
+            <p class="text-muted mb-0">Administra el catálogo general de productos.</p>
+        </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.CodProducto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NombreProducto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DescripcionCorta)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SkuProducto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CodigoBarrasProducto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UnidadMedidaProducto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MarcaProducto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Favorito)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.VisiblePublico)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PrecioVentaProducto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdCategoriaNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CodProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DescripcionCorta)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SkuProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CodigoBarrasProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UnidadMedidaProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MarcaProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Favorito)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.VisiblePublico)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PrecioVentaProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdCategoriaNavigation.IdCategoria)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdProducto">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdProducto">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdProducto">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-dark">Nuevo producto</a>
+            <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-dark">Ir a stock</a>
+        </div>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form asp-action="Index" method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Buscar</label>
+                        <input type="text"
+                               name="buscar"
+                               value="@busqueda"
+                               class="form-control"
+                               placeholder="Nombre, marca o código" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Categoría</label>
+                        <select name="categoria" class="form-select">
+                            <option value="">Todas</option>
+                            @foreach (var categoria in categorias)
+                            {
+                                if (categoriaSeleccionada == categoria.IdCategoria)
+                                {
+                                    <option value="@categoria.IdCategoria" selected>@categoria.NombreCategoria</option>
+                                }
+                                else
+                                {
+                                    <option value="@categoria.IdCategoria">@categoria.NombreCategoria</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mt-4 pt-2">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="soloStockBajo"
+                                   value="true"
+                                   id="soloStockBajo"
+                                   @(soloStockBajo ? "checked" : "") />
+                            <label class="form-check-label fw-semibold" for="soloStockBajo">
+                                Solo stock bajo
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-dark">Filtrar</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Marca</th>
+                            <th>Precio venta</th>
+                            <th>Stock</th>
+                            <th>Visible</th>
+                            <th>Categoría</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            bool tieneStock = item.Stock != null;
+                            bool stockBajo = item.Stock != null && item.Stock.StockActual <= item.Stock.StockMinimo;
+
+                            <tr class="@(stockBajo ? "table-warning" : "")">
+                                <td>@item.CodProducto</td>
+                                <td>@item.NombreProducto</td>
+                                <td>@item.MarcaProducto</td>
+                                <td>@item.PrecioVentaProducto.ToString("C")</td>
+                                <td>
+                                    @if (tieneStock)
+                                    {
+                                        <span>@(item.Stock?.StockActual ?? 0)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Sin registro</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.VisiblePublico)
+                                    {
+                                        <span class="badge bg-success">Publicado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Oculto</span>
+                                    }
+                                </td>
+                                <td>@item.IdCategoriaNavigation?.NombreCategoria</td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end flex-wrap gap-2">
+                                        <a asp-action="Edit" asp-route-id="@item.IdProducto" class="btn btn-sm btn-outline-dark">Editar</a>
+                                        <a asp-action="Details" asp-route-id="@item.IdProducto" class="btn btn-sm btn-outline-secondary">Detalle</a>
+
+                                        @if (tieneStock)
+                                        {
+                                            <a asp-controller="Stock"
+                                               asp-action="Edit"
+                                               asp-route-id="@item.Stock?.IdInventario"
+                                               class="btn btn-sm btn-dark">
+                                                Editar stock
+                                            </a>
+                                        }
+
+                                        <a asp-action="Delete" asp-route-id="@item.IdProducto" class="btn btn-sm btn-danger">Ocultar</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
