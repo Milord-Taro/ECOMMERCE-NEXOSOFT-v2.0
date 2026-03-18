@@ -225,6 +225,7 @@ public partial class NexosoftDbContext : DbContext
             entity.Property(e => e.MarcaProducto).HasMaxLength(100);
             entity.Property(e => e.NombreProducto).HasMaxLength(100);
             entity.Property(e => e.PrecioVentaProducto).HasPrecision(10, 2);
+            entity.Property(e => e.VisiblePublico);
             entity.Property(e => e.SkuProducto).HasMaxLength(20);
             entity.Property(e => e.UnidadMedidaProducto).HasColumnType("enum('unidad','caja','paquete','metro','metro_cuadrado','litro','galon','kilogramo')");
 

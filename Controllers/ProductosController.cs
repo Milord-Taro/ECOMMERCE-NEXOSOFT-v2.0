@@ -13,10 +13,17 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int? categoria, string? buscar, string? marca)
+        public async Task<IActionResult> Index(
+    int? categoria,
+    string? buscar,
+    string? marca,
+    string? orden,
+    bool? soloDisponibles)
         {
             var query = _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.Stock)
+                .Where(p => p.VisiblePublico)
                 .AsQueryable();
 
             if (categoria.HasValue)
@@ -30,16 +37,32 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
                 query = query.Where(p =>
                     p.NombreProducto.ToLower().Contains(texto) ||
+                    (p.DescripcionCorta != null && p.DescripcionCorta.ToLower().Contains(texto)) ||
                     (p.MarcaProducto != null && p.MarcaProducto.ToLower().Contains(texto)) ||
-                    p.IdCategoriaNavigation.NombreCategoria.ToLower().Contains(texto)
-                );
+                    p.IdCategoriaNavigation.NombreCategoria.ToLower().Contains(texto));
             }
 
             if (!string.IsNullOrWhiteSpace(marca))
             {
                 var marcaTexto = marca.Trim().ToLower();
-                query = query.Where(p => p.MarcaProducto != null && p.MarcaProducto.ToLower() == marcaTexto);
+
+                query = query.Where(p =>
+                    p.MarcaProducto != null &&
+                    p.MarcaProducto.ToLower() == marcaTexto);
             }
+
+            if (soloDisponibles == true)
+            {
+                query = query.Where(p => p.Stock != null && p.Stock.StockActual > 0);
+            }
+
+            query = orden switch
+            {
+                "nombre_desc" => query.OrderByDescending(p => p.NombreProducto),
+                "precio_asc" => query.OrderBy(p => p.PrecioVentaProducto),
+                "precio_desc" => query.OrderByDescending(p => p.PrecioVentaProducto),
+                _ => query.OrderBy(p => p.NombreProducto)
+            };
 
             var productos = await query.ToListAsync();
 
@@ -48,7 +71,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .ToListAsync();
 
             var marcas = await _context.Productos
-                .Where(p => p.MarcaProducto != null && p.MarcaProducto != "")
+                .Where(p => p.VisiblePublico &&
+                            p.MarcaProducto != null &&
+                            p.MarcaProducto != "")
                 .Select(p => p.MarcaProducto!)
                 .Distinct()
                 .OrderBy(m => m)
@@ -59,6 +84,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             ViewBag.CategoriaSeleccionada = categoria;
             ViewBag.Busqueda = buscar;
             ViewBag.MarcaSeleccionada = marca;
+            ViewBag.OrdenSeleccionado = orden;
+            ViewBag.SoloDisponibles = soloDisponibles;
 
             return View(productos);
         }

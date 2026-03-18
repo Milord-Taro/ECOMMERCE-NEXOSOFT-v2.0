@@ -48,7 +48,19 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // GET: Producto/Create
         public IActionResult Create()
         {
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "IdCategoria");
+            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "NombreCategoria");
+            ViewBag.Categorias = _context.Categoria.ToList();
+            ViewBag.UnidadesMedida = new List<string>
+            {
+                "unidad",
+                "caja",
+                "paquete",
+                "metro",
+                "metro_cuadrado",
+                "litro",
+                "galon",
+                "kilogramo"
+            };
             return View();
         }
 
@@ -57,15 +69,41 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdProducto,CodProducto,IdCategoria,NombreProducto,DescripcionCorta,SkuProducto,CodigoBarrasProducto,UnidadMedidaProducto,MarcaProducto,Favorito,PrecioVentaProducto")] Producto producto)
+        public async Task<IActionResult> Create([Bind("IdProducto,CodProducto,IdCategoria,NombreProducto,DescripcionCorta,SkuProducto,CodigoBarrasProducto,UnidadMedidaProducto,MarcaProducto,Favorito,VisiblePublico,PrecioVentaProducto")] Producto producto)
         {
+            ModelState.Remove("IdCategoriaNavigation");
+            ModelState.Remove("Detallepedidos");
+            ModelState.Remove("Stock");
+
             if (ModelState.IsValid)
             {
-                _context.Add(producto);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(producto);
+                    await _context.SaveChangesAsync();
+                    TempData["MensajeExito"] = "Producto creado correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Error al guardar el producto: " + ex.Message);
+                }
             }
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "IdCategoria", producto.IdCategoria);
+
+            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "NombreCategoria", producto.IdCategoria);
+            ViewBag.Categorias = _context.Categoria.ToList();
+            ViewBag.UnidadesMedida = new List<string>
+            {
+                "unidad",
+                "caja",
+                "paquete",
+                "metro",
+                "metro_cuadrado",
+                "litro",
+                "galon",
+                "kilogramo"
+            };
+
             return View(producto);
         }
 
@@ -82,7 +120,19 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             {
                 return NotFound();
             }
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "IdCategoria", producto.IdCategoria);
+            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "NombreCategoria");
+            ViewBag.Categorias = _context.Categoria.ToList();
+            ViewBag.UnidadesMedida = new List<string>
+            {
+                "unidad",
+                "caja",
+                "paquete",
+                "metro",
+                "metro_cuadrado",
+                "litro",
+                "galon",
+                "kilogramo"
+            };
             return View(producto);
         }
 
@@ -91,12 +141,16 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,CodProducto,IdCategoria,NombreProducto,DescripcionCorta,SkuProducto,CodigoBarrasProducto,UnidadMedidaProducto,MarcaProducto,Favorito,PrecioVentaProducto")] Producto producto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,CodProducto,IdCategoria,NombreProducto,DescripcionCorta,SkuProducto,CodigoBarrasProducto,UnidadMedidaProducto,MarcaProducto,Favorito,VisiblePublico,PrecioVentaProducto")] Producto producto)
         {
             if (id != producto.IdProducto)
             {
                 return NotFound();
             }
+
+            ModelState.Remove("IdCategoriaNavigation");
+            ModelState.Remove("Detallepedidos");
+            ModelState.Remove("Stock");
 
             if (ModelState.IsValid)
             {
@@ -118,9 +172,23 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "IdCategoria", producto.IdCategoria);
+
+            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "NombreCategoria", producto.IdCategoria);
+            ViewBag.Categorias = _context.Categoria.ToList();
+            ViewBag.UnidadesMedida = new List<string>
+            {
+                "unidad",
+                "caja",
+                "paquete",
+                "metro",
+                "metro_cuadrado",
+                "litro",
+                "galon",
+                "kilogramo"
+            };
             return View(producto);
         }
+
 
         // GET: Producto/Delete/5
         public async Task<IActionResult> Delete(int? id)
