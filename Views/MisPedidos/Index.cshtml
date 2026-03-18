@@ -1,0 +1,57 @@
+﻿@model List<ECOMMERCE_NEXOSOFT.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Mis pedidos";
+}
+
+<section class="container py-5">
+    <h2 class="section-title mb-4">Mis pedidos</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Aún no tienes pedidos registrados.
+        </div>
+
+        <a asp-controller="Productos" asp-action="Index" class="btn btn-danger">
+            Ir al catálogo
+        </a>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Código</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var pedido in Model)
+                    {
+                        <tr>
+                            <td>@pedido.IdPedido</td>
+                            <td>@pedido.CodPedido</td>
+                            <td>@pedido.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>$@pedido.Total.ToString("N2")</td>
+                            <td>@pedido.EstadoPedido</td>
+                            <td>
+                                <a asp-controller="MisPedidos"
+                                   asp-action="Detalle"
+                                   asp-route-id="@pedido.IdPedido"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Ver detalle
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

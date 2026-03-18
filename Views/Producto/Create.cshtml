@@ -1,77 +1,101 @@
 ﻿@model ECOMMERCE_NEXOSOFT.Models.Producto
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Nuevo producto";
 }
 
-<h1>Create</h1>
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Nuevo producto</h2>
+        <p class="text-muted mb-0">Registra un nuevo producto en el catálogo administrativo.</p>
+    </div>
 
-<h4>Producto</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="CodProducto" class="control-label"></label>
-                <input asp-for="CodProducto" class="form-control" />
-                <span asp-validation-for="CodProducto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdCategoria" class="control-label"></label>
-                <select asp-for="IdCategoria" class ="form-control" asp-items="ViewBag.IdCategoria"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="NombreProducto" class="control-label"></label>
-                <input asp-for="NombreProducto" class="form-control" />
-                <span asp-validation-for="NombreProducto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DescripcionCorta" class="control-label"></label>
-                <input asp-for="DescripcionCorta" class="form-control" />
-                <span asp-validation-for="DescripcionCorta" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SkuProducto" class="control-label"></label>
-                <input asp-for="SkuProducto" class="form-control" />
-                <span asp-validation-for="SkuProducto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CodigoBarrasProducto" class="control-label"></label>
-                <input asp-for="CodigoBarrasProducto" class="form-control" />
-                <span asp-validation-for="CodigoBarrasProducto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UnidadMedidaProducto" class="control-label"></label>
-                <input asp-for="UnidadMedidaProducto" class="form-control" />
-                <span asp-validation-for="UnidadMedidaProducto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MarcaProducto" class="control-label"></label>
-                <input asp-for="MarcaProducto" class="form-control" />
-                <span asp-validation-for="MarcaProducto" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Favorito" /> @Html.DisplayNameFor(model => model.Favorito)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="PrecioVentaProducto" class="control-label"></label>
-                <input asp-for="PrecioVentaProducto" class="form-control" />
-                <span asp-validation-for="PrecioVentaProducto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="CodProducto" class="form-label fw-semibold"></label>
+                        <input asp-for="CodProducto" class="form-control" />
+                        <span asp-validation-for="CodProducto" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label asp-for="NombreProducto" class="form-label fw-semibold"></label>
+                        <input asp-for="NombreProducto" class="form-control" />
+                        <span asp-validation-for="NombreProducto" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="DescripcionCorta" class="form-label fw-semibold"></label>
+                        <textarea asp-for="DescripcionCorta" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="DescripcionCorta" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="SkuProducto" class="form-label fw-semibold"></label>
+                        <input asp-for="SkuProducto" class="form-control" />
+                        <span asp-validation-for="SkuProducto" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="CodigoBarrasProducto" class="form-label fw-semibold"></label>
+                        <input asp-for="CodigoBarrasProducto" class="form-control" />
+                        <span asp-validation-for="CodigoBarrasProducto" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="UnidadMedidaProducto" class="form-label fw-semibold"></label>
+                        <select asp-for="UnidadMedidaProducto" class="form-select" asp-items="ViewBag.UnidadMedidaProducto"></select>
+                        <span asp-validation-for="UnidadMedidaProducto" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="MarcaProducto" class="form-label fw-semibold"></label>
+                        <input asp-for="MarcaProducto" class="form-control" />
+                        <span asp-validation-for="MarcaProducto" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="PrecioVentaProducto" class="form-label fw-semibold"></label>
+                        <input asp-for="PrecioVentaProducto" class="form-control" />
+                        <span asp-validation-for="PrecioVentaProducto" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="IdCategoria" class="form-label fw-semibold"></label>
+                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria"></select>
+                        <span asp-validation-for="IdCategoria" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" asp-for="Favorito" />
+                            <label class="form-check-label fw-semibold" asp-for="Favorito"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" asp-for="VisiblePublico" />
+                            <label class="form-check-label fw-semibold" asp-for="VisiblePublico"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-dark">Guardar producto</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

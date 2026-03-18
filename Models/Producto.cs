@@ -25,6 +25,8 @@ public partial class Producto
 
     public bool Favorito { get; set; }
 
+    public bool VisiblePublico { get; set; }
+
     public decimal PrecioVentaProducto { get; set; }
 
     public virtual ICollection<Detallepedido> Detallepedidos { get; set; } = new List<Detallepedido>();

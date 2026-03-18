@@ -1,0 +1,140 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.Pedido
+
+@{
+    Layout = null;
+    var subtotal = Model.Detallepedidos.Sum(x => x.Subtotal);
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Comprobante Pedido @Model.CodPedido</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            color: #263238;
+        }
+
+        .comprobante-box {
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 30px;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .titulo {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .empresa {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #D32F2F;
+        }
+
+        .info p {
+            margin-bottom: 6px;
+        }
+
+        .table th {
+            background: #f8f9fa;
+        }
+
+        .acciones {
+            margin-top: 30px;
+        }
+
+        @@media print {
+            .acciones {
+                display: none;
+            }
+
+            body {
+                padding: 0;
+            }
+
+            .comprobante-box {
+                border: none;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="comprobante-box">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <div class="empresa">NEXOSOFT SAS</div>
+                <p class="mb-0">Ferretería Ecommerce</p>
+                <p class="mb-0">Bogotá, Colombia</p>
+                <p class="mb-0">ventas@nexosoft.com.co</p>
+            </div>
+
+            <div class="text-end">
+                <div class="titulo">Comprobante</div>
+                <p class="mb-1"><strong>ID Pedido:</strong> @Model.IdPedido</p>
+                <p class="mb-1"><strong>Código:</strong> @Model.CodPedido</p>
+                <p class="mb-1"><strong>Fecha:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
+                <p class="mb-1"><strong>Estado:</strong> @Model.EstadoPedido</p>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="info mb-4">
+            <p><strong>Cliente:</strong> Usuario temporal #@Model.IdUsuario</p>
+            <p><strong>Método de entrega:</strong> @Model.MetodoEntrega</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio unitario</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Detallepedidos)
+                    {
+                        <tr>
+                            <td>@item.IdProductoNavigation.NombreProducto</td>
+                            <td>$@item.PrecioUnitario.ToString("N2")</td>
+                            <td>@item.Cantidad</td>
+                            <td>$@item.Subtotal.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-end mt-4">
+            <p><strong>Subtotal:</strong> $@subtotal.ToString("N2")</p>
+            <p><strong>Costo de envío:</strong> $@Model.CostoEnvio.ToString("N2")</p>
+            <h4><strong>Total:</strong> $@Model.Total.ToString("N2")</h4>
+        </div>
+
+        <div class="acciones d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-danger">
+                Imprimir / Guardar PDF
+            </button>
+
+            <a asp-controller="MisPedidos"
+               asp-action="Detalle"
+               asp-route-id="@Model.IdPedido"
+               class="btn btn-outline-secondary">
+                Volver al pedido
+            </a>
+        </div>
+    </div>
+</body>
+</html>

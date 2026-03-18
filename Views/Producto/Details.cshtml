@@ -1,78 +1,150 @@
-﻿    @model ECOMMERCE_NEXOSOFT.Models.Producto
+﻿@model ECOMMERCE_NEXOSOFT.Models.Producto
 
-    @{
-        ViewData["Title"] = "Details";
-    }
+@{
+    ViewData["Title"] = "Detalle del producto";
+    bool tieneStock = Model.Stock != null;
+    bool stockBajo = Model.Stock != null && Model.Stock.StockActual <= Model.Stock.StockMinimo;
+}
 
-    <h1>Details</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Detalle del producto</h2>
+            <p class="text-muted mb-0">Consulta la información general y el estado actual del producto.</p>
+        </div>
 
-    <div>
-        <h4>Producto</h4>
-        <hr />
-        <dl class="row">
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.CodProducto)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.CodProducto)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.NombreProducto)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.NombreProducto)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.DescripcionCorta)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.DescripcionCorta)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.SkuProducto)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.SkuProducto)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.CodigoBarrasProducto)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.CodigoBarrasProducto)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.UnidadMedidaProducto)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.UnidadMedidaProducto)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.MarcaProducto)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.MarcaProducto)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.Favorito)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.Favorito)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.PrecioVentaProducto)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.PrecioVentaProducto)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.IdCategoriaNavigation)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.IdCategoriaNavigation.IdCategoria)
-            </dd>
-        </dl>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.IdProducto" class="btn btn-dark">Editar producto</a>
+
+            @if (tieneStock)
+            {
+                <a asp-controller="Stock" asp-action="Edit" asp-route-id="@Model.Stock?.IdInventario" class="btn btn-outline-dark">
+                    Editar stock
+                </a>
+            }
+
+            <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+        </div>
     </div>
-    <div>
-        <a asp-action="Edit" asp-route-id="@Model?.IdProducto">Edit</a> |
-        <a asp-action="Index">Back to List</a>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">Información general</h5>
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Código</dt>
+                        <dd class="col-sm-7">@Model.CodProducto</dd>
+
+                        <dt class="col-sm-5">Nombre</dt>
+                        <dd class="col-sm-7">@Model.NombreProducto</dd>
+
+                        <dt class="col-sm-5">Descripción</dt>
+                        <dd class="col-sm-7">@Model.DescripcionCorta</dd>
+
+                        <dt class="col-sm-5">SKU</dt>
+                        <dd class="col-sm-7">@Model.SkuProducto</dd>
+
+                        <dt class="col-sm-5">Código de barras</dt>
+                        <dd class="col-sm-7">@Model.CodigoBarrasProducto</dd>
+
+                        <dt class="col-sm-5">Unidad de medida</dt>
+                        <dd class="col-sm-7">@Model.UnidadMedidaProducto</dd>
+
+                        <dt class="col-sm-5">Marca</dt>
+                        <dd class="col-sm-7">@Model.MarcaProducto</dd>
+
+                        <dt class="col-sm-5">Precio de venta</dt>
+                        <dd class="col-sm-7">@Model.PrecioVentaProducto.ToString("C")</dd>
+
+                        <dt class="col-sm-5">Categoría</dt>
+                        <dd class="col-sm-7">@Model.IdCategoriaNavigation?.NombreCategoria</dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">Estado del producto</h5>
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Favorito</dt>
+                        <dd class="col-sm-7">
+                            @if (Model.Favorito)
+                            {
+                                <span class="badge bg-warning text-dark">Sí</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">No</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-5">Visibilidad</dt>
+                        <dd class="col-sm-7">
+                            @if (Model.VisiblePublico)
+                            {
+                                <span class="badge bg-success">Publicado</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Oculto</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-5">Stock actual</dt>
+                        <dd class="col-sm-7">
+                            @if (tieneStock)
+                            {
+                                @(Model.Stock?.StockActual ?? 0)
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Sin registro</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-5">Stock mínimo</dt>
+                        <dd class="col-sm-7">
+                            @if (tieneStock)
+                            {
+                                @(Model.Stock?.StockMinimo ?? 0)
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-5">Precio compra</dt>
+                        <dd class="col-sm-7">
+                            @if (tieneStock)
+                            {
+                                @((Model.Stock?.PrecioCompraStock ?? 0).ToString("C"))
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-5">Estado inventario</dt>
+                        <dd class="col-sm-7">
+                            @if (!tieneStock)
+                            {
+                                <span class="badge bg-danger">Sin stock registrado</span>
+                            }
+                            else if (stockBajo)
+                            {
+                                <span class="badge bg-warning text-dark">Stock bajo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Disponible</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
     </div>
+</div>

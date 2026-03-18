@@ -25,9 +25,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .ToListAsync();
 
             var productos = await _context.Productos
-     .Where(p => p.Favorito)
-     .Take(8)
-     .ToListAsync();
+            .Where(p => p.VisiblePublico)
+            .Take(8)
+            .ToListAsync();
 
             var viewModel = new HomeViewModel
             {
