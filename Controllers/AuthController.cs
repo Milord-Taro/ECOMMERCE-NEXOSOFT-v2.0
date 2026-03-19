@@ -37,7 +37,24 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             var usuario = _context.Usuarios
                 .FirstOrDefault(u => u.CorreoElectronico == model.CorreoElectronico);
 
-            if (usuario == null || !BCrypt.Net.BCrypt.Verify(model.Contrasena, usuario.Contrasena))
+            if (usuario == null)
+            {
+                ViewBag.Error = "Usuario o contraseña incorrectos";
+                return View(model);
+            }
+
+            bool passwordValida = false;
+
+            try
+            {
+                passwordValida = BCrypt.Net.BCrypt.Verify(model.Contrasena, usuario.Contrasena);
+            }
+            catch
+            {
+                passwordValida = false;
+            }
+
+            if (!passwordValida)
             {
                 ViewBag.Error = "Usuario o contraseña incorrectos";
                 return View(model);

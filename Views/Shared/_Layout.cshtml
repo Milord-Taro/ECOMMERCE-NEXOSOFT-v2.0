@@ -62,15 +62,17 @@
                             }
                             else
                             {
-                                <span class="text-dark fw-semibold">Hola, @usuarioSesion</span>
+                                <a asp-controller="Perfil" asp-action="Index" class="text-decoration-none text-dark fw-semibold">
+                                    Hola, @usuarioSesion
+                                </a>
 
-                                @if (rolSesion == 2)
-                                {
-                                    <a asp-controller="MisPedidos" asp-action="Index" class="text-decoration-none text-dark">Mis pedidos</a>
-                                }
-                                else if (rolSesion == 1)
+                                @if (rolSesion == 1)
                                 {
                                     <a asp-controller="Admin" asp-action="Index" class="text-decoration-none text-dark">Panel admin</a>
+                                }
+                                else if (rolSesion == 2)
+                                {
+                                    <a asp-controller="MisPedidos" asp-action="Index" class="text-decoration-none text-dark">Mis pedidos</a>
                                 }
                                 else if (rolSesion == 3)
                                 {

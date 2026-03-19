@@ -1,0 +1,109 @@
+﻿@using ECOMMERCE_NEXOSOFT.Models
+
+@{
+    ViewData["Title"] = "Panel vendedor";
+    var stockCritico = ViewBag.StockCritico as List<Stock> ?? new List<Stock>();
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Panel vendedor</h2>
+        <p class="text-muted mb-0">Resumen operativo de catálogo e inventario.</p>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Productos</h6>
+                    <h3 class="fw-bold">@ViewBag.TotalProductos</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Publicados</h6>
+                    <h3 class="fw-bold text-success">@ViewBag.ProductosPublicados</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Ocultos</h6>
+                    <h3 class="fw-bold text-danger">@ViewBag.ProductosOcultos</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Stock bajo</h6>
+                    <h3 class="fw-bold text-warning">@ViewBag.TotalStockBajo</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Productos a revisar por inventario</h5>
+
+                    @if (!stockCritico.Any())
+                    {
+                        <p class="text-muted mb-0">No hay productos con alerta de stock.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Stock actual</th>
+                                        <th>Stock mínimo</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in stockCritico)
+                                    {
+                                        bool stockBajo = item.StockActual <= item.StockMinimo;
+
+                                        <tr class="@(stockBajo ? "table-warning" : "")">
+                                            <td>@item.IdProductoNavigation?.NombreProducto</td>
+                                            <td>@item.StockActual</td>
+                                            <td>@item.StockMinimo</td>
+                                            <td>
+                                                <a asp-controller="Stock" asp-action="Edit" asp-route-id="@item.IdInventario" class="btn btn-sm btn-dark">
+                                                    Editar stock
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Accesos rápidos</h5>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Producto" asp-action="Index" class="btn btn-dark">Mis productos</a>
+                <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-dark">Mi stock</a>
+            </div>
+        </div>
+    </div>
+</div>
