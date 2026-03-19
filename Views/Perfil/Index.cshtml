@@ -1,0 +1,74 @@
+﻿@model ECOMMERCE_NEXOSOFT.ViewModels.PerfilViewModel
+
+@{
+    ViewData["Title"] = "Mi perfil";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Mi perfil</h2>
+        <p class="text-muted mb-0">Consulta y actualiza tu información personal.</p>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form asp-action="Index" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <input type="hidden" asp-for="IdUsuario" />
+                <input type="hidden" asp-for="IdRol" />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label fw-semibold"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Apellido" class="form-label fw-semibold"></label>
+                        <input asp-for="Apellido" class="form-control" />
+                        <span asp-validation-for="Apellido" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Telefono" class="form-label fw-semibold"></label>
+                        <input asp-for="Telefono" class="form-control" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CorreoElectronico" class="form-label fw-semibold"></label>
+                        <input asp-for="CorreoElectronico" class="form-control" />
+                        <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold">Rol</label>
+                        <input class="form-control"
+                               value="@(Model.IdRol == 1 ? "Administrador" : Model.IdRol == 2 ? "Cliente" : Model.IdRol == 3 ? "Vendedor" : "Sin rol")"
+                               disabled />
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-dark">Guardar cambios</button>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
