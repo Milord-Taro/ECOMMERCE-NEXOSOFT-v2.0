@@ -15,10 +15,15 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         public async Task<IActionResult> Index()
         {
-            int idUsuario = 1; // temporal hasta implementar login
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuario == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
             var pedidos = await _context.Pedidos
-                .Where(p => p.IdUsuario == idUsuario)
+                .Where(p => p.IdUsuario == idUsuario.Value)
                 .OrderByDescending(p => p.FechaCreacion)
                 .ToListAsync();
 
@@ -32,12 +37,17 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return NotFound();
             }
 
-            int idUsuario = 1; // temporal hasta implementar login
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuario == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
             var pedido = await _context.Pedidos
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
-                .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario);
+                .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);
 
             if (pedido == null)
             {
@@ -54,12 +64,17 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return NotFound();
             }
 
-            int idUsuario = 1; // temporal hasta implementar login
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuario == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
             var pedido = await _context.Pedidos
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
-                .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario);
+                .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);
 
             if (pedido == null)
             {

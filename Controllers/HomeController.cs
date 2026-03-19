@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ECOMMERCE_NEXOSOFT.Models;
 using ECOMMERCE_NEXOSOFT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -52,6 +52,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         {
             return View("Error404");
         }
+
         public IActionResult Error500()
         {
             return View("Error500");

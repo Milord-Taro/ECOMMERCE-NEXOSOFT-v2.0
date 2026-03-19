@@ -38,6 +38,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Index", "Carrito");
             }
 
+            var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuarioSesion == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             foreach (var item in carrito)
             {
                 var stock = _context.Stocks.FirstOrDefault(s => s.IdProducto == item.IdProducto);
@@ -58,7 +65,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             var pedido = new Pedido
             {
                 CodPedido = random.Next(100000, 999999),
-                IdUsuario = 1, // temporal hasta implementar login
+                IdUsuario = idUsuarioSesion.Value,
                 FechaCreacion = DateTime.Now,
                 Subtotal = subtotal,
                 CostoEnvio = costoEnvio,
