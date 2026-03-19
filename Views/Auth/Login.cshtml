@@ -14,7 +14,19 @@
 
             <div class="mb-3">
                 <label class="form-label">Contraseña</label>
-                <input asp-for="Contrasena" type="password" class="form-control" />
+
+                <div class="password-wrapper">
+                    <input asp-for="Contrasena"
+                           class="form-control pe-5"
+                           id="LoginContrasena" />
+                    <button type="button"
+                            class="password-toggle"
+                            onclick="togglePassword('LoginContrasena', this)">
+                        👁
+                    </button>
+                </div>
+
+                <span asp-validation-for="Contrasena" class="text-danger"></span>
             </div>
 
             <button type="submit" class="btn-login">
@@ -30,9 +42,6 @@
             </div>
         }
 
-        <form method="post">
-            ...
-        </form>
 
         <div class="text-center mt-3">
             <span>¿No tienes cuenta?</span>
@@ -40,3 +49,26 @@
                 Regístrate
             </a>
         </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                button.innerHTML = "🙈";
+            } else {
+                input.type = "password";
+                button.innerHTML = "👁";
+            }
+        }
+    </script>
+}

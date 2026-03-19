@@ -106,26 +106,42 @@
                     </div>
 
                     <div class="row">
+
+                        <!-- CONTRASENA -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Contraseña</label>
 
-                            <!-- 🔹 CONTRASEÑA SEGURA -->
-                            <input asp-for="Contrasena"
-                                   type="password"
-                                   class="form-control"
-                                   maxlength="8"
-                                   placeholder="8 caracteres"
-                                   oninput="validarPassword(this)" />
+                            <div class="password-wrapper">
+                                <input asp-for="Contrasena"
+                                       class="form-control pe-5"
+                                       id="Contrasena"
+                                       oninput="validarPassword(this)" />
+                                <button type="button"
+                                        class="password-toggle"
+                                        onclick="togglePassword('Contrasena', this)">
+                                    👁
+                                </button>
+                            </div>
 
                             <small id="passInfo" class="text-muted"></small>
                             <span asp-validation-for="Contrasena" class="text-danger small"></span>
                         </div>
 
+                        <!-- CONFIRMAR CONTRASENA -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Confirmar contraseña</label>
-                            <input asp-for="ConfirmarContrasena"
-                                   type="password"
-                                   class="form-control" />
+
+                            <div class="password-wrapper">
+                                <input asp-for="ConfirmarContrasena"
+                                       class="form-control pe-5"
+                                       id="ConfirmarContrasena" />
+                                <button type="button"
+                                        class="password-toggle"
+                                        onclick="togglePassword('ConfirmarContrasena', this)">
+                                    👁
+                                </button>
+                            </div>
+
                             <span asp-validation-for="ConfirmarContrasena" class="text-danger small"></span>
                         </div>
                     </div>
@@ -153,28 +169,21 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        // 🔴 VALIDAR CORREO
         function validarCorreo(input) {
-    const error = document.getElementById("correoError");
-
-    // ✔️ Regex estándar de email
+            const error = document.getElementById("correoError");
             const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
 
-    // ❌ No iniciar con número
-    if (/^[0-9]/.test(input.value)) {
-        error.innerText = "El correo no puede iniciar con número";
-    }
-    // ❌ Formato inválido
-    else if (!emailRegex.test(input.value)) {
-        error.innerText = "Ingresa un correo válido";
-    }
-    // ✅ Todo bien
-    else {
-        error.innerText = "";
-    }
-}
+            if (/^[0-9]/.test(input.value)) {
+                error.innerText = "El correo no puede iniciar con número";
+            }
+            else if (!emailRegex.test(input.value)) {
+                error.innerText = "Ingresa un correo válido";
+            }
+            else {
+                error.innerText = "";
+            }
+        }
 
-        // 🔴 VALIDAR TELÉFONO COLOMBIANO
         function validarTelefono(input) {
             const error = document.getElementById("telError");
 
@@ -191,18 +200,28 @@
             }
         }
 
-        // 🔴 VALIDAR CONTRASEÑA
         function validarPassword(input) {
             const info = document.getElementById("passInfo");
-
-            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8}$/;
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
             if (!regex.test(input.value)) {
-                info.innerText = "Debe tener mayúscula, minúscula, número y símbolo (8 caracteres)";
+                info.innerText = "Debe tener mayúscula, minúscula, número y símbolo (mínimo 8 caracteres)";
                 info.style.color = "red";
             } else {
                 info.innerText = "Contraseña segura ✔";
                 info.style.color = "green";
+            }
+        }
+
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                button.innerHTML = "🙈";
+            } else {
+                input.type = "password";
+                button.innerHTML = "👁";
             }
         }
     </script>
