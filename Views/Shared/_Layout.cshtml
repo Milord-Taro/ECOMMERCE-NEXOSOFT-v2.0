@@ -1,7 +1,10 @@
 ﻿@using ECOMMERCE_NEXOSOFT.Helpers
 @using ECOMMERCE_NEXOSOFT.Models
+@using Microsoft.AspNetCore.Http
 
 @{
+    var usuarioSesion = Context.Session.GetString("Usuario");
+    var rolSesion = Context.Session.GetInt32("Rol");
     var carrito = Context.Session.GetObjectFromJson<List<CarritoItem>>("CARRITO") ?? new List<CarritoItem>();
     var cantidadCarrito = CarritoHelper.ObtenerCantidadItems(carrito);
 }
@@ -51,31 +54,35 @@
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-4">
+                            @if (string.IsNullOrEmpty(usuarioSesion))
+                            {
+                                <a asp-controller="Auth" asp-action="Login" class="text-decoration-none text-dark">Mi cuenta</a>
+                                <a asp-controller="Auth" asp-action="Login" class="text-decoration-none text-dark">Mis pedidos</a>
+                            }
+                            else
+                            {
+                                <span class="text-dark fw-semibold">Hola, @usuarioSesion</span>
 
-                            <a href="#" class="header-icon text-decoration-none">
-                                Mi cuenta
-                            </a>
-
-                            <a asp-controller="MisPedidos"
-                               asp-action="Index"
-                               class="header-icon text-decoration-none">
-                                Mis pedidos
-                            </a>
-
-                            <a asp-controller="Carrito"
-                               asp-action="Index"
-                               class="header-icon text-decoration-none position-relative">
-
-                                Carrito
-
-                                @if (cantidadCarrito > 0)
+                                @if (rolSesion == 2)
                                 {
-                                    <span class="cart-badge">@cantidadCarrito</span>
+                                    <a asp-controller="MisPedidos" asp-action="Index" class="text-decoration-none text-dark">Mis pedidos</a>
+                                }
+                                else if (rolSesion == 1)
+                                {
+                                    <a asp-controller="Admin" asp-action="Index" class="text-decoration-none text-dark">Panel admin</a>
+                                }
+                                else if (rolSesion == 3)
+                                {
+                                    <a asp-controller="Vendedor" asp-action="Index" class="text-decoration-none text-dark">Panel vendedor</a>
                                 }
 
-                            </a>
+                                <a asp-controller="Auth" asp-action="Logout" class="text-decoration-none text-danger">Cerrar sesión</a>
+                            }
 
+                            <a asp-controller="Carrito" asp-action="Index" class="text-decoration-none text-dark">
+                                Carrito (@cantidadCarrito)
+                            </a>
                         </div>
                     </div>
                 </div>

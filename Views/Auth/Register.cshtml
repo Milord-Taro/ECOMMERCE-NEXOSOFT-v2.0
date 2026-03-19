@@ -1,0 +1,228 @@
+﻿@model ECOMMERCE_NEXOSOFT.ViewModels.RegisterViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card shadow-lg border-0 p-4">
+                <h3 class="text-center mb-3 fw-bold">Crear Cuenta</h3>
+                <p class="text-center text-muted mb-4">
+                    Regístrate para comenzar a comprar
+                </p>
+
+                <form method="post" novalidate>
+
+                    <!-- 🔴 ERRORES GENERALES -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre</label>
+
+                            <!-- 🔹 SOLO LETRAS DESDE EL FRONT -->
+                            <input asp-for="Nombre"
+                                   class="form-control"
+                                   placeholder="Ej: Juan"
+                                   pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
+                                   title="Solo letras"
+                                   autocomplete="given-name" />
+
+                            <span asp-validation-for="Nombre" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Apellido</label>
+
+                            <!-- 🔹 SOLO LETRAS -->
+                            <input asp-for="Apellido"
+                                   class="form-control"
+                                   placeholder="Ej: Pérez"
+                                   pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
+                                   title="Solo letras"
+                                   autocomplete="family-name" />
+
+                            <span asp-validation-for="Apellido" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Correo electrónico</label>
+
+                        <input asp-for="CorreoElectronico"
+                               type="email"
+                               class="form-control"
+                               placeholder="ejemplo@correo.com"
+                               autocomplete="email"
+                               required
+                               oninput="validarCorreo(this)" />
+
+                        <small id="correoError" class="text-danger"></small>
+                        <span asp-validation-for="CorreoElectronico" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tipo de identificación</label>
+                            <select asp-for="TipoIdentificacion" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <option value="cc">Cédula</option>
+                                <option value="ti">Tarjeta de identidad</option>
+                                <option value="ppt">PPT</option>
+                                <option value="pasaporte">Pasaporte</option>
+                            </select>
+                            <span asp-validation-for="TipoIdentificacion" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Número</label>
+
+                            <!-- 🔹 SOLO NÚMEROS Y MÁXIMO 10 -->
+                            <input asp-for="NumeroIdentificacion"
+                                   class="form-control"
+                                   maxlength="10"
+                                   pattern="\d{10}"
+                                   inputmode="numeric"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                   placeholder="10 dígitos" />
+
+                            <span asp-validation-for="NumeroIdentificacion" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+
+                        <!-- 🔹 SOLO NÚMEROS, EMPIEZA EN 3 -->
+                        <input asp-for="Telefono"
+                               class="form-control"
+                               maxlength="10"
+                               pattern="3\d{9}"
+                               inputmode="numeric"
+                               placeholder="3001234567"
+                               oninput="validarTelefono(this)" />
+
+                        <small id="telError" class="text-danger"></small>
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+
+                        <!-- CONTRASENA -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contraseña</label>
+
+                            <div class="password-wrapper">
+                                <input asp-for="Contrasena"
+                                       class="form-control pe-5"
+                                       id="Contrasena"
+                                       oninput="validarPassword(this)" />
+                                <button type="button"
+                                        class="password-toggle"
+                                        onclick="togglePassword('Contrasena', this)">
+                                    👁
+                                </button>
+                            </div>
+
+                            <small id="passInfo" class="text-muted"></small>
+                            <span asp-validation-for="Contrasena" class="text-danger small"></span>
+                        </div>
+
+                        <!-- CONFIRMAR CONTRASENA -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Confirmar contraseña</label>
+
+                            <div class="password-wrapper">
+                                <input asp-for="ConfirmarContrasena"
+                                       class="form-control pe-5"
+                                       id="ConfirmarContrasena" />
+                                <button type="button"
+                                        class="password-toggle"
+                                        onclick="togglePassword('ConfirmarContrasena', this)">
+                                    👁
+                                </button>
+                            </div>
+
+                            <span asp-validation-for="ConfirmarContrasena" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger w-100 fw-bold py-2">
+                        Crear cuenta
+                    </button>
+
+                </form>
+
+                <div class="text-center mt-4">
+                    <span class="text-muted">¿Ya tienes cuenta?</span><br />
+                    <a asp-controller="Auth" asp-action="Login" class="fw-bold text-decoration-none">
+                        Inicia sesión aquí
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function validarCorreo(input) {
+            const error = document.getElementById("correoError");
+            const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+
+            if (/^[0-9]/.test(input.value)) {
+                error.innerText = "El correo no puede iniciar con número";
+            }
+            else if (!emailRegex.test(input.value)) {
+                error.innerText = "Ingresa un correo válido";
+            }
+            else {
+                error.innerText = "";
+            }
+        }
+
+        function validarTelefono(input) {
+            const error = document.getElementById("telError");
+
+            input.value = input.value.replace(/[^0-9]/g, '');
+
+            if (!input.value.startsWith("3")) {
+                error.innerText = "Debe iniciar con 3";
+            }
+            else if (input.value.length !== 10) {
+                error.innerText = "Debe tener 10 dígitos";
+            }
+            else {
+                error.innerText = "";
+            }
+        }
+
+        function validarPassword(input) {
+            const info = document.getElementById("passInfo");
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+            if (!regex.test(input.value)) {
+                info.innerText = "Debe tener mayúscula, minúscula, número y símbolo (mínimo 8 caracteres)";
+                info.style.color = "red";
+            } else {
+                info.innerText = "Contraseña segura ✔";
+                info.style.color = "green";
+            }
+        }
+
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                button.innerHTML = "🙈";
+            } else {
+                input.type = "password";
+                button.innerHTML = "👁";
+            }
+        }
+    </script>
+}
