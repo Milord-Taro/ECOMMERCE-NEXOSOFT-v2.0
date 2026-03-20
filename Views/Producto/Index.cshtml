@@ -97,6 +97,7 @@
                             <th>Stock</th>
                             <th>Visible</th>
                             <th>Categoría</th>
+                            <th>Subcategoría</th>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
@@ -132,6 +133,7 @@
                                     }
                                 </td>
                                 <td>@item.IdCategoriaNavigation?.NombreCategoria</td>
+                                <td>@item.IdSubcategoriaNavigation?.NombreSubcategoria</td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end flex-wrap gap-2">
                                         <a asp-action="Edit" asp-route-id="@item.IdProducto" class="btn btn-sm btn-outline-dark">Editar</a>

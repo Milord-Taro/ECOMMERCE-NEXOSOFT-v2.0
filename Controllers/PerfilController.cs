@@ -1,10 +1,12 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Filters;
 using ECOMMERCE_NEXOSOFT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(1, 2, 3)]
     public class PerfilController : Controller
     {
         private readonly NexosoftDbContext _context;

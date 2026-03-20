@@ -11,6 +11,8 @@ public partial class Producto
 
     public int IdCategoria { get; set; }
 
+    public int? IdSubcategoria { get; set; }
+
     public string NombreProducto { get; set; } = null!;
 
     public string? DescripcionCorta { get; set; }
@@ -32,6 +34,8 @@ public partial class Producto
     public virtual ICollection<Detallepedido> Detallepedidos { get; set; } = new List<Detallepedido>();
 
     public virtual Categorium IdCategoriaNavigation { get; set; } = null!;
+
+    public virtual Subcategorium? IdSubcategoriaNavigation { get; set; }
 
     public virtual Stock? Stock { get; set; }
 }

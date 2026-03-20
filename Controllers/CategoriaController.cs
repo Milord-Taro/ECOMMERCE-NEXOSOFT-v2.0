@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ECOMMERCE_NEXOSOFT.Data;
 using ECOMMERCE_NEXOSOFT.Models;
+using ECOMMERCE_NEXOSOFT.Filters;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(1)]
     public class CategoriaController : Controller
     {
         private readonly NexosoftDbContext _context;
@@ -54,12 +56,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdCategoria,CodCategoria,NombreCategoria,Descripcion")] Categorium categorium)
+        public async Task<IActionResult> Create([Bind("IdCategoria,CodCategoria,NombreCategoria,Descripcion,VisiblePublico")] Categorium categorium)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(categorium);
                 await _context.SaveChangesAsync();
+                TempData["MensajeExito"] = "Categoría creada correctamente.";
                 return RedirectToAction(nameof(Index));
             }
             return View(categorium);
@@ -86,7 +89,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdCategoria,CodCategoria,NombreCategoria,Descripcion")] Categorium categorium)
+        public async Task<IActionResult> Edit(int id, [Bind("IdCategoria,CodCategoria,NombreCategoria,Descripcion,VisiblePublico")] Categorium categorium)
         {
             if (id != categorium.IdCategoria)
             {
@@ -99,6 +102,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 {
                     _context.Update(categorium);
                     await _context.SaveChangesAsync();
+                    TempData["MensajeExito"] = "Categoría actualizada correctamente.";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -126,6 +130,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var categorium = await _context.Categoria
                 .FirstOrDefaultAsync(m => m.IdCategoria == id);
+
             if (categorium == null)
             {
                 return NotFound();
@@ -140,12 +145,15 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var categorium = await _context.Categoria.FindAsync(id);
+
             if (categorium != null)
             {
-                _context.Categoria.Remove(categorium);
+                categorium.VisiblePublico = false;
+                _context.Update(categorium);
+                await _context.SaveChangesAsync();
+                TempData["MensajeExito"] = "Categoría ocultada correctamente.";
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

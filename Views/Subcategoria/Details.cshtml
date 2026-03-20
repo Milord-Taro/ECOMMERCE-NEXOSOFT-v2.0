@@ -1,0 +1,49 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.Subcategorium
+
+@{
+    ViewData["Title"] = "Detalle de subcategoría";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Detalle de subcategoría</h2>
+            <p class="text-muted mb-0">Consulta la información de la subcategoría seleccionada.</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.IdSubcategoria" class="btn btn-dark">Editar</a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Código</dt>
+                <dd class="col-sm-9">@Model.CodSubcategoria</dd>
+
+                <dt class="col-sm-3">Categoría</dt>
+                <dd class="col-sm-9">@Model.IdCategoriaNavigation?.NombreCategoria</dd>
+
+                <dt class="col-sm-3">Nombre</dt>
+                <dd class="col-sm-9">@Model.NombreSubcategoria</dd>
+
+                <dt class="col-sm-3">Descripción</dt>
+                <dd class="col-sm-9">@Model.Descripcion</dd>
+
+                <dt class="col-sm-3">Visible</dt>
+                <dd class="col-sm-9">
+                    @if (Model.VisiblePublico)
+                    {
+                        <span class="badge bg-success">Sí</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">No</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>

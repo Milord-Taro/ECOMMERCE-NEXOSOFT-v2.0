@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ECOMMERCE_NEXOSOFT.Data;
+﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Filters;
 using ECOMMERCE_NEXOSOFT.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(1, 3)]
     public class StockController : Controller
     {
         private readonly NexosoftDbContext _context;

@@ -13,5 +13,9 @@ public partial class Categorium
 
     public string? Descripcion { get; set; }
 
+    public bool VisiblePublico { get; set; }
+
     public virtual ICollection<Producto> Productos { get; set; } = new List<Producto>();
+
+    public virtual ICollection<Subcategorium> Subcategoria { get; set; } = new List<Subcategorium>();
 }
