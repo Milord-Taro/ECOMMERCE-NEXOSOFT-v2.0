@@ -41,8 +41,10 @@ public partial class NexosoftDbContext : DbContext
 
     public virtual DbSet<Ventum> Venta { get; set; }
 
+    public virtual DbSet<Subcategorium> Subcategoria { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+    #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseMySql("server=localhost;port=3306;database=NexosoftDB;user=root;password=123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.44-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -60,7 +62,26 @@ public partial class NexosoftDbContext : DbContext
             entity.HasIndex(e => e.CodCategoria, "CodCategoria").IsUnique();
 
             entity.Property(e => e.Descripcion).HasMaxLength(100);
-            entity.Property(e => e.NombreCategoria).HasColumnType("enum('Herramientas eléctricas','Herramientas manuales','Tornillería y fijación','Clavos y puntillas','Pinturas','Construcción','Agregados','Eléctricos','Plomería','Pintura y acabados','Selladores','Aseo','Mallas y refuerzo','Abrasivos','Adhesivos','Ferretería general','Seguridad industrial','Medición','Jardinería','Cerrajería')");
+            entity.Property(e => e.NombreCategoria).HasMaxLength(100);
+            entity.Property(e => e.VisiblePublico);
+        });
+
+        modelBuilder.Entity<Subcategorium>(entity =>
+        {
+            entity.HasKey(e => e.IdSubcategoria).HasName("PRIMARY");
+
+            entity.ToTable("subcategoria");
+
+            entity.HasIndex(e => e.CodSubcategoria, "CodSubcategoria").IsUnique();
+            entity.HasIndex(e => e.IdCategoria, "IdCategoria");
+
+            entity.Property(e => e.NombreSubcategoria).HasMaxLength(100);
+            entity.Property(e => e.Descripcion).HasMaxLength(150);
+
+            entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Subcategoria)
+                .HasForeignKey(d => d.IdCategoria)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Subcategoria_Categoria");
         });
 
         modelBuilder.Entity<Cliente>(entity =>
@@ -220,6 +241,8 @@ public partial class NexosoftDbContext : DbContext
 
             entity.HasIndex(e => e.SkuProducto, "SkuProducto").IsUnique();
 
+            entity.HasIndex(e => e.IdSubcategoria, "IdSubcategoria");
+
             entity.Property(e => e.CodigoBarrasProducto).HasMaxLength(20);
             entity.Property(e => e.DescripcionCorta).HasMaxLength(100);
             entity.Property(e => e.MarcaProducto).HasMaxLength(100);
@@ -228,6 +251,10 @@ public partial class NexosoftDbContext : DbContext
             entity.Property(e => e.VisiblePublico);
             entity.Property(e => e.SkuProducto).HasMaxLength(20);
             entity.Property(e => e.UnidadMedidaProducto).HasColumnType("enum('unidad','caja','paquete','metro','metro_cuadrado','litro','galon','kilogramo')");
+
+            entity.HasOne(d => d.IdSubcategoriaNavigation).WithMany(p => p.Productos)
+                .HasForeignKey(d => d.IdSubcategoria)
+                .HasConstraintName("FK_Producto_Subcategoria");
 
             entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Productos)
                 .HasForeignKey(d => d.IdCategoria)
@@ -318,6 +345,7 @@ public partial class NexosoftDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("venta_ibfk_2");
         });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

@@ -1,9 +1,11 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(2)]
     public class MisPedidosController : Controller
     {
         private readonly NexosoftDbContext _context;
