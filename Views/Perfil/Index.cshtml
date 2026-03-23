@@ -5,9 +5,23 @@
 }
 
 <div class="container py-4">
-    <div class="mb-4">
-        <h2 class="fw-bold mb-1">Mi perfil</h2>
-        <p class="text-muted mb-0">Consulta y actualiza tu información personal.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Mi perfil</h2>
+            <p class="text-muted mb-0">Consulta y actualiza tu información personal.</p>
+        </div>
+
+        @if (Model.IdRol != 1 && Model.IdRol != 3)
+        {
+            <a asp-controller="SolicitudVendedor" asp-action="MisSolicitudes" class="btn btn-outline-dark">
+                Mis solicitudes de vendedor
+            </a>
+
+            <a asp-controller="SolicitudVendedor" asp-action="Create" class="btn btn-outline-dark">
+                Quiero vender
+            </a>
+        }
+        </div>
     </div>
 
     @if (TempData["MensajeExito"] != null)

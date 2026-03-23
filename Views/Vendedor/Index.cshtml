@@ -5,6 +5,13 @@
     var stockCritico = ViewBag.StockCritico as List<Stock> ?? new List<Stock>();
 }
 
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["MensajeError"]
+    </div>
+}
+
 <div class="container py-4">
     <div class="mb-4">
         <h2 class="fw-bold mb-1">Panel vendedor</h2>
@@ -101,7 +108,8 @@
             <h5 class="fw-bold mb-3">Accesos rápidos</h5>
 
             <div class="d-flex flex-wrap gap-2">
-                <a asp-controller="Producto" asp-action="Index" class="btn btn-dark">Mis productos</a>
+                <a asp-controller="MiTienda" asp-action="Index" class="btn btn-outline-dark">Perfil tienda</a>
+                <a asp-controller="Producto" asp-action="Index" class="btn btn-outline-dark">Mis productos</a>
                 <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-dark">Mi stock</a>
             </div>
         </div>

@@ -19,17 +19,25 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // GET: Stock
         public async Task<IActionResult> Index(string? buscar, bool? soloStockBajo)
         {
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+            if (idTienda == null)
+            {
+                TempData["MensajeError"] = "No tienes una tienda asociada para gestionar stock.";
+                return RedirectToAction("Index", "Vendedor");
+            }
+
             var query = _context.Stocks
                 .Include(s => s.IdProductoNavigation)
-                .ThenInclude(p => p.IdCategoriaNavigation)
+                    .ThenInclude(p => p.IdCategoriaNavigation)
+                .Where(s => s.IdProductoNavigation != null && s.IdProductoNavigation.IdTienda == idTienda.Value)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(buscar))
             {
                 var texto = buscar.Trim().ToLower();
-
-                query = query.Where(s =>
-                    s.IdProductoNavigation.NombreProducto.ToLower().Contains(texto));
+                query = query.Where(s => s.IdProductoNavigation != null &&
+                                         s.IdProductoNavigation.NombreProducto.ToLower().Contains(texto));
             }
 
             if (soloStockBajo == true)
@@ -38,7 +46,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             var stocks = await query
-                .OrderBy(s => s.IdProductoNavigation.NombreProducto)
+                .OrderBy(s => s.IdProductoNavigation!.NombreProducto)
                 .ToListAsync();
 
             ViewBag.Busqueda = buscar;
@@ -55,9 +63,17 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return NotFound();
             }
 
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+            if (idTienda == null)
+            {
+                TempData["MensajeError"] = "No tienes una tienda asociada.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var stock = await _context.Stocks
                 .Include(s => s.IdProductoNavigation)
-                .FirstOrDefaultAsync(s => s.IdInventario == id);
+                .FirstOrDefaultAsync(s => s.IdInventario == id && s.IdProductoNavigation != null && s.IdProductoNavigation.IdTienda == idTienda.Value);
 
             if (stock == null)
             {
@@ -83,6 +99,28 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             {
                 try
                 {
+                    var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+                    if (idTienda == null)
+                    {
+                        TempData["MensajeError"] = "No tienes una tienda asociada.";
+                        return View(stock);
+                    }
+
+                    var stockExistente = await _context.Stocks
+                        .Include(s => s.IdProductoNavigation)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(s => s.IdInventario == id &&
+                                                  s.IdProductoNavigation != null &&
+                                                  s.IdProductoNavigation.IdTienda == idTienda.Value);
+
+                    if (stockExistente == null)
+                    {
+                        return NotFound();
+                    }
+
+                    stock.IdProducto = stockExistente.IdProducto;
+
                     _context.Update(stock);
                     await _context.SaveChangesAsync();
                     TempData["MensajeExito"] = "Stock actualizado correctamente.";
@@ -103,6 +141,24 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .FirstOrDefaultAsync(p => p.IdProducto == stock.IdProducto) ?? new Producto();
 
             return View(stock);
+        }
+
+        private int? ObtenerIdTiendaVendedorLogueado()
+        {
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuario == null)
+            {
+                return null;
+            }
+
+            var idTienda = _context.Tiendas
+                .Include(t => t.IdVendedorNavigation)
+                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value && t.VisiblePublico)
+                .Select(t => (int?)t.IdTienda)
+                .FirstOrDefault();
+
+            return idTienda;
         }
     }
 }

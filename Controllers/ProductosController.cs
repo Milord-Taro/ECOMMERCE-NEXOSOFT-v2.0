@@ -14,14 +14,16 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         }
 
         public async Task<IActionResult> Index(
-    int? categoria,
-    string? buscar,
-    string? marca,
-    string? orden,
-    bool? soloDisponibles)
+            int? categoria,
+            int? subcategoria,
+            string? buscar,
+            string? marca,
+            string? orden,
+            bool? soloDisponibles)
         {
             var query = _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.IdSubcategoriaNavigation)
                 .Include(p => p.Stock)
                 .Where(p => p.VisiblePublico)
                 .AsQueryable();
@@ -29,6 +31,11 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             if (categoria.HasValue)
             {
                 query = query.Where(p => p.IdCategoria == categoria.Value);
+            }
+
+            if (subcategoria.HasValue)
+            {
+                query = query.Where(p => p.IdSubcategoria == subcategoria.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(buscar))
@@ -39,7 +46,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                     p.NombreProducto.ToLower().Contains(texto) ||
                     (p.DescripcionCorta != null && p.DescripcionCorta.ToLower().Contains(texto)) ||
                     (p.MarcaProducto != null && p.MarcaProducto.ToLower().Contains(texto)) ||
-                    p.IdCategoriaNavigation.NombreCategoria.ToLower().Contains(texto));
+                    p.IdCategoriaNavigation.NombreCategoria.ToLower().Contains(texto) ||
+                    (p.IdSubcategoriaNavigation != null && p.IdSubcategoriaNavigation.NombreSubcategoria.ToLower().Contains(texto)));
             }
 
             if (!string.IsNullOrWhiteSpace(marca))
@@ -70,6 +78,11 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .OrderBy(c => c.NombreCategoria)
                 .ToListAsync();
 
+            var subcategorias = await _context.Subcategoria
+                .Where(s => s.VisiblePublico && (!categoria.HasValue || s.IdCategoria == categoria.Value))
+                .OrderBy(s => s.NombreSubcategoria)
+                .ToListAsync();
+
             var marcas = await _context.Productos
                 .Where(p => p.VisiblePublico &&
                             p.MarcaProducto != null &&
@@ -80,8 +93,10 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .ToListAsync();
 
             ViewBag.Categorias = categorias;
+            ViewBag.Subcategorias = subcategorias;
             ViewBag.Marcas = marcas;
             ViewBag.CategoriaSeleccionada = categoria;
+            ViewBag.SubcategoriaSeleccionada = subcategoria;
             ViewBag.Busqueda = buscar;
             ViewBag.MarcaSeleccionada = marca;
             ViewBag.OrdenSeleccionado = orden;
@@ -99,6 +114,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var producto = await _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.IdSubcategoriaNavigation)
                 .Include(p => p.Stock)
                 .FirstOrDefaultAsync(p => p.IdProducto == id);
 
@@ -108,6 +124,22 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             return View(producto);
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerSubcategorias(int idCategoria)
+        {
+            var subcategorias = _context.Subcategoria
+                .Where(s => s.VisiblePublico && s.IdCategoria == idCategoria)
+                .OrderBy(s => s.NombreSubcategoria)
+                .Select(s => new
+                {
+                    idSubcategoria = s.IdSubcategoria,
+                    nombreSubcategoria = s.NombreSubcategoria
+                })
+                .ToList();
+
+            return Json(subcategorias);
         }
     }
 }
