@@ -43,9 +43,7 @@
                                 }
                             }
                         </select>
-                    </div>
 
-                    <div class="col-md-3">
                         <label class="form-label fw-semibold">Subcategoría</label>
                         <select name="subcategoria" id="subcategoriaFiltro" class="form-select">
                             <option value="">Todas</option>
@@ -150,16 +148,28 @@
                                 </div>
                             </div>
 
-                            <div class="mb-2">
-                                <span class="badge bg-secondary-subtle text-dark border">
+                            <div class="mb-2 d-flex flex-wrap align-items-center">
+                                <span class="tag-label tag-categoria">
                                     @item.IdCategoriaNavigation?.NombreCategoria
                                 </span>
+
+                                @if (item.IdSubcategoriaNavigation != null)
+                                {
+                                    <span class="tag-label tag-subcategoria">
+                                        @item.IdSubcategoriaNavigation.NombreSubcategoria
+                                    </span>
+                                }
                             </div>
 
-                            @if (item.IdSubcategoriaNavigation != null)
+                            @if (item.IdTiendaNavigation != null)
                             {
-                                <p class="text-muted small mb-2">
-                                    @item.IdSubcategoriaNavigation.NombreSubcategoria
+                                <p class="small mb-2">
+                                    <a asp-controller="Tiendas"
+                                       asp-action="Detalle"
+                                       asp-route-id="@item.IdTienda"
+                                       class="text-decoration-none fw-semibold">
+                                        @item.IdTiendaNavigation.NombreTienda
+                                    </a>
                                 </p>
                             }
 
@@ -168,12 +178,6 @@
                             <p class="text-muted small mb-2">
                                 @(string.IsNullOrWhiteSpace(item.MarcaProducto) ? "Sin marca" : item.MarcaProducto)
                             </p>
-
-                            <p class="text-muted small mb-3" style="min-height: 40px;">
-                                @(string.IsNullOrWhiteSpace(item.DescripcionCorta)
-                                                        ? "Producto disponible en catálogo."
-                                                        : item.DescripcionCorta)
-                    </p>
 
                             <div class="mb-2">
                                 <span class="fs-5 fw-bold">

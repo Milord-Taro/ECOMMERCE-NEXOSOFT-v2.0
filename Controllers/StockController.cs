@@ -154,7 +154,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var idTienda = _context.Tiendas
                 .Include(t => t.IdVendedorNavigation)
-                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value && t.VisiblePublico)
+                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value)
                 .Select(t => (int?)t.IdTienda)
                 .FirstOrDefault();
 

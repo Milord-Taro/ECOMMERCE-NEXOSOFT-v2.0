@@ -1,8 +1,13 @@
 ﻿@model List<ECOMMERCE_NEXOSOFT.Models.CarritoItem>
+@using System.Linq
 
 @{
     ViewData["Title"] = "Carrito";
     decimal total = Model.Sum(x => x.Precio * x.Cantidad);
+
+    var gruposPorTienda = Model
+        .GroupBy(x => new { x.IdTienda, x.NombreTienda })
+        .ToList();
 }
 
 <section class="container py-5">
@@ -27,56 +32,83 @@
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Precio</th>
-                        <th>Cantidad</th>
-                        <th>Subtotal</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.NombreProducto</td>
-                            <td>$@item.Precio.ToString("N2")</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <a asp-controller="Carrito"
-                                       asp-action="Disminuir"
-                                       asp-route-id="@item.IdProducto"
-                                       class="btn btn-sm btn-outline-secondary">
-                                        -
-                                    </a>
+        @foreach (var grupo in gruposPorTienda)
+        {
+            decimal subtotalTienda = grupo.Sum(x => x.Precio * x.Cantidad);
 
-                                    <span>@item.Cantidad</span>
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                @(string.IsNullOrWhiteSpace(grupo.Key.NombreTienda)
+                                                        ? "Tienda no identificada"
+                                                        : grupo.Key.NombreTienda)
+                    </h5>
+                    <p class="text-muted mb-0">
+                        @grupo.Count() producto(s) en esta tienda
+                    </p>
+                </div>
 
-                                    <a asp-controller="Carrito"
-                                       asp-action="Aumentar"
-                                       asp-route-id="@item.IdProducto"
-                                       class="btn btn-sm btn-outline-secondary">
-                                        +
-                                    </a>
-                                </div>
-                            </td>
-                            <td>$@((item.Precio * item.Cantidad).ToString("N2"))</td>
-                            <td>
-                                <a asp-controller="Carrito"
-                                   asp-action="Eliminar"
-                                   asp-route-id="@item.IdProducto"
-                                   class="btn btn-sm btn-outline-danger">
-                                    Eliminar
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                        <div class="text-end">
+                            <span class="text-muted d-block">Subtotal tienda</span>
+                            <strong>$@subtotalTienda.ToString("N2")</strong>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Precio</th>
+                                    <th>Cantidad</th>
+                                    <th>Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        @foreach (var item in grupo)
+                                {
+                                    <tr>
+                                        <td>@item.NombreProducto</td>
+                                        <td>$@item.Precio.ToString("N2")</td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a asp-controller="Carrito"
+                                                   asp-action="Disminuir"
+                                                   asp-route-id="@item.IdProducto"
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    -
+                                                </a>
+
+                                                <span>@item.Cantidad</span>
+
+                                                <a asp-controller="Carrito"
+                                                   asp-action="Aumentar"
+                                                   asp-route-id="@item.IdProducto"
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    +
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td>$@((item.Precio * item.Cantidad).ToString("N2"))</td>
+                                        <td>
+                                            <a asp-controller="Carrito"
+                                               asp-action="Eliminar"
+                                               asp-route-id="@item.IdProducto"
+                                               class="btn btn-sm btn-outline-danger">
+                                                Eliminar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-4">
             <div>

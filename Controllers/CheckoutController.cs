@@ -1,10 +1,12 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
 using ECOMMERCE_NEXOSOFT.Helpers;
 using ECOMMERCE_NEXOSOFT.Models;
+using ECOMMERCE_NEXOSOFT.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(2, 3)]
     public class CheckoutController : Controller
     {
         private readonly NexosoftDbContext _context;

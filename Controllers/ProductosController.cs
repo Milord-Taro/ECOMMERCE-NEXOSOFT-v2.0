@@ -24,8 +24,11 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             var query = _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
                 .Include(p => p.IdSubcategoriaNavigation)
+                .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Stock)
-                .Where(p => p.VisiblePublico)
+                .Where(p => p.VisiblePublico &&
+                        p.IdTiendaNavigation != null &&
+                        p.IdTiendaNavigation.VisiblePublico)
                 .AsQueryable();
 
             if (categoria.HasValue)
@@ -115,8 +118,12 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             var producto = await _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
                 .Include(p => p.IdSubcategoriaNavigation)
+                .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Stock)
-                .FirstOrDefaultAsync(p => p.IdProducto == id);
+                .FirstOrDefaultAsync(p => p.IdProducto == id &&
+                              p.VisiblePublico &&
+                              p.IdTiendaNavigation != null &&
+                              p.IdTiendaNavigation.VisiblePublico);
 
             if (producto == null)
             {

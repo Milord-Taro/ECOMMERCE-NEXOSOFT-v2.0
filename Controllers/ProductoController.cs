@@ -372,21 +372,21 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         }
 
         private int? ObtenerIdTiendaVendedorLogueado()
-{
-    var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+        {
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
 
-    if (idUsuario == null)
-    {
-        return null;
-    }
+            if (idUsuario == null)
+            {
+                return null;
+            }
 
-    var idTienda = _context.Tiendas
-        .Include(t => t.IdVendedorNavigation)
-        .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value && t.VisiblePublico)
-        .Select(t => (int?)t.IdTienda)
-        .FirstOrDefault();
+            var idTienda = _context.Tiendas
+                .Include(t => t.IdVendedorNavigation)
+                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value)
+                .Select(t => (int?)t.IdTienda)
+                .FirstOrDefault();
 
-    return idTienda;
-}
+            return idTienda;
+        }
     }
 }

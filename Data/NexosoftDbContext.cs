@@ -296,7 +296,7 @@ public partial class NexosoftDbContext : DbContext
             entity.HasIndex(e => e.IdTienda, "IdTienda");
 
             entity.Property(e => e.CodigoBarrasProducto).HasMaxLength(20);
-            entity.Property(e => e.DescripcionCorta).HasMaxLength(100);
+            entity.Property(e => e.DescripcionCorta).HasMaxLength(255);
             entity.Property(e => e.MarcaProducto).HasMaxLength(100);
             entity.Property(e => e.NombreProducto).HasMaxLength(100);
             entity.Property(e => e.PrecioVentaProducto).HasPrecision(10, 2);

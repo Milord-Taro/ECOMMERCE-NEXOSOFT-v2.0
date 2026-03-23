@@ -59,6 +59,10 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([Bind("IdTienda,CodTienda,IdVendedor,NombreTienda,Descripcion,LogoUrl,VisiblePublico,FechaRegistro")] ECOMMERCE_NEXOSOFT.Models.Tienda tienda)
         {
+            ModelState.Remove("IdVendedorNavigation");
+            ModelState.Remove("Pedidos");
+            ModelState.Remove("Productos");
+
             var tiendaActual = await ObtenerTiendaActualAsync();
 
             if (tiendaActual == null || tienda.IdTienda != tiendaActual.IdTienda)
@@ -72,12 +76,10 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return View(tienda);
             }
 
-            tienda.NombreTienda = tiendaActual.NombreTienda;
-            tienda.IdVendedor = tiendaActual.IdVendedor;
-            tienda.CodTienda = tiendaActual.CodTienda;
-            tienda.FechaRegistro = tiendaActual.FechaRegistro;
+            tiendaActual.Descripcion = tienda.Descripcion;
+            tiendaActual.LogoUrl = tienda.LogoUrl;
+            tiendaActual.VisiblePublico = tienda.VisiblePublico;
 
-            _context.Update(tienda);
             await _context.SaveChangesAsync();
 
             TempData["MensajeExito"] = "La información de la tienda se actualizó correctamente.";

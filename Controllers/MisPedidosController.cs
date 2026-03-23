@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
-    [AuthorizeUser(2)]
+    [AuthorizeUser(2, 3)]
     public class MisPedidosController : Controller
     {
         private readonly NexosoftDbContext _context;

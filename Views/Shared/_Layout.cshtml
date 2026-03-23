@@ -118,6 +118,16 @@
                                                     Panel vendedor
                                                 </a>
                                             </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="MiTienda" asp-action="Index">
+                                                    Mi tienda
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="MisPedidos" asp-action="Index">
+                                                    Mis pedidos
+                                                </a>
+                                            </li>
                                         }
 
                                         <li><hr class="dropdown-divider"></li>
@@ -130,7 +140,7 @@
                                     </ul>
                                 </div>
 
-                                @if (rolSesion == 2)
+                                @if (rolSesion == 2 || rolSesion == 3)
                                 {
                                     <a asp-controller="Carrito" asp-action="Index" class="cart-link position-relative" title="Carrito">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">

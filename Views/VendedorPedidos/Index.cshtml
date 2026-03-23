@@ -1,0 +1,156 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model IEnumerable<ECOMMERCE_NEXOSOFT.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Pedidos de mi tienda";
+    var estadoSeleccionado = ViewBag.EstadoSeleccionado as string;
+    var busqueda = ViewBag.Busqueda as string;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Pedidos de mi tienda</h2>
+            <p class="text-muted mb-0">Consulta los pedidos asociados a tu tienda.</p>
+        </div>
+
+        <a asp-controller="Vendedor" asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver al panel
+        </a>
+    </div>
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["MensajeError"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold">Buscar</label>
+                        <input type="text"
+                               name="buscar"
+                               value="@busqueda"
+                               class="form-control"
+                               placeholder="Código, cliente o correo" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">Todos</option>
+                            @if (estadoSeleccionado == "pendiente")
+                            {
+                                <option value="pendiente" selected>Pendiente</option>
+                            }
+                            else
+                            {
+                                <option value="pendiente">Pendiente</option>
+                            }
+
+                            @if (estadoSeleccionado == "en camino")
+                            {
+                                <option value="en camino" selected>En camino</option>
+                            }
+                            else
+                            {
+                                <option value="en camino">En camino</option>
+                            }
+
+                            @if (estadoSeleccionado == "entregado")
+                            {
+                                <option value="entregado" selected>Entregado</option>
+                            }
+                            else
+                            {
+                                <option value="entregado">Entregado</option>
+                            }
+
+                            @if (estadoSeleccionado == "cancelado")
+                            {
+                                <option value="cancelado" selected>Cancelado</option>
+                            }
+                            else
+                            {
+                                <option value="cancelado">Cancelado</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-dark">Filtrar</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Código</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Correo</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    No se encontraron pedidos para tu tienda con los filtros seleccionados.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.CodPedido</td>
+                                    <td>@item.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.IdUsuarioNavigation?.Nombre @item.IdUsuarioNavigation?.Apellido</td>
+                                    <td>@item.IdUsuarioNavigation?.CorreoElectronico</td>
+                                    <td>@item.Total.ToString("C")</td>
+                                    <td>
+                                        @if (item.EstadoPedido == "pendiente")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        }
+                                        else if (item.EstadoPedido == "en camino")
+                                        {
+                                            <span class="badge bg-info text-dark">En camino</span>
+                                        }
+                                        else if (item.EstadoPedido == "entregado")
+                                        {
+                                            <span class="badge bg-success">Entregado</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Cancelado</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

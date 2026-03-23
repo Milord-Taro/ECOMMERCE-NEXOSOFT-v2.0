@@ -40,6 +40,12 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .Take(5)
                 .ToListAsync();
 
+            ViewBag.UltimosPedidos = await _context.Pedidos
+                .Where(p => p.IdTienda == idTienda.Value)
+                .OrderByDescending(p => p.FechaCreacion)
+                .Take(5)
+                .ToListAsync();
+
             return View();
         }
 
@@ -54,7 +60,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var idTienda = _context.Tiendas
                 .Include(t => t.IdVendedorNavigation)
-                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value && t.VisiblePublico)
+                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value)
                 .Select(t => (int?)t.IdTienda)
                 .FirstOrDefault();
 

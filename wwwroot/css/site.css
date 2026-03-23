@@ -547,3 +547,43 @@ h3 {
     padding: 0 4px;
     line-height: 1;
 }
+
+.badge-tag {
+    display: inline-block;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid #d0d7de;
+    background: #f8f9fa;
+    color: #334155;
+    margin-right: 0.35rem;
+    margin-bottom: 0.35rem;
+}
+
+.tag-label {
+    position: relative;
+    display: inline-block;
+    padding: 0.35rem 0.75rem 0.35rem 0.75rem;
+    margin-right: 0.45rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 0.35rem;
+    text-transform: uppercase;
+}
+
+/* Categoría */
+.tag-categoria {
+    background: #5c6f82;
+    color: #fff;
+}
+
+/* Subcategoría */
+.tag-subcategoria {
+    background: #e9eef3;
+    color: #344054;
+    border: 1px solid #cfd7df;
+}
