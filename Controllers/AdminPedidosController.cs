@@ -46,5 +46,27 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             return View(pedidos);
         }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var pedido = await _context.Pedidos
+                .Include(p => p.IdUsuarioNavigation)
+                .Include(p => p.IdTiendaNavigation)
+                .Include(p => p.Detallepedidos)
+                    .ThenInclude(d => d.IdProductoNavigation)
+                .FirstOrDefaultAsync(p => p.IdPedido == id);
+
+            if (pedido == null)
+            {
+                return NotFound();
+            }
+
+            return View(pedido);
+        }
     }
 }

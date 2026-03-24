@@ -25,6 +25,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             var pedidos = await _context.Pedidos
+                .Include(p => p.IdTiendaNavigation)
                 .Where(p => p.IdUsuario == idUsuario.Value)
                 .OrderByDescending(p => p.FechaCreacion)
                 .ToListAsync();
@@ -47,6 +48,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             var pedido = await _context.Pedidos
+                .Include(p => p.IdUsuarioNavigation)
+                .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
                 .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);

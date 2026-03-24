@@ -18,13 +18,23 @@
         </a>
     </div>
 
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["MensajeError"]
+        </div>
+    }
+
     <div class="card shadow-sm border-0 rounded-4 mb-4">
         <div class="card-body p-4">
             <form method="get">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-5">
                         <label class="form-label fw-semibold">Buscar</label>
-                        <input type="text" name="buscar" value="@busqueda" class="form-control"
+                        <input type="text"
+                               name="buscar"
+                               value="@busqueda"
+                               class="form-control"
                                placeholder="Código, usuario o tienda" />
                     </div>
 
@@ -32,10 +42,42 @@
                         <label class="form-label fw-semibold">Estado</label>
                         <select name="estado" class="form-select">
                             <option value="">Todos</option>
-                            <option value="pendiente" selected="@(estadoSeleccionado == "pendiente")">Pendiente</option>
-                            <option value="en camino" selected="@(estadoSeleccionado == "en camino")">En camino</option>
-                            <option value="entregado" selected="@(estadoSeleccionado == "entregado")">Entregado</option>
-                            <option value="cancelado" selected="@(estadoSeleccionado == "cancelado")">Cancelado</option>
+
+                            @if (estadoSeleccionado == "pendiente")
+                            {
+                                <option value="pendiente" selected>Pendiente</option>
+                            }
+                            else
+                            {
+                                <option value="pendiente">Pendiente</option>
+                            }
+
+                            @if (estadoSeleccionado == "en camino")
+                            {
+                                <option value="en camino" selected>En camino</option>
+                            }
+                            else
+                            {
+                                <option value="en camino">En camino</option>
+                            }
+
+                            @if (estadoSeleccionado == "entregado")
+                            {
+                                <option value="entregado" selected>Entregado</option>
+                            }
+                            else
+                            {
+                                <option value="entregado">Entregado</option>
+                            }
+
+                            @if (estadoSeleccionado == "cancelado")
+                            {
+                                <option value="cancelado" selected>Cancelado</option>
+                            }
+                            else
+                            {
+                                <option value="cancelado">Cancelado</option>
+                            }
                         </select>
                     </div>
 
@@ -60,13 +102,14 @@
                             <th>Tienda</th>
                             <th>Total</th>
                             <th>Estado</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
+                                <td colspan="7" class="text-center text-muted py-4">
                                     No se encontraron pedidos con los filtros seleccionados.
                                 </td>
                             </tr>
@@ -78,10 +121,34 @@
                                 <tr>
                                     <td>@item.CodPedido</td>
                                     <td>@item.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@item.IdUsuarioNavigation?.Nombre</td>
+                                    <td>@item.IdUsuarioNavigation?.Nombre @item.IdUsuarioNavigation?.Apellido</td>
                                     <td>@item.IdTiendaNavigation?.NombreTienda</td>
                                     <td>@item.Total.ToString("C")</td>
-                                    <td>@item.EstadoPedido</td>
+                                    <td>
+                                        @if (item.EstadoPedido == "pendiente")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        }
+                                        else if (item.EstadoPedido == "en camino")
+                                        {
+                                            <span class="badge bg-info text-dark">En camino</span>
+                                        }
+                                        else if (item.EstadoPedido == "entregado")
+                                        {
+                                            <span class="badge bg-success">Entregado</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Cancelado</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.IdPedido"
+                                           class="btn btn-sm btn-outline-dark">
+                                            Detalle
+                                        </a>
+                                    </td>
                                 </tr>
                             }
                         }

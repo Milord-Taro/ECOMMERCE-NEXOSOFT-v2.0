@@ -74,5 +74,35 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             return View(pedidos);
         }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+            if (idTienda == null)
+            {
+                TempData["MensajeError"] = "No tienes una tienda asociada para consultar pedidos.";
+                return RedirectToAction("Index", "Vendedor");
+            }
+
+            var pedido = await _context.Pedidos
+                .Include(p => p.IdUsuarioNavigation)
+                .Include(p => p.IdTiendaNavigation)
+                .Include(p => p.Detallepedidos)
+                    .ThenInclude(d => d.IdProductoNavigation)
+                .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdTienda == idTienda.Value);
+
+            if (pedido == null)
+            {
+                return NotFound();
+            }
+
+            return View(pedido);
+        }
     }
 }
