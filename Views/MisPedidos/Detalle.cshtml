@@ -4,53 +4,98 @@
     ViewData["Title"] = "Detalle del pedido";
 }
 
-<section class="container py-5">
-    <h2 class="section-title mb-4">Detalle del pedido</h2>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Detalle del pedido</h2>
+            <p class="text-muted mb-0">Consulta la información completa de tu pedido.</p>
+        </div>
 
-    <div class="mb-4">
-        <p><strong>ID Pedido:</strong> @Model.IdPedido</p>
-        <p><strong>Código:</strong> @Model.CodPedido</p>
-        <p><strong>Fecha:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
-        <p><strong>Estado:</strong> @Model.EstadoPedido</p>
-        <p><strong>Total:</strong> $@Model.Total.ToString("N2")</p>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Precio unitario</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.Detallepedidos)
-                {
-                    <tr>
-                        <td>@item.IdProductoNavigation.NombreProducto</td>
-                        <td>$@item.PrecioUnitario.ToString("N2")</td>
-                        <td>@item.Cantidad</td>
-                        <td>$@item.Subtotal.ToString("N2")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <div class="d-flex gap-2 mt-3">
-        <a asp-controller="MisPedidos"
-           asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver a mis pedidos
-        </a>
-
-        <a asp-controller="MisPedidos"
-           asp-action="Comprobante"
-           asp-route-id="@Model.IdPedido"
-           class="btn btn-danger">
-            Ver comprobante
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver a mis pedidos
         </a>
     </div>
-</section>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <p class="mb-2"><strong>ID:</strong> @Model.IdPedido</p>
+                    <p class="mb-2"><strong>Código:</strong> @Model.CodPedido</p>
+                    <p class="mb-0"><strong>Fecha:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+
+                <div class="col-md-4">
+                    <p class="mb-2"><strong>Cliente:</strong> @Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</p>
+                    <p class="mb-2"><strong>Correo:</strong> @Model.IdUsuarioNavigation?.CorreoElectronico</p>
+                    <p class="mb-0"><strong>Tienda:</strong> @(Model.IdTiendaNavigation?.NombreTienda ?? "Sin tienda")</p>
+                </div>
+
+                <div class="col-md-4">
+                    <p class="mb-2"><strong>Total:</strong> @Model.Total.ToString("C")</p>
+                    <p class="mb-2"><strong>Método de entrega:</strong> @(string.IsNullOrWhiteSpace(Model.MetodoEntrega) ? "No definido" : Model.MetodoEntrega)</p>
+                    <p class="mb-0">
+                        <strong>Estado:</strong>
+                        @if (Model.EstadoPedido == "pendiente")
+                        {
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        }
+                        else if (Model.EstadoPedido == "en camino")
+                        {
+                            <span class="badge bg-info text-dark">En camino</span>
+                        }
+                        else if (Model.EstadoPedido == "entregado")
+                        {
+                            <span class="badge bg-success">Entregado</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Cancelado</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Productos del pedido</h5>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio unitario</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Detallepedidos == null || !Model.Detallepedidos.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    Este pedido no tiene productos registrados.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.Detallepedidos)
+                            {
+                                <tr>
+                                    <td>@item.IdProductoNavigation?.NombreProducto</td>
+                                    <td>@item.PrecioUnitario.ToString("C")</td>
+                                    <td>@item.Cantidad</td>
+                                    <td>@item.Subtotal.ToString("C")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

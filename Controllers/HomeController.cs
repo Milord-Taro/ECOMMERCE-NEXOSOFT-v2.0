@@ -57,5 +57,30 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         {
             return View("Error500");
         }
+
+        public async Task<IActionResult> Categorias()
+        {
+            var categorias = await _context.Categoria
+                .Where(c => c.VisiblePublico)
+                .OrderBy(c => c.NombreCategoria)
+                .ToListAsync();
+
+            return View(categorias);
+        }
+
+        public IActionResult Ofertas()
+        {
+            return View();
+        }
+
+        public IActionResult Nosotros()
+        {
+            return View();
+        }
+
+        public IActionResult Contacto()
+        {
+            return View();
+        }
     }
 }

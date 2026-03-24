@@ -17,26 +17,48 @@
                     }
                 </div>
             </div>
+            @if (!string.IsNullOrWhiteSpace(Model.DescripcionCorta))
+            {
+                <div class="mt-3">
+                    <h6 class="fw-bold">Descripción</h6>
+                    <p class="text-muted mb-0">@Model.DescripcionCorta</p>
+                </div>
+            }
         </div>
 
         <div class="col-md-7">
             <h2 class="section-title mb-3">@Model.NombreProducto</h2>
 
-            <p class="text-muted mb-2">
-                Categoría: @Model.IdCategoriaNavigation.NombreCategoria
-            </p>
+            @if (Model.IdTiendaNavigation != null)
+            {
+                <p class="mb-2">
+                    <strong>Tienda:</strong>
+                    <a asp-controller="Tiendas"
+                       asp-action="Detalle"
+                       asp-route-id="@Model.IdTienda"
+                       class="text-decoration-none fw-semibold">
+                        @Model.IdTiendaNavigation.NombreTienda
+                    </a>
+                </p>
+            }
+
+            <div class="mb-3 d-flex flex-wrap align-items-center">
+                <span class="tag-label tag-categoria">
+                    @Model.IdCategoriaNavigation.NombreCategoria
+                </span>
+
+                @if (Model.IdSubcategoriaNavigation != null)
+                {
+                    <span class="tag-label tag-subcategoria">
+                        @Model.IdSubcategoriaNavigation.NombreSubcategoria
+                    </span>
+                }
+            </div>
 
             @if (!string.IsNullOrEmpty(Model.MarcaProducto))
             {
                 <p class="text-muted mb-2">
                     Marca: @Model.MarcaProducto
-                </p>
-            }
-
-            @if (!string.IsNullOrEmpty(Model.DescripcionCorta))
-            {
-                <p class="mb-3">
-                    @Model.DescripcionCorta
                 </p>
             }
 
@@ -62,34 +84,51 @@
                 </div>
             }
 
-            <form asp-controller="Carrito" asp-action="Agregar" method="get" class="mb-3">
-                <input type="hidden" name="id" value="@Model.IdProducto" />
+            @{
+                var rolSesion = Context.Session.GetInt32("IdRol");
+            }
 
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <label for="cantidad" class="fw-bold mb-0">Cantidad:</label>
+            @if (rolSesion == 2 || rolSesion == 3)
+            {
+                <form asp-controller="Carrito" asp-action="Agregar" method="get" class="mb-3">
+                    <input type="hidden" name="id" value="@Model.IdProducto" />
 
-                    <input type="number"
-                           id="cantidad"
-                           name="cantidad"
-                           value="1"
-                           min="1"
-                           max="@(Model.Stock != null ? Model.Stock.StockActual : 1)"
-                           class="form-control"
-                           style="width: 100px;" />
-                </div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <label for="cantidad" class="fw-bold mb-0">Cantidad:</label>
 
+                        <input type="number"
+                               id="cantidad"
+                               name="cantidad"
+                               value="1"
+                               min="1"
+                               max="@(Model.Stock != null ? Model.Stock.StockActual : 1)"
+                               class="form-control"
+                               style="width: 100px;" />
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            Agregar al carrito
+                        </button>
+
+                        <a asp-controller="Productos"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Volver al catálogo
+                        </a>
+                    </div>
+                </form>
+            }
+            else
+            {
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-danger">
-                        Agregar al carrito
-                    </button>
-
                     <a asp-controller="Productos"
                        asp-action="Index"
                        class="btn btn-outline-secondary">
                         Volver al catálogo
                     </a>
                 </div>
-            </form>
+            }
         </div>
 
     </div>

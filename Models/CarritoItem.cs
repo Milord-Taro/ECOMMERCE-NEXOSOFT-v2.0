@@ -7,5 +7,7 @@
         public decimal Precio { get; set; }
         public int Cantidad { get; set; }
         public string? ImagenUrl { get; set; }
+        public int? IdTienda { get; set; }
+        public string? NombreTienda { get; set; }
     }
 }

@@ -1,0 +1,69 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.Tienda
+
+@{
+    ViewData["Title"] = "Editar tienda";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Editar tienda</h2>
+        <p class="text-muted mb-0">Actualiza la información pública de tu tienda.</p>
+    </div>
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["MensajeError"]</div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <input type="hidden" asp-for="IdTienda" />
+                <input type="hidden" asp-for="CodTienda" />
+                <input type="hidden" asp-for="IdVendedor" />
+                <input type="hidden" asp-for="NombreTienda" />
+                <input type="hidden" asp-for="FechaRegistro" />
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold">Nombre de la tienda</label>
+                        <input class="form-control" value="@Model.NombreTienda" disabled />
+                        <small class="text-muted">El nombre de la tienda no se puede modificar directamente.</small>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="Descripcion" class="form-label fw-semibold">Descripción</label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="LogoUrl" class="form-label fw-semibold">Logo URL</label>
+                        <input asp-for="LogoUrl" class="form-control" />
+                        <span asp-validation-for="LogoUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" asp-for="VisiblePublico" />
+                            <label class="form-check-label fw-semibold" asp-for="VisiblePublico">Visible públicamente</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-dark">Guardar cambios</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

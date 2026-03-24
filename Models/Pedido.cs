@@ -11,6 +11,8 @@ public partial class Pedido
 
     public int IdUsuario { get; set; }
 
+    public int? IdTienda { get; set; }
+
     public DateTime FechaCreacion { get; set; }
 
     public decimal Subtotal { get; set; }
@@ -26,6 +28,8 @@ public partial class Pedido
     public virtual ICollection<Detallepedido> Detallepedidos { get; set; } = new List<Detallepedido>();
 
     public virtual Usuario IdUsuarioNavigation { get; set; } = null!;
+
+    public virtual Tienda? IdTiendaNavigation { get; set; }
 
     public virtual Ventum? Ventum { get; set; }
 }

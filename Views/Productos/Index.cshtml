@@ -10,6 +10,8 @@
     int? categoriaSeleccionada = ViewBag.CategoriaSeleccionada as int?;
     string busqueda = ViewBag.Busqueda as string ?? "";
     string marcaSeleccionada = ViewBag.MarcaSeleccionada as string ?? "";
+    var subcategorias = ViewBag.Subcategorias as List<Subcategorium> ?? new List<Subcategorium>();
+    int? subcategoriaSeleccionada = ViewBag.SubcategoriaSeleccionada as int?;
     string ordenSeleccionado = ViewBag.OrdenSeleccionado as string ?? "";
     bool soloDisponibles = ViewBag.SoloDisponibles != null && (bool)ViewBag.SoloDisponibles;
 }
@@ -25,9 +27,9 @@
             <form asp-action="Index" method="get">
                 <div class="row g-3 align-items-end">
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label fw-semibold">Categoría</label>
-                        <select name="categoria" class="form-select">
+                        <select name="categoria" id="categoriaFiltro" class="form-select">
                             <option value="">Todas</option>
                             @foreach (var categoria in categorias)
                             {
@@ -38,6 +40,22 @@
                                 else
                                 {
                                     <option value="@categoria.IdCategoria">@categoria.NombreCategoria</option>
+                                }
+                            }
+                        </select>
+
+                        <label class="form-label fw-semibold">Subcategoría</label>
+                        <select name="subcategoria" id="subcategoriaFiltro" class="form-select">
+                            <option value="">Todas</option>
+                            @foreach (var subcategoria in subcategorias)
+                            {
+                                if (subcategoriaSeleccionada == subcategoria.IdSubcategoria)
+                                {
+                                    <option value="@subcategoria.IdSubcategoria" selected>@subcategoria.NombreSubcategoria</option>
+                                }
+                                else
+                                {
+                                    <option value="@subcategoria.IdSubcategoria">@subcategoria.NombreSubcategoria</option>
                                 }
                             }
                         </select>
@@ -130,23 +148,36 @@
                                 </div>
                             </div>
 
-                            <div class="mb-2">
-                                <span class="badge bg-secondary-subtle text-dark border">
+                            <div class="mb-2 d-flex flex-wrap align-items-center">
+                                <span class="tag-label tag-categoria">
                                     @item.IdCategoriaNavigation?.NombreCategoria
                                 </span>
+
+                                @if (item.IdSubcategoriaNavigation != null)
+                                {
+                                    <span class="tag-label tag-subcategoria">
+                                        @item.IdSubcategoriaNavigation.NombreSubcategoria
+                                    </span>
+                                }
                             </div>
+
+                            @if (item.IdTiendaNavigation != null)
+                            {
+                                <p class="small mb-2">
+                                    <a asp-controller="Tiendas"
+                                       asp-action="Detalle"
+                                       asp-route-id="@item.IdTienda"
+                                       class="text-decoration-none fw-semibold">
+                                        @item.IdTiendaNavigation.NombreTienda
+                                    </a>
+                                </p>
+                            }
 
                             <h5 class="fw-bold mb-2">@item.NombreProducto</h5>
 
                             <p class="text-muted small mb-2">
                                 @(string.IsNullOrWhiteSpace(item.MarcaProducto) ? "Sin marca" : item.MarcaProducto)
                             </p>
-
-                            <p class="text-muted small mb-3" style="min-height: 40px;">
-                                @(string.IsNullOrWhiteSpace(item.DescripcionCorta)
-                                                        ? "Producto disponible en catálogo."
-                                                        : item.DescripcionCorta)
-                    </p>
 
                             <div class="mb-2">
                                 <span class="fs-5 fw-bold">
@@ -195,3 +226,45 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const categoriaSelect = document.getElementById("categoriaFiltro");
+            const subcategoriaSelect = document.getElementById("subcategoriaFiltro");
+            const selectedSubcategoria = "@(ViewBag.SubcategoriaSeleccionada ?? "")";
+
+            function cargarSubcategorias() {
+                const idCategoria = categoriaSelect.value;
+
+                subcategoriaSelect.innerHTML = '<option value="">Todas</option>';
+
+                if (!idCategoria) {
+                    return;
+                }
+
+                fetch(`/Productos/ObtenerSubcategorias?idCategoria=${idCategoria}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(item => {
+                            const option = document.createElement("option");
+                            option.value = item.idSubcategoria;
+                            option.text = item.nombreSubcategoria;
+
+                            if (item.idSubcategoria == selectedSubcategoria) {
+                                option.selected = true;
+                            }
+
+                            subcategoriaSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error cargando subcategorías:", error);
+                    });
+            }
+
+            categoriaSelect.addEventListener("change", cargarSubcategorias);
+            cargarSubcategorias();
+        });
+    </script>
+}

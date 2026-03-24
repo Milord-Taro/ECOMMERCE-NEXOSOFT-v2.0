@@ -43,6 +43,12 @@ public partial class NexosoftDbContext : DbContext
 
     public virtual DbSet<Subcategorium> Subcategoria { get; set; }
 
+    public virtual DbSet<Vendedor> Vendedors { get; set; }
+
+    public virtual DbSet<Tienda> Tiendas { get; set; }
+
+    public virtual DbSet<SolicitudVendedor> SolicitudVendedors { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseMySql("server=localhost;port=3306;database=NexosoftDB;user=root;password=123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.44-mysql"));
@@ -104,6 +110,44 @@ public partial class NexosoftDbContext : DbContext
                 .HasForeignKey<Cliente>(d => d.IdUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("cliente_ibfk_1");
+        });
+
+        modelBuilder.Entity<Vendedor>(entity =>
+        {
+            entity.HasKey(e => e.IdVendedor).HasName("PRIMARY");
+
+            entity.ToTable("vendedor");
+
+            entity.HasIndex(e => e.CodVendedor, "UQ_CodVendedor").IsUnique();
+            entity.HasIndex(e => e.IdUsuario, "UQ_Vendedor_IdUsuario").IsUnique();
+
+            entity.Property(e => e.EstadoVendedor).HasColumnType("enum('activo','inactivo','bloqueado')");
+            entity.Property(e => e.FechaRegistro).HasColumnType("datetime");
+
+            entity.HasOne(d => d.IdUsuarioNavigation).WithOne(p => p.Vendedor)
+                .HasForeignKey<Vendedor>(d => d.IdUsuario)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Vendedor_Usuario");
+        });
+
+        modelBuilder.Entity<Tienda>(entity =>
+        {
+            entity.HasKey(e => e.IdTienda).HasName("PRIMARY");
+
+            entity.ToTable("tienda");
+
+            entity.HasIndex(e => e.CodTienda, "UQ_CodTienda").IsUnique();
+            entity.HasIndex(e => e.IdVendedor, "IX_Tienda_IdVendedor");
+
+            entity.Property(e => e.NombreTienda).HasMaxLength(100);
+            entity.Property(e => e.Descripcion).HasMaxLength(150);
+            entity.Property(e => e.LogoUrl).HasMaxLength(255);
+            entity.Property(e => e.FechaRegistro).HasColumnType("datetime");
+
+            entity.HasOne(d => d.IdVendedorNavigation).WithMany(p => p.Tienda)
+                .HasForeignKey(d => d.IdVendedor)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Tienda_Vendedor");
         });
 
         modelBuilder.Entity<Detallepedido>(entity =>
@@ -214,12 +258,18 @@ public partial class NexosoftDbContext : DbContext
 
             entity.HasIndex(e => e.IdUsuario, "IdUsuario");
 
+            entity.HasIndex(e => e.IdTienda, "IdTienda");
+
             entity.Property(e => e.CostoEnvio).HasPrecision(10, 2);
             entity.Property(e => e.EstadoPedido).HasColumnType("enum('pendiente','en camino','entregado','cancelado')");
             entity.Property(e => e.FechaCreacion).HasColumnType("datetime");
             entity.Property(e => e.MetodoEntrega).HasMaxLength(100);
             entity.Property(e => e.Subtotal).HasPrecision(10, 2);
             entity.Property(e => e.Total).HasPrecision(10, 2);
+
+            entity.HasOne(d => d.IdTiendaNavigation).WithMany(p => p.Pedidos)
+                .HasForeignKey(d => d.IdTienda)
+                .HasConstraintName("FK_Pedido_Tienda");
 
             entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.Pedidos)
                 .HasForeignKey(d => d.IdUsuario)
@@ -243,8 +293,10 @@ public partial class NexosoftDbContext : DbContext
 
             entity.HasIndex(e => e.IdSubcategoria, "IdSubcategoria");
 
+            entity.HasIndex(e => e.IdTienda, "IdTienda");
+
             entity.Property(e => e.CodigoBarrasProducto).HasMaxLength(20);
-            entity.Property(e => e.DescripcionCorta).HasMaxLength(100);
+            entity.Property(e => e.DescripcionCorta).HasMaxLength(255);
             entity.Property(e => e.MarcaProducto).HasMaxLength(100);
             entity.Property(e => e.NombreProducto).HasMaxLength(100);
             entity.Property(e => e.PrecioVentaProducto).HasPrecision(10, 2);
@@ -255,6 +307,10 @@ public partial class NexosoftDbContext : DbContext
             entity.HasOne(d => d.IdSubcategoriaNavigation).WithMany(p => p.Productos)
                 .HasForeignKey(d => d.IdSubcategoria)
                 .HasConstraintName("FK_Producto_Subcategoria");
+
+            entity.HasOne(d => d.IdTiendaNavigation).WithMany(p => p.Productos)
+                .HasForeignKey(d => d.IdTienda)
+                .HasConstraintName("FK_Producto_Tienda");
 
             entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Productos)
                 .HasForeignKey(d => d.IdCategoria)
@@ -346,6 +402,27 @@ public partial class NexosoftDbContext : DbContext
                 .HasConstraintName("venta_ibfk_2");
         });
 
+        modelBuilder.Entity<SolicitudVendedor>(entity =>
+        {
+            entity.HasKey(e => e.IdSolicitudVendedor).HasName("PRIMARY");
+
+            entity.ToTable("solicitud_vendedor");
+
+            entity.HasIndex(e => e.CodSolicitudVendedor, "UQ_CodSolicitudVendedor").IsUnique();
+            entity.HasIndex(e => e.IdUsuario, "IX_SolicitudVendedor_IdUsuario");
+
+            entity.Property(e => e.NombreTiendaSolicitada).HasMaxLength(100);
+            entity.Property(e => e.DescripcionTienda).HasMaxLength(150);
+            entity.Property(e => e.EstadoSolicitud).HasColumnType("enum('pendiente','aprobada','rechazada')");
+            entity.Property(e => e.ObservacionAdmin).HasMaxLength(200);
+            entity.Property(e => e.FechaSolicitud).HasColumnType("datetime");
+            entity.Property(e => e.FechaRespuesta).HasColumnType("datetime");
+
+            entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.SolicitudVendedors)
+                .HasForeignKey(d => d.IdUsuario)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SolicitudVendedor_Usuario");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }
