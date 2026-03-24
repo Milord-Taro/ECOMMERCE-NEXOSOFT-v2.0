@@ -104,5 +104,41 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             return View(pedido);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActualizarEstado(int idPedido, string estadoPedido)
+        {
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+            if (idTienda == null)
+            {
+                TempData["MensajeError"] = "No tienes una tienda asociada para actualizar pedidos.";
+                return RedirectToAction("Index", "Vendedor");
+            }
+
+            var estadosValidos = new[] { "pendiente", "en camino", "entregado", "cancelado" };
+
+            if (string.IsNullOrWhiteSpace(estadoPedido) || !estadosValidos.Contains(estadoPedido))
+            {
+                TempData["MensajeError"] = "El estado seleccionado no es válido.";
+                return RedirectToAction("Details", new { id = idPedido });
+            }
+
+            var pedido = await _context.Pedidos
+                .FirstOrDefaultAsync(p => p.IdPedido == idPedido && p.IdTienda == idTienda.Value);
+
+            if (pedido == null)
+            {
+                TempData["MensajeError"] = "No se encontró el pedido asociado a tu tienda.";
+                return RedirectToAction("Index");
+            }
+
+            pedido.EstadoPedido = estadoPedido;
+            await _context.SaveChangesAsync();
+
+            TempData["MensajeExito"] = "Estado del pedido actualizado correctamente.";
+            return RedirectToAction("Details", new { id = idPedido });
+        }
     }
 }

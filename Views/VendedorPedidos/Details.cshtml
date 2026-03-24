@@ -31,6 +31,78 @@
         </div>
     </div>
 
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["MensajeError"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Actualizar estado del pedido</h5>
+
+            <form asp-action="ActualizarEstado" method="post" class="row g-3 align-items-end">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="idPedido" value="@Model.IdPedido" />
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Nuevo estado</label>
+                    <select name="estadoPedido" class="form-select">
+                        @if (Model.EstadoPedido == "pendiente")
+                        {
+                            <option value="pendiente" selected>Pendiente</option>
+                        }
+                        else
+                        {
+                            <option value="pendiente">Pendiente</option>
+                        }
+
+                        @if (Model.EstadoPedido == "en camino")
+                        {
+                            <option value="en camino" selected>En camino</option>
+                        }
+                        else
+                        {
+                            <option value="en camino">En camino</option>
+                        }
+
+                        @if (Model.EstadoPedido == "entregado")
+                        {
+                            <option value="entregado" selected>Entregado</option>
+                        }
+                        else
+                        {
+                            <option value="entregado">Entregado</option>
+                        }
+
+                        @if (Model.EstadoPedido == "cancelado")
+                        {
+                            <option value="cancelado" selected>Cancelado</option>
+                        }
+                        else
+                        {
+                            <option value="cancelado">Cancelado</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-dark">
+                        Guardar cambio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body">
             <h5 class="mb-3">Productos del pedido</h5>

@@ -68,5 +68,33 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             return View(pedido);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActualizarEstado(int idPedido, string estadoPedido)
+        {
+            var estadosValidos = new[] { "pendiente", "en camino", "entregado", "cancelado" };
+
+            if (string.IsNullOrWhiteSpace(estadoPedido) || !estadosValidos.Contains(estadoPedido))
+            {
+                TempData["MensajeError"] = "El estado seleccionado no es válido.";
+                return RedirectToAction("Details", new { id = idPedido });
+            }
+
+            var pedido = await _context.Pedidos
+                .FirstOrDefaultAsync(p => p.IdPedido == idPedido);
+
+            if (pedido == null)
+            {
+                TempData["MensajeError"] = "No se encontró el pedido.";
+                return RedirectToAction("Index");
+            }
+
+            pedido.EstadoPedido = estadoPedido;
+            await _context.SaveChangesAsync();
+
+            TempData["MensajeExito"] = "Estado del pedido actualizado correctamente.";
+            return RedirectToAction("Details", new { id = idPedido });
+        }
     }
 }

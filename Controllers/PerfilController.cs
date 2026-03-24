@@ -37,7 +37,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 IdUsuario = usuario.IdUsuario,
                 Nombre = usuario.Nombre,
                 Apellido = usuario.Apellido,
-                Telefono = usuario.Telefono,
+                Telefono = usuario.Telefono ?? string.Empty,
                 CorreoElectronico = usuario.CorreoElectronico,
                 IdRol = usuario.IdRol
             };
