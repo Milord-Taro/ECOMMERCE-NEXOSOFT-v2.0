@@ -16,6 +16,7 @@
             font-family: Arial, sans-serif;
             padding: 40px;
             color: #263238;
+            background: #f8f9fa;
         }
 
         .comprobante-box {
@@ -47,6 +48,34 @@
             background: #f8f9fa;
         }
 
+        .estado-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .estado-pendiente {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .estado-en-camino {
+            background: #0dcaf0;
+            color: #212529;
+        }
+
+        .estado-entregado {
+            background: #198754;
+            color: #fff;
+        }
+
+        .estado-cancelado {
+            background: #dc3545;
+            color: #fff;
+        }
+
         .acciones {
             margin-top: 30px;
         }
@@ -58,6 +87,7 @@
 
             body {
                 padding: 0;
+                background: #fff;
             }
 
             .comprobante-box {
@@ -82,15 +112,35 @@
                 <p class="mb-1"><strong>ID Pedido:</strong> @Model.IdPedido</p>
                 <p class="mb-1"><strong>Código:</strong> @Model.CodPedido</p>
                 <p class="mb-1"><strong>Fecha:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
-                <p class="mb-1"><strong>Estado:</strong> @Model.EstadoPedido</p>
+                <p class="mb-1">
+                    <strong>Estado:</strong>
+                    @if (Model.EstadoPedido == "pendiente")
+                    {
+                        <span class="estado-badge estado-pendiente">Pendiente</span>
+                    }
+                    else if (Model.EstadoPedido == "en camino")
+                    {
+                        <span class="estado-badge estado-en-camino">En camino</span>
+                    }
+                    else if (Model.EstadoPedido == "entregado")
+                    {
+                        <span class="estado-badge estado-entregado">Entregado</span>
+                    }
+                    else
+                    {
+                        <span class="estado-badge estado-cancelado">Cancelado</span>
+                    }
+                </p>
             </div>
         </div>
 
         <hr />
 
         <div class="info mb-4">
-            <p><strong>Cliente:</strong> Usuario temporal #@Model.IdUsuario</p>
-            <p><strong>Método de entrega:</strong> @Model.MetodoEntrega</p>
+            <p><strong>Cliente:</strong> @Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</p>
+            <p><strong>Correo:</strong> @Model.IdUsuarioNavigation?.CorreoElectronico</p>
+            <p><strong>Tienda:</strong> @(Model.IdTiendaNavigation?.NombreTienda ?? "Sin tienda")</p>
+            <p><strong>Método de entrega:</strong> @(string.IsNullOrWhiteSpace(Model.MetodoEntrega) ? "No definido" : Model.MetodoEntrega)</p>
         </div>
 
         <div class="table-responsive">
@@ -107,7 +157,7 @@
                     @foreach (var item in Model.Detallepedidos)
                     {
                         <tr>
-                            <td>@item.IdProductoNavigation.NombreProducto</td>
+                            <td>@item.IdProductoNavigation?.NombreProducto</td>
                             <td>$@item.PrecioUnitario.ToString("N2")</td>
                             <td>@item.Cantidad</td>
                             <td>$@item.Subtotal.ToString("N2")</td>
