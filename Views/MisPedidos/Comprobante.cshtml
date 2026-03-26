@@ -109,7 +109,6 @@
 
             <div class="text-end">
                 <div class="titulo">Comprobante</div>
-                <p class="mb-1"><strong>ID Pedido:</strong> @Model.IdPedido</p>
                 <p class="mb-1"><strong>Código:</strong> @Model.CodPedido</p>
                 <p class="mb-1"><strong>Fecha:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
                 <p class="mb-1">
@@ -138,6 +137,8 @@
 
         <div class="info mb-4">
             <p><strong>Cliente:</strong> @Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</p>
+            <p><strong>Dirección de entrega:</strong> @(string.IsNullOrWhiteSpace(Model.DireccionEntrega) ? "No registrada" : Model.DireccionEntrega)</p>
+            <p><strong>Teléfono:</strong> @(string.IsNullOrWhiteSpace(Model.TelefonoEntrega) ? "No registrado" : Model.TelefonoEntrega)</p>
             <p><strong>Correo:</strong> @Model.IdUsuarioNavigation?.CorreoElectronico</p>
             <p><strong>Tienda:</strong> @(Model.IdTiendaNavigation?.NombreTienda ?? "Sin tienda")</p>
             <p><strong>Método de entrega:</strong> @(string.IsNullOrWhiteSpace(Model.MetodoEntrega) ? "No definido" : Model.MetodoEntrega)</p>

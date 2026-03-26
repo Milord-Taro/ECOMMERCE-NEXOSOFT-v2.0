@@ -17,6 +17,36 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             _context = context;
         }
 
+        private Cliente ObtenerOCrearClienteComprador(int idUsuario)
+        {
+            var cliente = _context.Clientes.FirstOrDefault(c => c.IdUsuario == idUsuario);
+
+            if (cliente != null)
+            {
+                return cliente;
+            }
+
+            var ultimoCodCliente = _context.Clientes
+                .OrderByDescending(c => c.CodCliente)
+                .Select(c => (int?)c.CodCliente)
+                .FirstOrDefault();
+
+            int nuevoCodCliente = (ultimoCodCliente ?? 2000) + 1;
+
+            cliente = new Cliente
+            {
+                CodCliente = nuevoCodCliente,
+                IdUsuario = idUsuario,
+                FechaRegistroCliente = DateTime.Now,
+                EstadoCliente = "activo"
+            };
+
+            _context.Clientes.Add(cliente);
+            _context.SaveChanges();
+
+            return cliente;
+        }
+
         public IActionResult Index()
         {
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
@@ -26,12 +56,28 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Index", "Carrito");
             }
 
+            var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuarioSesion != null)
+            {
+                var usuario = _context.Usuarios.FirstOrDefault(u => u.IdUsuario == idUsuarioSesion.Value);
+                var cliente = _context.Clientes.FirstOrDefault(c => c.IdUsuario == idUsuarioSesion.Value);
+
+                ViewBag.TelefonoEntrega = usuario?.Telefono ?? string.Empty;
+                ViewBag.DireccionEntrega = cliente?.Direccion1 ?? string.Empty;
+            }
+            else
+            {
+                ViewBag.TelefonoEntrega = string.Empty;
+                ViewBag.DireccionEntrega = string.Empty;
+            }
+
             return View(carrito);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Confirmar()
+        public IActionResult Confirmar(string direccionEntrega, string telefonoEntrega, string metodoPago)
         {
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
 
@@ -45,6 +91,28 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             if (idUsuarioSesion == null)
             {
                 return RedirectToAction("Login", "Auth");
+            }
+
+            var clienteComprador = ObtenerOCrearClienteComprador(idUsuarioSesion.Value);
+
+            if (string.IsNullOrWhiteSpace(direccionEntrega))
+            {
+                TempData["MensajeCheckout"] = "Debes ingresar una dirección de entrega.";
+                return RedirectToAction("Index");
+            }
+
+            if (string.IsNullOrWhiteSpace(telefonoEntrega))
+            {
+                TempData["MensajeCheckout"] = "Debes ingresar un teléfono de contacto.";
+                return RedirectToAction("Index");
+            }
+
+            var metodosPagoValidos = new[] { "efectivo", "tarjeta credito", "tarjeta debito", "transferencias" };
+
+            if (string.IsNullOrWhiteSpace(metodoPago) || !metodosPagoValidos.Contains(metodoPago))
+            {
+                TempData["MensajeCheckout"] = "Debes seleccionar un método de pago válido.";
+                return RedirectToAction("Index");
             }
 
             foreach (var item in carrito)
@@ -84,10 +152,55 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                     CostoEnvio = costoEnvio,
                     Total = total,
                     MetodoEntrega = "domicilio",
+                    DireccionEntrega = direccionEntrega,
+                    TelefonoEntrega = telefonoEntrega,
                     EstadoPedido = "pendiente"
                 };
 
                 _context.Pedidos.Add(pedido);
+                _context.SaveChanges();
+
+                var ultimoCodVenta = _context.Venta
+                    .OrderByDescending(v => v.CodVenta)
+                    .Select(v => (int?)v.CodVenta)
+                    .FirstOrDefault();
+
+                int nuevoCodVenta = (ultimoCodVenta ?? 8000) + 1;
+
+                var venta = new Ventum
+                {
+                    CodVenta = nuevoCodVenta,
+                    IdCliente = clienteComprador.IdCliente,
+                    IdPedido = pedido.IdPedido,
+                    FechaVenta = DateTime.Now,
+                    EstadoVenta = "pagada"
+                };
+
+                _context.Venta.Add(venta);
+                _context.SaveChanges();
+
+                var ultimoCodPago = _context.Pagos
+                    .OrderByDescending(p => p.CodPago)
+                    .Select(p => (int?)p.CodPago)
+                    .FirstOrDefault();
+
+                int nuevoCodPago = (ultimoCodPago ?? 9000) + 1;
+
+                var codigoAutorizacion = "AUT" + Guid.NewGuid().ToString("N")[..8].ToUpper();
+
+                var pago = new Pago
+                {
+                    CodPago = nuevoCodPago,
+                    IdVenta = venta.IdVenta,
+                    MetodoPago = metodoPago,
+                    Descripcion = "Pago demo aprobado por la pasarela simulada.",
+                    FechaPago = DateTime.Now,
+                    MontoPagado = total,
+                    CodigoAutorizacion = codigoAutorizacion,
+                    EstadoPago = "aprobado"
+                };
+
+                _context.Pagos.Add(pago);
                 _context.SaveChanges();
 
                 foreach (var item in grupo)

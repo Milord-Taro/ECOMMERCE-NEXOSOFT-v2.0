@@ -23,6 +23,10 @@ public partial class Pedido
 
     public string? MetodoEntrega { get; set; }
 
+    public string? DireccionEntrega { get; set; }
+
+    public string? TelefonoEntrega { get; set; }
+
     public string EstadoPedido { get; set; } = null!;
 
     public virtual ICollection<Detallepedido> Detallepedidos { get; set; } = new List<Detallepedido>();
