@@ -1,0 +1,75 @@
+﻿@model IEnumerable<ECOMMERCE_NEXOSOFT.Models.SolicitudVendedor>
+
+@{
+    ViewData["Title"] = "Mis solicitudes";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Mis solicitudes de vendedor</h2>
+            <p class="text-muted mb-0">Consulta el estado de tus solicitudes enviadas.</p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-dark">Nueva solicitud</a>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-light border rounded-4 shadow-sm">
+            Aún no has enviado solicitudes.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Tienda solicitada</th>
+                                <th>Estado</th>
+                                <th>Fecha solicitud</th>
+                                <th>Respuesta admin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.CodSolicitudVendedor</td>
+                                    <td>@item.NombreTiendaSolicitada</td>
+                                    <td>
+                                        @if (item.EstadoSolicitud == "pendiente")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        }
+                                        else if (item.EstadoSolicitud == "aprobada")
+                                        {
+                                            <span class="badge bg-success">Aprobada</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Rechazada</span>
+                                        }
+                                    </td>
+                                    <td>@item.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ObservacionAdmin) ? "-" : item.ObservacionAdmin)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

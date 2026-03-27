@@ -5,6 +5,13 @@
 
         <h3 class="text-center mb-4">Iniciar Sesión</h3>
 
+        @if (TempData["MensajeExito"] != null)
+        {
+            <div class="alert alert-success text-center">
+                @TempData["MensajeExito"]
+            </div>
+        }
+
         <form method="post">
 
             <div class="mb-3">
@@ -27,6 +34,12 @@
                 </div>
 
                 <span asp-validation-for="Contrasena" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex justify-content-end mb-3">
+                <a asp-controller="Auth" asp-action="ForgotPassword" class="small text-decoration-none">
+                    ¿Olvidaste tu contraseña?
+                </a>
             </div>
 
             <button type="submit" class="btn-login">

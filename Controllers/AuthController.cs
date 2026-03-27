@@ -1,6 +1,7 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
 using ECOMMERCE_NEXOSOFT.Models;
 using ECOMMERCE_NEXOSOFT.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
@@ -81,6 +82,75 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
+        }
+
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        // ================= FORGOTPASSWORD =================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.CorreoElectronico == model.CorreoElectronico);
+
+            if (usuario == null)
+            {
+                ViewBag.Error = "No existe una cuenta con ese correo.";
+                return View(model);
+            }
+
+            return RedirectToAction("ResetPassword", new { correo = model.CorreoElectronico });
+        }
+
+        public IActionResult ResetPassword(string correo)
+        {
+            if (string.IsNullOrWhiteSpace(correo))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                CorreoElectronico = correo
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.CorreoElectronico == model.CorreoElectronico);
+
+            if (usuario == null)
+            {
+                ViewBag.Error = "No existe una cuenta con ese correo.";
+                return View(model);
+            }
+
+            usuario.Contrasena = BCrypt.Net.BCrypt.HashPassword(model.NuevaContrasena);
+
+            _context.Update(usuario);
+            _context.SaveChanges();
+
+            TempData["MensajeExito"] = "La contraseña fue actualizada correctamente.";
+
+            return RedirectToAction("Login");
         }
 
         // ================= REGISTER =================

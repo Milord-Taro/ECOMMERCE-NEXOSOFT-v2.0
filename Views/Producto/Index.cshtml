@@ -7,6 +7,8 @@
     var categorias = ViewBag.Categorias as List<Categorium> ?? new List<Categorium>();
     string busqueda = ViewBag.Busqueda as string ?? "";
     int? categoriaSeleccionada = ViewBag.CategoriaSeleccionada as int?;
+    var subcategorias = ViewBag.Subcategorias as List<Subcategorium> ?? new List<Subcategorium>();
+    int? subcategoriaSeleccionada = ViewBag.SubcategoriaSeleccionada as int?;
     bool soloStockBajo = ViewBag.SoloStockBajo != null && (bool)ViewBag.SoloStockBajo;
 }
 
@@ -18,8 +20,12 @@
         </div>
 
         <div class="d-flex gap-2">
-            <a asp-action="Create" class="btn btn-dark">Nuevo producto</a>
-            <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-dark">Ir a stock</a>
+            <a asp-action="Create" class="btn btn-dark">
+            Nuevo producto
+            </a>
+            <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-dark">
+            Ir a stock
+            </a>
         </div>
     </div>
 
@@ -43,9 +49,9 @@
                                placeholder="Nombre, marca o código" />
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label fw-semibold">Categoría</label>
-                        <select name="categoria" class="form-select">
+                        <select name="categoria" id="categoriaFiltroAdmin" class="form-select">
                             <option value="">Todas</option>
                             @foreach (var categoria in categorias)
                             {
@@ -56,6 +62,24 @@
                                 else
                                 {
                                     <option value="@categoria.IdCategoria">@categoria.NombreCategoria</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Subcategoría</label>
+                        <<select name="subcategoria" id="subcategoriaFiltroAdmin" class="form-select">
+                            <option value="">Todas</option>
+                            @foreach (var subcategoria in subcategorias)
+                            {
+                                if (subcategoriaSeleccionada == subcategoria.IdSubcategoria)
+                                {
+                                    <option value="@subcategoria.IdSubcategoria" selected>@subcategoria.NombreSubcategoria</option>
+                                }
+                                else
+                                {
+                                    <option value="@subcategoria.IdSubcategoria">@subcategoria.NombreSubcategoria</option>
                                 }
                             }
                         </select>
@@ -97,6 +121,8 @@
                             <th>Stock</th>
                             <th>Visible</th>
                             <th>Categoría</th>
+                            <th>Subcategoría</th>
+                            <th>Tienda</th>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
@@ -132,6 +158,8 @@
                                     }
                                 </td>
                                 <td>@item.IdCategoriaNavigation?.NombreCategoria</td>
+                                <td>@item.IdSubcategoriaNavigation?.NombreSubcategoria</td>
+                                <td>@item.IdTiendaNavigation?.NombreTienda</td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end flex-wrap gap-2">
                                         <a asp-action="Edit" asp-route-id="@item.IdProducto" class="btn btn-sm btn-outline-dark">Editar</a>
@@ -158,3 +186,45 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const categoriaSelect = document.getElementById("categoriaFiltroAdmin");
+            const subcategoriaSelect = document.getElementById("subcategoriaFiltroAdmin");
+            const selectedSubcategoria = "@(ViewBag.SubcategoriaSeleccionada ?? "")";
+
+            function cargarSubcategorias() {
+                const idCategoria = categoriaSelect.value;
+
+                subcategoriaSelect.innerHTML = '<option value="">Todas</option>';
+
+                if (!idCategoria) {
+                    return;
+                }
+
+                fetch(`/Producto/ObtenerSubcategorias?idCategoria=${idCategoria}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(item => {
+                            const option = document.createElement("option");
+                            option.value = item.idSubcategoria;
+                            option.text = item.nombreSubcategoria;
+
+                            if (item.idSubcategoria == selectedSubcategoria) {
+                                option.selected = true;
+                            }
+
+                            subcategoriaSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error cargando subcategorías:", error);
+                    });
+            }
+
+            categoriaSelect.addEventListener("change", cargarSubcategorias);
+            cargarSubcategorias();
+        });
+    </script>
+}

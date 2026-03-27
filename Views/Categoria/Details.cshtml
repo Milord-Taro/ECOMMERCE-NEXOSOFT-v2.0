@@ -1,36 +1,34 @@
 ﻿@model ECOMMERCE_NEXOSOFT.Models.Categorium
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalle de categoría";
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Detalle de categoría</h2>
+            <p class="text-muted mb-0">Consulta la información de la categoría seleccionada.</p>
+        </div>
 
-<div>
-    <h4>Categorium</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CodCategoria)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CodCategoria)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NombreCategoria)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NombreCategoria)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdCategoria">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.IdCategoria" class="btn btn-dark">Editar</a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Código</dt>
+                <dd class="col-sm-9">@Model.CodCategoria</dd>
+
+                <dt class="col-sm-3">Nombre</dt>
+                <dd class="col-sm-9">@Model.NombreCategoria</dd>
+
+                <dt class="col-sm-3">Descripción</dt>
+                <dd class="col-sm-9">@Model.Descripcion</dd>
+            </dl>
+        </div>
+    </div>
 </div>

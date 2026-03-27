@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ECOMMERCE_NEXOSOFT.Data;
 using ECOMMERCE_NEXOSOFT.Models;
+using ECOMMERCE_NEXOSOFT.Filters;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(1, 3)]
     public class ProductoController : Controller
     {
         private readonly NexosoftDbContext _context;
@@ -20,11 +22,22 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         }
 
         // GET: Producto
-        public async Task<IActionResult> Index(string? buscar, int? categoria, bool? soloStockBajo)
+        public async Task<IActionResult> Index(string? buscar, int? categoria, int? subcategoria, bool? soloStockBajo)
         {
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+            if (idTienda == null)
+            {
+                TempData["MensajeError"] = "No tienes una tienda asociada para gestionar productos.";
+                return RedirectToAction("Index", "Vendedor");
+            }
+
             var query = _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.IdSubcategoriaNavigation)
+                .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Stock)
+                .Where(p => p.IdTienda == idTienda.Value)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(buscar))
@@ -42,11 +55,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 query = query.Where(p => p.IdCategoria == categoria.Value);
             }
 
+            if (subcategoria.HasValue)
+            {
+                query = query.Where(p => p.IdSubcategoria == subcategoria.Value);
+            }
+
             if (soloStockBajo == true)
             {
-                query = query.Where(p =>
-                    p.Stock != null &&
-                    p.Stock.StockActual <= p.Stock.StockMinimo);
+                query = query.Where(p => p.Stock != null && p.Stock.StockActual <= p.Stock.StockMinimo);
             }
 
             var productos = await query
@@ -57,8 +73,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .OrderBy(c => c.NombreCategoria)
                 .ToListAsync();
 
+            ViewBag.Subcategorias = await _context.Subcategoria
+                .Where(s => !categoria.HasValue || s.IdCategoria == categoria.Value)
+                .OrderBy(s => s.NombreSubcategoria)
+                .ToListAsync();
+
             ViewBag.Busqueda = buscar;
             ViewBag.CategoriaSeleccionada = categoria;
+            ViewBag.SubcategoriaSeleccionada = subcategoria;
             ViewBag.SoloStockBajo = soloStockBajo;
 
             return View(productos);
@@ -74,6 +96,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var producto = await _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.IdSubcategoriaNavigation)
+                .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Stock)
                 .FirstOrDefaultAsync(m => m.IdProducto == id);
             if (producto == null)
@@ -87,12 +111,15 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // GET: Producto/Create
         public IActionResult Create()
         {
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "NombreCategoria");
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
 
-            ViewData["UnidadMedidaProducto"] = new SelectList(
-                new List<string> { "Unidad", "Caja", "Paquete", "Metro", "Litro", "Kilogramo" }
-            );
+            if (idTienda == null)
+            {
+                TempData["MensajeError"] = "No tienes una tienda asociada para crear productos.";
+                return RedirectToAction(nameof(Index));
+            }
 
+            CargarCombosProducto();
             return View();
         }
 
@@ -101,7 +128,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdProducto,CodProducto,IdCategoria,NombreProducto,DescripcionCorta,SkuProducto,CodigoBarrasProducto,UnidadMedidaProducto,MarcaProducto,Favorito,VisiblePublico,PrecioVentaProducto")] Producto producto)
+        public async Task<IActionResult> Create([Bind("IdProducto,CodProducto,IdCategoria,IdSubcategoria,NombreProducto,DescripcionCorta,SkuProducto,CodigoBarrasProducto,UnidadMedidaProducto,MarcaProducto,Favorito,VisiblePublico,PrecioVentaProducto")] Producto producto)
         {
             ModelState.Remove("IdCategoriaNavigation");
             ModelState.Remove("Detallepedidos");
@@ -112,6 +139,18 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 try
                 {
                     _context.Add(producto);
+
+                    var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+                    if (idTienda == null)
+                    {
+                        TempData["MensajeError"] = "No tienes una tienda asociada para crear productos.";
+                        CargarCombosProducto(producto.IdCategoria, producto.IdSubcategoria);
+                        return View(producto);
+                    }
+
+                    producto.IdTienda = idTienda.Value;
+
                     await _context.SaveChangesAsync();
 
                     var ultimoCodInventario = await _context.Stocks
@@ -142,10 +181,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 }
             }
 
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "NombreCategoria", producto.IdCategoria);
-
+            CargarCombosProducto(producto.IdCategoria, producto.IdSubcategoria);
             ViewData["UnidadMedidaProducto"] = new SelectList(
-                new List<string> { "Unidad", "Caja", "Paquete", "Metro", "Litro", "Kilogramo" },
+                new List<string> { "unidad", "caja", "paquete", "metro", "metro_cuadrado", "litro", "galon", "kilogramo" },
                 producto.UnidadMedidaProducto
             );
 
@@ -160,15 +198,25 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return NotFound();
             }
 
-            var producto = await _context.Productos.FindAsync(id);
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+            if (idTienda == null)
+            {
+                TempData["MensajeError"] = "No tienes una tienda asociada.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p => p.IdProducto == id && p.IdTienda == idTienda.Value);
+
             if (producto == null)
             {
                 return NotFound();
             }
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "NombreCategoria", producto.IdCategoria);
 
+            CargarCombosProducto(producto.IdCategoria, producto.IdSubcategoria);
             ViewData["UnidadMedidaProducto"] = new SelectList(
-                new List<string> { "Unidad", "Caja", "Paquete", "Metro", "Litro", "Kilogramo" },
+                new List<string> { "unidad", "caja", "paquete", "metro", "metro_cuadrado", "litro", "galon", "kilogramo" },
                 producto.UnidadMedidaProducto
             );
 
@@ -180,7 +228,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,CodProducto,IdCategoria,NombreProducto,DescripcionCorta,SkuProducto,CodigoBarrasProducto,UnidadMedidaProducto,MarcaProducto,Favorito,VisiblePublico,PrecioVentaProducto")] Producto producto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,CodProducto,IdCategoria,IdSubcategoria,NombreProducto,DescripcionCorta,SkuProducto,CodigoBarrasProducto,UnidadMedidaProducto,MarcaProducto,Favorito,VisiblePublico,PrecioVentaProducto")] Producto producto)
         {
             if (id != producto.IdProducto)
             {
@@ -195,6 +243,26 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             {
                 try
                 {
+                    var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+                    if (idTienda == null)
+                    {
+                        TempData["MensajeError"] = "No tienes una tienda asociada.";
+                        CargarCombosProducto(producto.IdCategoria, producto.IdSubcategoria);
+                        return View(producto);
+                    }
+
+                    var productoExistente = await _context.Productos
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(p => p.IdProducto == id && p.IdTienda == idTienda.Value);
+
+                    if (productoExistente == null)
+                    {
+                        return NotFound();
+                    }
+
+                    producto.IdTienda = productoExistente.IdTienda;
+
                     _context.Update(producto);
                     await _context.SaveChangesAsync();
                     TempData["MensajeExito"] = "Producto actualizado correctamente.";
@@ -213,10 +281,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "NombreCategoria", producto.IdCategoria);
-
+            CargarCombosProducto(producto.IdCategoria, producto.IdSubcategoria);
             ViewData["UnidadMedidaProducto"] = new SelectList(
-                new List<string> { "Unidad", "Caja", "Paquete", "Metro", "Litro", "Kilogramo" },
+                new List<string> { "unidad", "caja", "paquete", "metro", "metro_cuadrado", "litro", "galon", "kilogramo" },
                 producto.UnidadMedidaProducto
             );
 
@@ -264,6 +331,62 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         private bool ProductoExists(int id)
         {
             return _context.Productos.Any(e => e.IdProducto == id);
+        }
+
+        private void CargarCombosProducto(int? idCategoriaSeleccionada = null, int? idSubcategoriaSeleccionada = null)
+        {
+            var categorias = _context.Categoria
+                .Where(c => c.VisiblePublico || c.IdCategoria == idCategoriaSeleccionada)
+                .OrderBy(c => c.NombreCategoria)
+                .ToList();
+
+            var subcategorias = _context.Subcategoria
+                .Where(s =>
+                    (s.VisiblePublico || s.IdSubcategoria == idSubcategoriaSeleccionada) &&
+                    (!idCategoriaSeleccionada.HasValue || s.IdCategoria == idCategoriaSeleccionada.Value))
+                .OrderBy(s => s.NombreSubcategoria)
+                .ToList();
+
+            ViewData["IdCategoria"] = new SelectList(categorias, "IdCategoria", "NombreCategoria", idCategoriaSeleccionada);
+            ViewData["IdSubcategoria"] = new SelectList(subcategorias, "IdSubcategoria", "NombreSubcategoria", idSubcategoriaSeleccionada);
+
+            ViewData["UnidadMedidaProducto"] = new SelectList(
+                new List<string> { "unidad", "caja", "paquete", "metro", "metro_cuadrado", "litro", "galon", "kilogramo" }
+            );
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerSubcategorias(int idCategoria)
+        {
+            var subcategorias = _context.Subcategoria
+                .Where(s => s.VisiblePublico && s.IdCategoria == idCategoria)
+                .OrderBy(s => s.NombreSubcategoria)
+                .Select(s => new
+                {
+                    idSubcategoria = s.IdSubcategoria,
+                    nombreSubcategoria = s.NombreSubcategoria
+                })
+                .ToList();
+
+            return Json(subcategorias);
+        }
+
+        private int? ObtenerIdTiendaVendedorLogueado()
+        {
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuario == null)
+            {
+                return null;
+            }
+
+            var idTienda = _context.Tiendas
+                .Include(t => t.IdVendedorNavigation)
+                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value)
+                .Select(t => (int?)t.IdTienda)
+                .FirstOrDefault();
+
+            return idTienda;
         }
     }
 }

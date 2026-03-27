@@ -1,0 +1,50 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.SolicitudVendedor
+
+@{
+    ViewData["Title"] = "Detalle de solicitud";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Detalle de solicitud</h2>
+            <p class="text-muted mb-0">Consulta la información completa de la solicitud.</p>
+        </div>
+        <div class="mb-3">
+            <a asp-action="Index" class="btn btn-outline-secondary">← Volver a solicitudes</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Código</dt>
+                <dd class="col-sm-9">@Model.CodSolicitudVendedor</dd>
+
+                <dt class="col-sm-3">Usuario</dt>
+                <dd class="col-sm-9">@Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</dd>
+
+                <dt class="col-sm-3">Correo</dt>
+                <dd class="col-sm-9">@Model.IdUsuarioNavigation?.CorreoElectronico</dd>
+
+                <dt class="col-sm-3">Tienda solicitada</dt>
+                <dd class="col-sm-9">@Model.NombreTiendaSolicitada</dd>
+
+                <dt class="col-sm-3">Descripción</dt>
+                <dd class="col-sm-9">@Model.DescripcionTienda</dd>
+
+                <dt class="col-sm-3">Estado</dt>
+                <dd class="col-sm-9">@Model.EstadoSolicitud</dd>
+
+                <dt class="col-sm-3">Observación admin</dt>
+                <dd class="col-sm-9">@Model.ObservacionAdmin</dd>
+
+                <dt class="col-sm-3">Fecha solicitud</dt>
+                <dd class="col-sm-9">@Model.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                <dt class="col-sm-3">Fecha respuesta</dt>
+                <dd class="col-sm-9">@(Model.FechaRespuesta.HasValue? Model.FechaRespuesta.Value.ToString("dd/MM/yyyy HH:mm") : "-")</dd>
+            </dl>
+        </div>
+    </div>
+</div>

@@ -1,10 +1,13 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Filters;
 using ECOMMERCE_NEXOSOFT.Helpers;
 using ECOMMERCE_NEXOSOFT.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(2, 3)]
     public class CarritoController : Controller
     {
         private readonly NexosoftDbContext _context;
@@ -24,6 +27,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         public IActionResult Agregar(int id, int cantidad = 1)
         {
             var producto = _context.Productos
+                .Include(p => p.IdTiendaNavigation)
                 .FirstOrDefault(p => p.IdProducto == id);
 
             if (producto == null)
@@ -79,7 +83,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                     NombreProducto = producto.NombreProducto,
                     Precio = producto.PrecioVentaProducto,
                     Cantidad = cantidadFinal,
-                    ImagenUrl = "/img/producto-default.jpg"
+                    ImagenUrl = "/img/producto-default.jpg",
+                    IdTienda = producto.IdTienda,
+                    NombreTienda = producto.IdTiendaNavigation?.NombreTienda
                 });
             }
 

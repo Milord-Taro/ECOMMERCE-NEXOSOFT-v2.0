@@ -1,0 +1,203 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.Pedido
+
+@{
+    ViewData["Title"] = "Detalle del pedido";
+    var pago = Model.Ventum?.Pago;
+    var estadoActual = (Model.EstadoPedido ?? "").Trim().ToLower();
+}
+
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="section-title mb-1">Detalle del pedido</h2>
+            <p class="text-muted mb-0">Consulta la información completa del pedido de tu tienda.</p>
+        </div>
+
+        <a asp-controller="VendedorPedidos"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Volver a pedidos
+        </a>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success rounded-4">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger rounded-4">
+            @TempData["MensajeError"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Información del pedido</h6>
+                    <p class="mb-2"><strong>Código:</strong> @Model.CodPedido</p>
+                    <p class="mb-2"><strong>Fecha:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-2"><strong>Método de entrega:</strong> @(string.IsNullOrWhiteSpace(Model.MetodoEntrega) ? "No definido" : Model.MetodoEntrega)</p>
+                    <p class="mb-0">
+                        <strong>Estado del pedido:</strong>
+                        @if (estadoActual == "pendiente")
+                        {
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        }
+                        else if (estadoActual == "en camino")
+                        {
+                            <span class="badge bg-info text-dark">En camino</span>
+                        }
+                        else if (estadoActual == "entregado")
+                        {
+                            <span class="badge bg-success">Entregado</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Cancelado</span>
+                        }
+                    </p>
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Entrega</h6>
+                    <p class="mb-2"><strong>Cliente:</strong> @Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</p>
+                    <p class="mb-2"><strong>Correo:</strong> @Model.IdUsuarioNavigation?.CorreoElectronico</p>
+                    <p class="mb-2"><strong>Tienda:</strong> @(Model.IdTiendaNavigation?.NombreTienda ?? "Sin tienda")</p>
+                    <p class="mb-2"><strong>Dirección:</strong> @(string.IsNullOrWhiteSpace(Model.DireccionEntrega) ? "No registrada" : Model.DireccionEntrega)</p>
+                    <p class="mb-0"><strong>Teléfono:</strong> @(string.IsNullOrWhiteSpace(Model.TelefonoEntrega) ? "No registrado" : Model.TelefonoEntrega)</p>
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Pago</h6>
+                    <p class="mb-2"><strong>Total:</strong> @Model.Total.ToString("C")</p>
+                    <p class="mb-2"><strong>Método de pago:</strong> @(string.IsNullOrWhiteSpace(pago?.MetodoPago) ? "No registrado" : pago.MetodoPago)</p>
+                    <p class="mb-2">
+                        <strong>Estado del pago:</strong>
+                        @if (string.IsNullOrWhiteSpace(pago?.EstadoPago))
+                        {
+                            <span>No registrado</span>
+                        }
+                        else if (pago.EstadoPago == "aprobado")
+                        {
+                            <span class="badge bg-success">Aprobado</span>
+                        }
+                        else if (pago.EstadoPago == "enproceso")
+                        {
+                            <span class="badge bg-warning text-dark">En proceso</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Desaprobado</span>
+                        }
+                    </p>
+                    <p class="mb-2"><strong>Código autorización:</strong> @(string.IsNullOrWhiteSpace(pago?.CodigoAutorizacion) ? "No registrado" : pago.CodigoAutorizacion)</p>
+                    <p class="mb-0"><strong>Detalle del pago:</strong> @(string.IsNullOrWhiteSpace(pago?.Descripcion) ? "Sin observaciones" : pago.Descripcion)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Gestión del pedido</h5>
+
+            @if (estadoActual == "pendiente")
+            {
+                <div class="d-flex gap-2 flex-wrap">
+                    <form asp-action="ActualizarEstado" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idPedido" value="@Model.IdPedido" />
+                        <input type="hidden" name="accion" value="despachar" />
+                        <button type="submit" class="btn btn-dark">Marcar como en camino</button>
+                    </form>
+
+                    <form asp-action="ActualizarEstado" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idPedido" value="@Model.IdPedido" />
+                        <input type="hidden" name="accion" value="cancelar" />
+                        <button type="submit" class="btn btn-outline-danger">Cancelar pedido</button>
+                    </form>
+                </div>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Solo puedes despachar o cancelar un pedido pendiente.
+                </p>
+            }
+            else if (estadoActual == "en camino")
+            {
+                <div class="d-flex gap-2 flex-wrap">
+                    <form asp-action="ActualizarEstado" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idPedido" value="@Model.IdPedido" />
+                        <input type="hidden" name="accion" value="entregar" />
+                        <button type="submit" class="btn btn-success">Marcar como entregado</button>
+                    </form>
+
+                    <form asp-action="ActualizarEstado" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idPedido" value="@Model.IdPedido" />
+                        <input type="hidden" name="accion" value="cancelar" />
+                        <button type="submit" class="btn btn-outline-danger">Cancelar pedido</button>
+                    </form>
+                </div>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Un pedido en camino solo puede finalizarse como entregado o cancelado.
+                </p>
+            }
+            else if (estadoActual == "entregado")
+            {
+                <div class="alert alert-success mb-0">
+                    Este pedido ya fue entregado y no admite más cambios desde este panel.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary mb-0">
+                    Este pedido fue cancelado y no admite más cambios desde este panel.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Productos del pedido</h5>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio unitario</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Detallepedidos)
+                        {
+                            <tr>
+                                <td>@item.IdProductoNavigation?.NombreProducto</td>
+                                <td>@item.PrecioUnitario.ToString("C")</td>
+                                <td>@item.Cantidad</td>
+                                <td>@item.Subtotal.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Total</td>
+                            <td class="fw-bold">@Model.Total.ToString("C")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

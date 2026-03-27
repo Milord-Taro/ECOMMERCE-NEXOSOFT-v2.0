@@ -1,9 +1,11 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(2, 3)]
     public class MisPedidosController : Controller
     {
         private readonly NexosoftDbContext _context;
@@ -23,6 +25,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             var pedidos = await _context.Pedidos
+                .Include(p => p.IdTiendaNavigation)
                 .Where(p => p.IdUsuario == idUsuario.Value)
                 .OrderByDescending(p => p.FechaCreacion)
                 .ToListAsync();
@@ -45,8 +48,12 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             var pedido = await _context.Pedidos
+                .Include(p => p.IdUsuarioNavigation)
+                .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
+                .Include(p => p.Ventum)
+                    .ThenInclude(v => v.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);
 
             if (pedido == null)
@@ -72,8 +79,12 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             var pedido = await _context.Pedidos
+                .Include(p => p.IdUsuarioNavigation)
+                .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
+                .Include(p => p.Ventum)
+                    .ThenInclude(v => v.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);
 
             if (pedido == null)

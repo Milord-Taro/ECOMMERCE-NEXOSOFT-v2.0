@@ -1,0 +1,42 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.SolicitudVendedor
+
+@{
+    ViewData["Title"] = "Rechazar solicitud";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Rechazar solicitud</h2>
+        <p class="text-muted mb-0">Indica una observación para el usuario.</p>
+    </div>
+
+    <div class="mb-3">
+        <a asp-action="Index" class="btn btn-outline-secondary">← Volver a solicitudes</a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <dl class="row mb-4">
+                <dt class="col-sm-3">Usuario</dt>
+                <dd class="col-sm-9">@Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</dd>
+
+                <dt class="col-sm-3">Tienda solicitada</dt>
+                <dd class="col-sm-9">@Model.NombreTiendaSolicitada</dd>
+            </dl>
+
+            <form asp-action="Rechazar">
+                <input type="hidden" asp-for="IdSolicitudVendedor" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Observación del administrador</label>
+                    <textarea name="observacionAdmin" class="form-control" rows="4"></textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger">Confirmar rechazo</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

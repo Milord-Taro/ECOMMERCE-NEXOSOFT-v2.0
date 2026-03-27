@@ -1,0 +1,71 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.Subcategorium
+
+@{
+    ViewData["Title"] = "Nueva subcategoría";
+}
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["MensajeError"]
+    </div>
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Nueva subcategoría</h2>
+        <p class="text-muted mb-0">Registra una subcategoría para el catálogo.</p>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="CodSubcategoria" class="form-label fw-semibold">Código</label>
+                        <input asp-for="CodSubcategoria" class="form-control" />
+                        <span asp-validation-for="CodSubcategoria" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label asp-for="IdCategoria" class="form-label fw-semibold">Categoría</label>
+                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria"></select>
+                        <span asp-validation-for="IdCategoria" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="NombreSubcategoria" class="form-label fw-semibold">Nombre</label>
+                        <input asp-for="NombreSubcategoria" class="form-control" />
+                        <span asp-validation-for="NombreSubcategoria" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="Descripcion" class="form-label fw-semibold">Descripción</label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" asp-for="VisiblePublico" />
+                            <label class="form-check-label fw-semibold" asp-for="VisiblePublico">Visible públicamente</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-dark">Guardar subcategoría</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

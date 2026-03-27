@@ -1,0 +1,125 @@
+﻿@{
+    ViewData["Title"] = "Pasarela de pago demo";
+    var metodoPago = ViewBag.MetodoPago as string ?? string.Empty;
+    var total = ViewBag.Total != null ? (decimal)ViewBag.Total : 0m;
+}
+
+<section class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="fw-bold mb-2">Pasarela de pago demo</h2>
+                    <p class="text-muted mb-4">
+                        Esta pantalla simula la autorización del pago antes de registrar la compra.
+                    </p>
+
+                    @if (TempData["MensajeCheckout"] != null)
+                    {
+                        <div class="alert alert-warning">
+                            @TempData["MensajeCheckout"]
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Método seleccionado</label>
+                        <input type="text" class="form-control" value="@metodoPago" readonly />
+                    </div>
+
+                    <form asp-action="AutorizarPagoDemo" method="post">
+                        @Html.AntiForgeryToken()
+
+                        @if (metodoPago == "tarjeta debito" || metodoPago == "tarjeta credito")
+                        {
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Nombre del titular</label>
+                                    <input type="text"
+                                           name="titularPago"
+                                           class="form-control"
+                                           placeholder="Ej: Efrain Manotas"
+                                           required />
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">Número de tarjeta</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           value="4111 1111 1111 1111"
+                                           readonly />
+                                    <small class="text-muted">Demo visual.</small>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold">MM/AA</label>
+                                    <input type="text" class="form-control" value="12/29" readonly />
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold">CVV</label>
+                                    <input type="text" class="form-control" value="123" readonly />
+                                </div>
+                            </div>
+                        }
+                        else if (metodoPago == "transferencias")
+                        {
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Entidad bancaria demo</label>
+                                    <input type="text" class="form-control" value="Banco Nexosoft Demo" readonly />
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Referencia de pago</label>
+                                    <input type="text"
+                                           name="referenciaPago"
+                                           class="form-control"
+                                           placeholder="Ej: TRX-2026-001"
+                                           required />
+                                </div>
+                            </div>
+                        }
+
+                        <div class="d-flex gap-2 mt-4 flex-wrap">
+                            <button type="submit" class="btn btn-danger">
+                                Autorizar pago demo
+                            </button>
+                        </div>
+                    </form>
+
+                    <form asp-action="CancelarPagoDemo" method="post" class="mt-2">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-secondary">
+                            Cancelar y volver al checkout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Resumen del pago</h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Método de pago</span>
+                        <strong>@metodoPago</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Estado esperado</span>
+                        <strong>Aprobado</strong>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Total a pagar</span>
+                        <h4 class="mb-0">$@total.ToString("N2")</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

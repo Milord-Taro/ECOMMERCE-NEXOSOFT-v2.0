@@ -30,7 +30,7 @@
 
                     <div class="col-md-12">
                         <label asp-for="DescripcionCorta" class="form-label fw-semibold"></label>
-                        <textarea asp-for="DescripcionCorta" class="form-control" rows="3"></textarea>
+                        <textarea asp-for="DescripcionCorta" class="form-control" rows="3" maxlength="255"></textarea>
                         <span asp-validation-for="DescripcionCorta" class="text-danger"></span>
                     </div>
 
@@ -66,21 +66,29 @@
 
                     <div class="col-md-4">
                         <label asp-for="IdCategoria" class="form-label fw-semibold"></label>
-                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria"></select>
+                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria" id="IdCategoria"></select>
                         <span asp-validation-for="IdCategoria" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-check mt-2">
+                    <div class="col-md-4">
+                        <label asp-for="IdSubcategoria" class="form-label fw-semibold">Subcategoría</label>
+                        <select asp-for="IdSubcategoria" class="form-select" asp-items="ViewBag.IdSubcategoria" id="IdSubcategoria">
+                            <option value="">Seleccione...</option>
+                        </select>
+                        <span asp-validation-for="IdSubcategoria" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check mb-2">
                             <input class="form-check-input" asp-for="Favorito" />
                             <label class="form-check-label fw-semibold" asp-for="Favorito"></label>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-check mt-2">
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check mb-2">
                             <input class="form-check-input" asp-for="VisiblePublico" />
-                            <label class="form-check-label fw-semibold" asp-for="VisiblePublico"></label>
+                            <label class="form-check-label fw-semibold" asp-for="VisiblePublico">Visible públicamente</label>
                         </div>
                     </div>
                 </div>
@@ -98,4 +106,35 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const categoriaSelect = document.getElementById("IdCategoria");
+            const subcategoriaSelect = document.getElementById("IdSubcategoria");
+
+            categoriaSelect.addEventListener("change", function () {
+                const idCategoria = this.value;
+
+                subcategoriaSelect.innerHTML = '<option value="">Seleccione...</option>';
+
+                if (!idCategoria) {
+                    return;
+                }
+
+                fetch(`/Producto/ObtenerSubcategorias?idCategoria=${idCategoria}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(item => {
+                            const option = document.createElement("option");
+                            option.value = item.idSubcategoria;
+                            option.text = item.nombreSubcategoria;
+                            subcategoriaSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error cargando subcategorías:", error);
+                    });
+            });
+        });
+    </script>
 }

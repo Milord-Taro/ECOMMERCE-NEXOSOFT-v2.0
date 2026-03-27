@@ -5,30 +5,30 @@ namespace ECOMMERCE_NEXOSOFT.Filters
 {
     public class AuthorizeUserAttribute : ActionFilterAttribute
     {
-        private readonly int[] _roles;
+        private readonly int[] _rolesPermitidos;
 
-        public AuthorizeUserAttribute(params int[] roles)
+        public AuthorizeUserAttribute(params int[] rolesPermitidos)
         {
-            _roles = roles;
+            _rolesPermitidos = rolesPermitidos;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var session = context.HttpContext.Session;
+            var rol = context.HttpContext.Session.GetInt32("Rol");
 
-            var usuario = session.GetString("Usuario");
-            var rol = session.GetInt32("Rol");
-
-            if (usuario == null || rol == null)
+            if (rol == null)
             {
                 context.Result = new RedirectToActionResult("Login", "Auth", null);
                 return;
             }
 
-            if (_roles.Length > 0 && !_roles.Contains(rol.Value))
+            if (!_rolesPermitidos.Contains(rol.Value))
             {
-                context.Result = new RedirectToActionResult("Login", "Auth", null);
+                context.Result = new RedirectToActionResult("Index", "Home", null);
+                return;
             }
+
+            base.OnActionExecuting(context);
         }
     }
 }
