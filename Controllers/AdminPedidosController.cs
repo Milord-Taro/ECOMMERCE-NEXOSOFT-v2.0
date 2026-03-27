@@ -59,6 +59,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
+                .Include(p => p.Ventum)
+                    .ThenInclude(v => v.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id);
 
             if (pedido == null)
@@ -67,6 +69,42 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             return View(pedido);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActualizarEstado(int idPedido, string accion)
+        {
+            var pedido = await _context.Pedidos
+                .FirstOrDefaultAsync(p => p.IdPedido == idPedido);
+
+            if (pedido == null)
+            {
+                TempData["MensajeError"] = "No se encontró el pedido.";
+                return RedirectToAction("Index");
+            }
+
+            var estadoActual = pedido.EstadoPedido?.Trim().ToLower();
+            var accionNormalizada = accion?.Trim().ToLower();
+
+            string? nuevoEstado = null;
+
+            if (estadoActual == "pendiente" && accionNormalizada == "cancelar")
+            {
+                nuevoEstado = "cancelado";
+            }
+
+            if (nuevoEstado == null)
+            {
+                TempData["MensajeError"] = "La acción seleccionada no es válida para el estado actual del pedido.";
+                return RedirectToAction("Details", new { id = idPedido });
+            }
+
+            pedido.EstadoPedido = nuevoEstado;
+            await _context.SaveChangesAsync();
+
+            TempData["MensajeExito"] = "El estado del pedido se actualizó correctamente.";
+            return RedirectToAction("Details", new { id = idPedido });
         }
     }
 }

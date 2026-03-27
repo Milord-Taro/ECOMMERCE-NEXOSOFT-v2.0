@@ -1,0 +1,304 @@
+﻿@{
+    ViewData["Title"] = "Métricas del marketplace";
+
+    var totalUsuarios = (int)(ViewBag.TotalUsuarios ?? 0);
+    var totalClientes = (int)(ViewBag.TotalClientes ?? 0);
+    var totalVendedores = (int)(ViewBag.TotalVendedores ?? 0);
+
+    var totalTiendas = (int)(ViewBag.TotalTiendas ?? 0);
+    var tiendasVisibles = (int)(ViewBag.TiendasVisibles ?? 0);
+    var tiendasOcultas = (int)(ViewBag.TiendasOcultas ?? 0);
+
+    var totalProductos = (int)(ViewBag.TotalProductos ?? 0);
+    var productosPublicados = (int)(ViewBag.ProductosPublicados ?? 0);
+    var productosOcultos = (int)(ViewBag.ProductosOcultos ?? 0);
+
+    var solicitudesPendientes = (int)(ViewBag.SolicitudesPendientes ?? 0);
+    var solicitudesAprobadas = (int)(ViewBag.SolicitudesAprobadas ?? 0);
+    var solicitudesRechazadas = (int)(ViewBag.SolicitudesRechazadas ?? 0);
+
+    var totalPedidos = (int)(ViewBag.TotalPedidos ?? 0);
+    var pedidosUltimos7Dias = (int)(ViewBag.PedidosUltimos7Dias ?? 0);
+    var pedidosUltimos30Dias = (int)(ViewBag.PedidosUltimos30Dias ?? 0);
+
+    var totalVentas = (int)(ViewBag.TotalVentas ?? 0);
+    var pagosAprobados = (int)(ViewBag.PagosAprobados ?? 0);
+    var pagosEnProceso = (int)(ViewBag.PagosEnProceso ?? 0);
+    var pagosDesaprobados = (int)(ViewBag.PagosDesaprobados ?? 0);
+    var recaudoTotal = (decimal)(ViewBag.RecaudoTotal ?? 0m);
+
+    var topTiendasPorPedidos = ViewBag.TopTiendasPorPedidos as IEnumerable<dynamic> ?? new List<dynamic>();
+    var topTiendasPorRecaudo = ViewBag.TopTiendasPorRecaudo as IEnumerable<dynamic> ?? new List<dynamic>();
+
+    int Porcentaje(int parte, int total) => total <= 0 ? 0 : (int)Math.Round((double)parte * 100 / total);
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Métricas del marketplace</h2>
+            <p class="text-muted mb-0">Vista analítica global del comportamiento del sistema.</p>
+        </div>
+
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver al panel admin
+        </a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Usuarios totales</h6>
+                    <h3 class="fw-bold">@totalUsuarios</h3>
+                    <small class="text-muted">Clientes: @totalClientes | Vendedores: @totalVendedores</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Tiendas</h6>
+                    <h3 class="fw-bold">@totalTiendas</h3>
+                    <small class="text-muted">Visibles: @tiendasVisibles | Ocultas: @tiendasOcultas</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Productos</h6>
+                    <h3 class="fw-bold">@totalProductos</h3>
+                    <small class="text-muted">Publicados: @productosPublicados | Ocultos: @productosOcultos</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Recaudo demo</h6>
+                    <h3 class="fw-bold text-success">@recaudoTotal.ToString("C")</h3>
+                    <small class="text-muted">Pagos aprobados del marketplace</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Distribución de tiendas</h5>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Tiendas visibles</span>
+                            <strong>@tiendasVisibles</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-success" style="width:@Porcentaje(tiendasVisibles, totalTiendas)%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Tiendas ocultas</span>
+                            <strong>@tiendasOcultas</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-secondary" style="width:@Porcentaje(tiendasOcultas, totalTiendas)%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Distribución de productos</h5>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Productos publicados</span>
+                            <strong>@productosPublicados</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-primary" style="width:@Porcentaje(productosPublicados, totalProductos)%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Productos ocultos</span>
+                            <strong>@productosOcultos</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-dark" style="width:@Porcentaje(productosOcultos, totalProductos)%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Solicitudes de vendedor</h5>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Pendientes</span>
+                            <strong>@solicitudesPendientes</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-warning" style="width:@Porcentaje(solicitudesPendientes, solicitudesPendientes + solicitudesAprobadas + solicitudesRechazadas)%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Aprobadas</span>
+                            <strong>@solicitudesAprobadas</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-success" style="width:@Porcentaje(solicitudesAprobadas, solicitudesPendientes + solicitudesAprobadas + solicitudesRechazadas)%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Rechazadas</span>
+                            <strong>@solicitudesRechazadas</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-danger" style="width:@Porcentaje(solicitudesRechazadas, solicitudesPendientes + solicitudesAprobadas + solicitudesRechazadas)%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Actividad comercial</h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pedidos totales</span>
+                        <strong>@totalPedidos</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pedidos últimos 7 días</span>
+                        <strong>@pedidosUltimos7Dias</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pedidos últimos 30 días</span>
+                        <strong>@pedidosUltimos30Dias</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Ventas registradas</span>
+                        <strong>@totalVentas</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pagos aprobados</span>
+                        <strong>@pagosAprobados</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pagos en proceso</span>
+                        <strong>@pagosEnProceso</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Pagos desaprobados</span>
+                        <strong>@pagosDesaprobados</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Top tiendas por pedidos</h5>
+
+                    @if (!topTiendasPorPedidos.Any())
+                    {
+                        <p class="text-muted mb-0">No hay información disponible.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tienda</th>
+                                        <th>Pedidos</th>
+                                        <th>Monto total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in topTiendasPorPedidos)
+                                    {
+                                        <tr>
+                                            <td>@item.NombreTienda</td>
+                                            <td>@item.TotalPedidos</td>
+                                            <td>@(((decimal)item.TotalMonto).ToString("C"))</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Top tiendas por recaudo</h5>
+
+                    @if (!topTiendasPorRecaudo.Any())
+                    {
+                        <p class="text-muted mb-0">No hay información disponible.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tienda</th>
+                                        <th>Recaudo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in topTiendasPorRecaudo)
+                                    {
+                                        <tr>
+                                            <td>@item.NombreTienda</td>
+                                            <td>@(((decimal)item.TotalRecaudado).ToString("C"))</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,293 @@
+﻿@using ECOMMERCE_NEXOSOFT.Models
+
+@{
+    ViewData["Title"] = "Métricas de mi tienda";
+
+    var nombreTienda = ViewBag.NombreTienda as string ?? "Mi tienda";
+    var tiendaVisible = (bool)(ViewBag.TiendaVisiblePublico ?? false);
+
+    var totalProductos = (int)(ViewBag.TotalProductos ?? 0);
+    var productosPublicados = (int)(ViewBag.ProductosPublicados ?? 0);
+    var productosOcultos = (int)(ViewBag.ProductosOcultos ?? 0);
+    var totalStockBajo = (int)(ViewBag.TotalStockBajo ?? 0);
+
+    var totalPedidos = (int)(ViewBag.TotalPedidos ?? 0);
+    var pedidosPendientes = (int)(ViewBag.PedidosPendientes ?? 0);
+    var pedidosEnCamino = (int)(ViewBag.PedidosEnCamino ?? 0);
+    var pedidosEntregados = (int)(ViewBag.PedidosEntregados ?? 0);
+    var pedidosCancelados = (int)(ViewBag.PedidosCancelados ?? 0);
+    var pedidosUltimos7Dias = (int)(ViewBag.PedidosUltimos7Dias ?? 0);
+    var pedidosUltimos30Dias = (int)(ViewBag.PedidosUltimos30Dias ?? 0);
+
+    var totalVentas = (int)(ViewBag.TotalVentas ?? 0);
+    var pagosAprobados = (int)(ViewBag.PagosAprobados ?? 0);
+    var pagosEnProceso = (int)(ViewBag.PagosEnProceso ?? 0);
+    var pagosDesaprobados = (int)(ViewBag.PagosDesaprobados ?? 0);
+    var totalRecaudado = (decimal)(ViewBag.TotalRecaudado ?? 0m);
+
+    var topProductos = ViewBag.TopProductos as IEnumerable<dynamic> ?? new List<dynamic>();
+    var productosStockCritico = ViewBag.ProductosStockCritico as List<Stock> ?? new List<Stock>();
+
+    int Porcentaje(int parte, int total) => total <= 0 ? 0 : (int)Math.Round((double)parte * 100 / total);
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Métricas de mi tienda</h2>
+            <p class="text-muted mb-0">Vista analítica del desempeño comercial y operativo de tu tienda.</p>
+            <p class="mb-0 mt-2">
+                <strong>Tienda:</strong> @nombreTienda
+                @if (tiendaVisible)
+                {
+                    <span class="badge bg-success ms-2">Visible al público</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary ms-2">Oculta al público</span>
+                }
+            </p>
+        </div>
+
+        <a asp-controller="Vendedor" asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver al panel
+        </a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Productos</h6>
+                    <h3 class="fw-bold">@totalProductos</h3>
+                    <small class="text-muted">Publicados: @productosPublicados | Ocultos: @productosOcultos</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Pedidos</h6>
+                    <h3 class="fw-bold">@totalPedidos</h3>
+                    <small class="text-muted">Últimos 7 días: @pedidosUltimos7Dias</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Stock bajo</h6>
+                    <h3 class="fw-bold text-warning">@totalStockBajo</h3>
+                    <small class="text-muted">Productos por revisar</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Recaudo demo</h6>
+                    <h3 class="fw-bold text-success">@totalRecaudado.ToString("C")</h3>
+                    <small class="text-muted">Pagos aprobados de tu tienda</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Estado de tus productos</h5>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Publicados</span>
+                            <strong>@productosPublicados</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-success" style="width:@Porcentaje(productosPublicados, totalProductos)%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Ocultos</span>
+                            <strong>@productosOcultos</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-secondary" style="width:@Porcentaje(productosOcultos, totalProductos)%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Estado de pedidos</h5>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Pendientes</span>
+                            <strong>@pedidosPendientes</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-warning" style="width:@Porcentaje(pedidosPendientes, totalPedidos)%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>En camino</span>
+                            <strong>@pedidosEnCamino</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-info" style="width:@Porcentaje(pedidosEnCamino, totalPedidos)%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Entregados</span>
+                            <strong>@pedidosEntregados</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-success" style="width:@Porcentaje(pedidosEntregados, totalPedidos)%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Cancelados</span>
+                            <strong>@pedidosCancelados</strong>
+                        </div>
+                        <div class="progress" style="height: 14px;">
+                            <div class="progress-bar bg-danger" style="width:@Porcentaje(pedidosCancelados, totalPedidos)%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Actividad comercial</h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pedidos totales</span>
+                        <strong>@totalPedidos</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pedidos últimos 7 días</span>
+                        <strong>@pedidosUltimos7Dias</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pedidos últimos 30 días</span>
+                        <strong>@pedidosUltimos30Dias</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Ventas registradas</span>
+                        <strong>@totalVentas</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pagos aprobados</span>
+                        <strong>@pagosAprobados</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pagos en proceso</span>
+                        <strong>@pagosEnProceso</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Pagos desaprobados</span>
+                        <strong>@pagosDesaprobados</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Productos con stock crítico</h5>
+
+                    @if (!productosStockCritico.Any())
+                    {
+                        <p class="text-muted mb-0">No hay productos con stock crítico.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Stock actual</th>
+                                        <th>Stock mínimo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in productosStockCritico)
+                                    {
+                                        <tr class="@(item.StockActual <= item.StockMinimo ? "table-warning" : "")">
+                                            <td>@item.IdProductoNavigation?.NombreProducto</td>
+                                            <td>@item.StockActual</td>
+                                            <td>@item.StockMinimo</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Top productos por ventas</h5>
+
+            @if (!topProductos.Any())
+            {
+                <p class="text-muted mb-0">Aún no hay productos vendidos en tu tienda.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Producto</th>
+                                <th>Unidades vendidas</th>
+                                <th>Total vendido</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in topProductos)
+                            {
+                                <tr>
+                                    <td>@item.NombreProducto</td>
+                                    <td>@item.UnidadesVendidas</td>
+                                    <td>@(((decimal)item.TotalVendido).ToString("C"))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

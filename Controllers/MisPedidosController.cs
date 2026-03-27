@@ -52,6 +52,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
+                .Include(p => p.Ventum)
+                    .ThenInclude(v => v.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);
 
             if (pedido == null)
@@ -77,8 +79,12 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             var pedido = await _context.Pedidos
+                .Include(p => p.IdUsuarioNavigation)
+                .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
+                .Include(p => p.Ventum)
+                    .ThenInclude(v => v.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);
 
             if (pedido == null)

@@ -3,19 +3,31 @@
 @{
     ViewData["Title"] = "Panel vendedor";
     var stockCritico = ViewBag.StockCritico as List<Stock> ?? new List<Stock>();
+    var ultimosPedidos = ViewBag.UltimosPedidos as IEnumerable<ECOMMERCE_NEXOSOFT.Models.Pedido> ?? new List<ECOMMERCE_NEXOSOFT.Models.Pedido>();
 }
 
 @if (TempData["MensajeError"] != null)
-    {
-        <div class="alert alert-danger">
-            @TempData["MensajeError"]
-        </div>
-    }
+{
+    <div class="alert alert-danger">
+        @TempData["MensajeError"]
+    </div>
+}
 
 <div class="container py-4">
     <div class="mb-4">
         <h2 class="fw-bold mb-1">Panel vendedor</h2>
-        <p class="text-muted mb-0">Resumen operativo de catálogo e inventario.</p>
+        <p class="text-muted mb-0">Resumen operativo, comercial y de inventario de tu tienda.</p>
+        <p class="mb-0 mt-2">
+            <strong>Tienda:</strong> @ViewBag.NombreTienda
+            @if ((bool)(ViewBag.TiendaVisiblePublico ?? false))
+            {
+                <span class="badge bg-success ms-2">Visible al público</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary ms-2">Oculta al público</span>
+            }
+        </p>
     </div>
 
     <div class="row g-4 mb-4">
@@ -24,6 +36,7 @@
                 <div class="card-body">
                     <h6 class="text-muted">Productos</h6>
                     <h3 class="fw-bold">@(ViewBag.TotalProductos ?? 0)</h3>
+                    <small class="text-muted">Publicados: @(ViewBag.ProductosPublicados ?? 0) | Ocultos: @(ViewBag.ProductosOcultos ?? 0)</small>
                 </div>
             </div>
         </div>
@@ -31,17 +44,9 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 rounded-4 h-100">
                 <div class="card-body">
-                    <h6 class="text-muted">Publicados</h6>
-                    <h3 class="fw-bold text-success">@(ViewBag.ProductosPublicados ?? 0)</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted">Ocultos</h6>
-                    <h3 class="fw-bold text-danger">@(ViewBag.ProductosOcultos ?? 0)</h3>
+                    <h6 class="text-muted">Pedidos</h6>
+                    <h3 class="fw-bold">@(ViewBag.TotalPedidos ?? 0)</h3>
+                    <small class="text-muted">Pendientes: @(ViewBag.PedidosPendientes ?? 0) | Entregados: @(ViewBag.PedidosEntregados ?? 0)</small>
                 </div>
             </div>
         </div>
@@ -51,13 +56,41 @@
                 <div class="card-body">
                     <h6 class="text-muted">Stock bajo</h6>
                     <h3 class="fw-bold text-warning">@(ViewBag.TotalStockBajo ?? 0)</h3>
+                    <small class="text-muted">Productos por revisar</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Recaudo demo</h6>
+                    <h3 class="fw-bold text-success">@(((decimal)(ViewBag.TotalRecaudado ?? 0m)).ToString("C"))</h3>
+                    <small class="text-muted">Pagos aprobados de tu tienda</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Ventas registradas</h6>
+                    <h3 class="fw-bold">@(ViewBag.TotalVentas ?? 0)</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Pagos aprobados</h6>
+                    <h3 class="fw-bold text-success">@(ViewBag.TotalPagosAprobados ?? 0)</h3>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row g-4 mt-1">
-
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 rounded-4 h-100">
                 <div class="card-body">
@@ -73,7 +106,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-
                                 @if (stockCritico == null || !stockCritico.Any())
                                 {
                                     <tr>
@@ -122,10 +154,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @{
-                                    var ultimosPedidos = ViewBag.UltimosPedidos as IEnumerable<ECOMMERCE_NEXOSOFT.Models.Pedido>;
-                                }
-
                                 @if (ultimosPedidos == null || !ultimosPedidos.Any())
                                 {
                                     <tr>
@@ -185,6 +213,7 @@
                     <a asp-controller="Producto" asp-action="Index" class="btn btn-outline-dark">Mis productos</a>
                     <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-dark">Mi stock</a>
                     <a asp-controller="VendedorPedidos" asp-action="Index" class="btn btn-outline-dark">Pedidos de mi tienda</a>
+                    <a asp-controller="Vendedor" asp-action="Metricas" class="btn btn-outline-dark">Métricas de mi tienda</a>
                 </div>
             </div>
         </div>
