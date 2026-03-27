@@ -11,6 +11,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
     {
         private readonly NexosoftDbContext _context;
         private const string CarritoKey = "CARRITO";
+        private const string CheckoutDireccionKey = "CHECKOUT_DIRECCION";
+        private const string CheckoutTelefonoKey = "CHECKOUT_TELEFONO";
+        private const string CheckoutMetodoPagoKey = "CHECKOUT_METODO_PAGO";
 
         public CheckoutController(NexosoftDbContext context)
         {
@@ -47,37 +50,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             return cliente;
         }
 
-        public IActionResult Index()
+        private void LimpiarCheckoutPendiente()
         {
-            var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
-
-            if (!carrito.Any())
-            {
-                return RedirectToAction("Index", "Carrito");
-            }
-
-            var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
-
-            if (idUsuarioSesion != null)
-            {
-                var usuario = _context.Usuarios.FirstOrDefault(u => u.IdUsuario == idUsuarioSesion.Value);
-                var cliente = _context.Clientes.FirstOrDefault(c => c.IdUsuario == idUsuarioSesion.Value);
-
-                ViewBag.TelefonoEntrega = usuario?.Telefono ?? string.Empty;
-                ViewBag.DireccionEntrega = cliente?.Direccion1 ?? string.Empty;
-            }
-            else
-            {
-                ViewBag.TelefonoEntrega = string.Empty;
-                ViewBag.DireccionEntrega = string.Empty;
-            }
-
-            return View(carrito);
+            HttpContext.Session.Remove(CheckoutDireccionKey);
+            HttpContext.Session.Remove(CheckoutTelefonoKey);
+            HttpContext.Session.Remove(CheckoutMetodoPagoKey);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Confirmar(string direccionEntrega, string telefonoEntrega, string metodoPago)
+        private IActionResult ProcesarCompra(string direccionEntrega, string telefonoEntrega, string metodoPago)
         {
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
 
@@ -93,17 +73,15 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var clienteComprador = ObtenerOCrearClienteComprador(idUsuarioSesion.Value);
-
             if (string.IsNullOrWhiteSpace(direccionEntrega))
             {
-                TempData["MensajeCheckout"] = "Debes ingresar una dirección de entrega.";
+                TempData["MensajeCheckout"] = "Debes seleccionar una dirección de entrega.";
                 return RedirectToAction("Index");
             }
 
             if (string.IsNullOrWhiteSpace(telefonoEntrega))
             {
-                TempData["MensajeCheckout"] = "Debes ingresar un teléfono de contacto.";
+                TempData["MensajeCheckout"] = "No se encontró un teléfono de contacto válido.";
                 return RedirectToAction("Index");
             }
 
@@ -112,6 +90,39 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             if (string.IsNullOrWhiteSpace(metodoPago) || !metodosPagoValidos.Contains(metodoPago))
             {
                 TempData["MensajeCheckout"] = "Debes seleccionar un método de pago válido.";
+                return RedirectToAction("Index");
+            }
+
+            var clienteComprador = ObtenerOCrearClienteComprador(idUsuarioSesion.Value);
+
+            var direccionesValidas = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(clienteComprador.Direccion1))
+                direccionesValidas.Add(clienteComprador.Direccion1.Trim());
+
+            if (!string.IsNullOrWhiteSpace(clienteComprador.Direccion2))
+                direccionesValidas.Add(clienteComprador.Direccion2.Trim());
+
+            if (!string.IsNullOrWhiteSpace(clienteComprador.Direccion3))
+                direccionesValidas.Add(clienteComprador.Direccion3.Trim());
+
+            if (!direccionesValidas.Contains(direccionEntrega.Trim()))
+            {
+                TempData["MensajeCheckout"] = "La dirección seleccionada no es válida.";
+                return RedirectToAction("Index");
+            }
+
+            var usuarioComprador = _context.Usuarios.FirstOrDefault(u => u.IdUsuario == idUsuarioSesion.Value);
+
+            if (usuarioComprador == null || string.IsNullOrWhiteSpace(usuarioComprador.Telefono))
+            {
+                TempData["MensajeCheckout"] = "No se encontró un teléfono de contacto válido.";
+                return RedirectToAction("Index");
+            }
+
+            if (telefonoEntrega.Trim() != usuarioComprador.Telefono.Trim())
+            {
+                TempData["MensajeCheckout"] = "El teléfono enviado no coincide con el registrado en tu cuenta.";
                 return RedirectToAction("Index");
             }
 
@@ -152,8 +163,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                     CostoEnvio = costoEnvio,
                     Total = total,
                     MetodoEntrega = "domicilio",
-                    DireccionEntrega = direccionEntrega,
-                    TelefonoEntrega = telefonoEntrega,
+                    DireccionEntrega = direccionEntrega.Trim(),
+                    TelefonoEntrega = telefonoEntrega.Trim(),
                     EstadoPedido = "pendiente"
                 };
 
@@ -188,12 +199,16 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
                 var codigoAutorizacion = "AUT" + Guid.NewGuid().ToString("N")[..8].ToUpper();
 
+                var descripcionPago = metodoPago == "efectivo"
+                    ? "Pago contra entrega registrado."
+                    : "Pago demo aprobado por la pasarela simulada.";
+
                 var pago = new Pago
                 {
                     CodPago = nuevoCodPago,
                     IdVenta = venta.IdVenta,
                     MetodoPago = metodoPago,
-                    Descripcion = "Pago demo aprobado por la pasarela simulada.",
+                    Descripcion = descripcionPago,
                     FechaPago = DateTime.Now,
                     MontoPagado = total,
                     CodigoAutorizacion = codigoAutorizacion,
@@ -201,7 +216,6 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 };
 
                 _context.Pagos.Add(pago);
-                _context.SaveChanges();
 
                 foreach (var item in grupo)
                 {
@@ -228,9 +242,147 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 pedidosCreados.Add(pedido.IdPedido);
             }
 
+            LimpiarCheckoutPendiente();
             HttpContext.Session.Remove(CarritoKey);
 
             return RedirectToAction("ConfirmacionMultiple", new { ids = string.Join(",", pedidosCreados) });
+        }
+
+        public IActionResult Index()
+        {
+            var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
+
+            if (!carrito.Any())
+            {
+                return RedirectToAction("Index", "Carrito");
+            }
+
+            var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuarioSesion == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.IdUsuario == idUsuarioSesion.Value);
+            var cliente = _context.Clientes.FirstOrDefault(c => c.IdUsuario == idUsuarioSesion.Value);
+
+            var direcciones = new List<string>();
+
+            if (cliente != null)
+            {
+                if (!string.IsNullOrWhiteSpace(cliente.Direccion1))
+                    direcciones.Add(cliente.Direccion1.Trim());
+
+                if (!string.IsNullOrWhiteSpace(cliente.Direccion2))
+                    direcciones.Add(cliente.Direccion2.Trim());
+
+                if (!string.IsNullOrWhiteSpace(cliente.Direccion3))
+                    direcciones.Add(cliente.Direccion3.Trim());
+            }
+
+            ViewBag.TelefonoEntrega = usuario?.Telefono ?? string.Empty;
+            ViewBag.DireccionesEntrega = direcciones;
+
+            if (!direcciones.Any())
+            {
+                TempData["MensajeCheckout"] = "No tienes direcciones registradas. Actualiza tu perfil de cliente antes de continuar con la compra.";
+            }
+
+            if (string.IsNullOrWhiteSpace(usuario?.Telefono))
+            {
+                TempData["MensajeCheckout"] = "No tienes un teléfono registrado. Actualiza tu perfil antes de continuar con la compra.";
+            }
+
+            return View(carrito);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Confirmar(string direccionEntrega, string telefonoEntrega, string metodoPago)
+        {
+            if (string.IsNullOrWhiteSpace(direccionEntrega) ||
+                string.IsNullOrWhiteSpace(telefonoEntrega) ||
+                string.IsNullOrWhiteSpace(metodoPago))
+            {
+                TempData["MensajeCheckout"] = "Debes completar los datos de entrega y seleccionar un método de pago.";
+                return RedirectToAction("Index");
+            }
+
+            if (metodoPago == "efectivo")
+            {
+                return ProcesarCompra(direccionEntrega, telefonoEntrega, metodoPago);
+            }
+
+            HttpContext.Session.SetString(CheckoutDireccionKey, direccionEntrega.Trim());
+            HttpContext.Session.SetString(CheckoutTelefonoKey, telefonoEntrega.Trim());
+            HttpContext.Session.SetString(CheckoutMetodoPagoKey, metodoPago.Trim());
+
+            return RedirectToAction(nameof(PasarelaDemo));
+        }
+
+        public IActionResult PasarelaDemo()
+        {
+            var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
+
+            if (!carrito.Any())
+            {
+                return RedirectToAction("Index", "Carrito");
+            }
+
+            var metodoPago = HttpContext.Session.GetString(CheckoutMetodoPagoKey);
+
+            if (string.IsNullOrWhiteSpace(metodoPago))
+            {
+                TempData["MensajeCheckout"] = "No hay un pago pendiente para procesar.";
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.MetodoPago = metodoPago;
+            ViewBag.Total = carrito.Sum(x => x.Precio * x.Cantidad);
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AutorizarPagoDemo(string? titularPago, string? referenciaPago)
+        {
+            var direccionEntrega = HttpContext.Session.GetString(CheckoutDireccionKey);
+            var telefonoEntrega = HttpContext.Session.GetString(CheckoutTelefonoKey);
+            var metodoPago = HttpContext.Session.GetString(CheckoutMetodoPagoKey);
+
+            if (string.IsNullOrWhiteSpace(direccionEntrega) ||
+                string.IsNullOrWhiteSpace(telefonoEntrega) ||
+                string.IsNullOrWhiteSpace(metodoPago))
+            {
+                TempData["MensajeCheckout"] = "No hay información de pago pendiente para procesar.";
+                return RedirectToAction("Index");
+            }
+
+            if ((metodoPago == "tarjeta debito" || metodoPago == "tarjeta credito") &&
+                string.IsNullOrWhiteSpace(titularPago))
+            {
+                TempData["MensajeCheckout"] = "Debes ingresar el nombre del titular para continuar con el pago demo.";
+                return RedirectToAction(nameof(PasarelaDemo));
+            }
+
+            if (metodoPago == "transferencias" && string.IsNullOrWhiteSpace(referenciaPago))
+            {
+                TempData["MensajeCheckout"] = "Debes ingresar una referencia para continuar con la transferencia demo.";
+                return RedirectToAction(nameof(PasarelaDemo));
+            }
+
+            return ProcesarCompra(direccionEntrega, telefonoEntrega, metodoPago);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CancelarPagoDemo()
+        {
+            LimpiarCheckoutPendiente();
+            TempData["MensajeCheckout"] = "El pago demo fue cancelado.";
+            return RedirectToAction("Index");
         }
 
         public IActionResult Confirmacion(int id)

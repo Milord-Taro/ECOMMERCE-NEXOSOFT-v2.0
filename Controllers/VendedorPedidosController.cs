@@ -95,6 +95,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
+                .Include(p => p.Ventum)
+                    .ThenInclude(v => v.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdTienda == idTienda.Value);
 
             if (pedido == null)
@@ -107,7 +109,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ActualizarEstado(int idPedido, string estadoPedido)
+        public async Task<IActionResult> ActualizarEstado(int idPedido, string accion)
         {
             var idTienda = ObtenerIdTiendaVendedorLogueado();
 
@@ -115,14 +117,6 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             {
                 TempData["MensajeError"] = "No tienes una tienda asociada para actualizar pedidos.";
                 return RedirectToAction("Index", "Vendedor");
-            }
-
-            var estadosValidos = new[] { "pendiente", "en camino", "entregado", "cancelado" };
-
-            if (string.IsNullOrWhiteSpace(estadoPedido) || !estadosValidos.Contains(estadoPedido))
-            {
-                TempData["MensajeError"] = "El estado seleccionado no es válido.";
-                return RedirectToAction("Details", new { id = idPedido });
             }
 
             var pedido = await _context.Pedidos
@@ -134,10 +128,36 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Index");
             }
 
-            pedido.EstadoPedido = estadoPedido;
+            var estadoActual = pedido.EstadoPedido?.Trim().ToLower();
+            var accionNormalizada = accion?.Trim().ToLower();
+
+            string? nuevoEstado = null;
+
+            if (estadoActual == "pendiente")
+            {
+                if (accionNormalizada == "despachar")
+                    nuevoEstado = "en camino";
+                else if (accionNormalizada == "cancelar")
+                    nuevoEstado = "cancelado";
+            }
+            else if (estadoActual == "en camino")
+            {
+                if (accionNormalizada == "entregar")
+                    nuevoEstado = "entregado";
+                else if (accionNormalizada == "cancelar")
+                    nuevoEstado = "cancelado";
+            }
+
+            if (nuevoEstado == null)
+            {
+                TempData["MensajeError"] = "La acción seleccionada no es válida para el estado actual del pedido.";
+                return RedirectToAction("Details", new { id = idPedido });
+            }
+
+            pedido.EstadoPedido = nuevoEstado;
             await _context.SaveChangesAsync();
 
-            TempData["MensajeExito"] = "Estado del pedido actualizado correctamente.";
+            TempData["MensajeExito"] = "El estado del pedido se actualizó correctamente.";
             return RedirectToAction("Details", new { id = idPedido });
         }
     }

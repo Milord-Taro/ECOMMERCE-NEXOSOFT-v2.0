@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Detalle del pedido";
+    var pago = Model.Ventum?.Pago;
 }
 
 <div class="container py-4">
@@ -26,25 +27,14 @@
 
     <div class="card shadow-sm border-0 rounded-4 mb-4">
         <div class="card-body p-4">
-            <div class="row g-3">
+            <div class="row g-4">
                 <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Información del pedido</h6>
                     <p class="mb-2"><strong>Código:</strong> @Model.CodPedido</p>
                     <p class="mb-2"><strong>Fecha:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
-                    <p class="mb-2"><strong>Dirección de entrega:</strong> @(string.IsNullOrWhiteSpace(Model.DireccionEntrega) ? "No registrada" : Model.DireccionEntrega)</p>
-                    <p class="mb-0"><strong>Teléfono:</strong> @(string.IsNullOrWhiteSpace(Model.TelefonoEntrega) ? "No registrado" : Model.TelefonoEntrega)</p>
-                </div>
-
-                <div class="col-md-4">
-                    <p class="mb-2"><strong>Cliente:</strong> @Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</p>
-                    <p class="mb-2"><strong>Correo:</strong> @Model.IdUsuarioNavigation?.CorreoElectronico</p>
-                    <p class="mb-0"><strong>Tienda:</strong> @(Model.IdTiendaNavigation?.NombreTienda ?? "Sin tienda")</p>
-                </div>
-
-                <div class="col-md-4">
-                    <p class="mb-2"><strong>Total:</strong> @Model.Total.ToString("C")</p>
                     <p class="mb-2"><strong>Método de entrega:</strong> @(string.IsNullOrWhiteSpace(Model.MetodoEntrega) ? "No definido" : Model.MetodoEntrega)</p>
                     <p class="mb-0">
-                        <strong>Estado:</strong>
+                        <strong>Estado del pedido:</strong>
                         @if (Model.EstadoPedido == "pendiente")
                         {
                             <span class="badge bg-warning text-dark">Pendiente</span>
@@ -62,6 +52,42 @@
                             <span class="badge bg-danger">Cancelado</span>
                         }
                     </p>
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Entrega</h6>
+                    <p class="mb-2"><strong>Cliente:</strong> @Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</p>
+                    <p class="mb-2"><strong>Correo:</strong> @Model.IdUsuarioNavigation?.CorreoElectronico</p>
+                    <p class="mb-2"><strong>Tienda:</strong> @(Model.IdTiendaNavigation?.NombreTienda ?? "Sin tienda")</p>
+                    <p class="mb-2"><strong>Dirección de entrega:</strong> @(string.IsNullOrWhiteSpace(Model.DireccionEntrega) ? "No registrada" : Model.DireccionEntrega)</p>
+                    <p class="mb-0"><strong>Teléfono:</strong> @(string.IsNullOrWhiteSpace(Model.TelefonoEntrega) ? "No registrado" : Model.TelefonoEntrega)</p>
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Pago</h6>
+                    <p class="mb-2"><strong>Total pagado:</strong> @Model.Total.ToString("C")</p>
+                    <p class="mb-2"><strong>Método de pago:</strong> @(string.IsNullOrWhiteSpace(pago?.MetodoPago) ? "No registrado" : pago.MetodoPago)</p>
+                    <p class="mb-2">
+                        <strong>Estado del pago:</strong>
+                        @if (string.IsNullOrWhiteSpace(pago?.EstadoPago))
+                        {
+                            <span>No registrado</span>
+                        }
+                        else if (pago.EstadoPago == "aprobado")
+                        {
+                            <span class="badge bg-success">Aprobado</span>
+                        }
+                        else if (pago.EstadoPago == "enproceso")
+                        {
+                            <span class="badge bg-warning text-dark">En proceso</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Desaprobado</span>
+                        }
+                    </p>
+                    <p class="mb-2"><strong>Código de autorización:</strong> @(string.IsNullOrWhiteSpace(pago?.CodigoAutorizacion) ? "No registrado" : pago.CodigoAutorizacion)</p>
+                    <p class="mb-0"><strong>Detalle del pago:</strong> @(string.IsNullOrWhiteSpace(pago?.Descripcion) ? "Sin observaciones" : pago.Descripcion)</p>
                 </div>
             </div>
         </div>
@@ -103,6 +129,12 @@
                             }
                         }
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Total</td>
+                            <td class="fw-bold">@Model.Total.ToString("C")</td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>

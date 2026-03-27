@@ -20,5 +20,14 @@ namespace ECOMMERCE_NEXOSOFT.ViewModels
         public string CorreoElectronico { get; set; } = string.Empty;
 
         public int IdRol { get; set; }
+
+        [StringLength(150, ErrorMessage = "La dirección 1 no puede superar 150 caracteres")]
+        public string? Direccion1 { get; set; }
+
+        [StringLength(150, ErrorMessage = "La dirección 2 no puede superar 150 caracteres")]
+        public string? Direccion2 { get; set; }
+
+        [StringLength(150, ErrorMessage = "La dirección 3 no puede superar 150 caracteres")]
+        public string? Direccion3 { get; set; }
     }
 }
