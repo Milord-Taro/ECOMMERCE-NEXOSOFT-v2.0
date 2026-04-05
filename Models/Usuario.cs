@@ -37,4 +37,6 @@ public partial class Usuario
     public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
 
     public virtual ICollection<SolicitudVendedor> SolicitudVendedors { get; set; } = new List<SolicitudVendedor>();
+
+    public virtual ICollection<MiembroTienda> MiembroTiendas { get; set; } = new List<MiembroTienda>();
 }

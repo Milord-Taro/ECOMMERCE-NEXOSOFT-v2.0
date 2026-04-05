@@ -14,14 +14,33 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         {
             _context = context;
         }
+        private bool EsCuentaInternaSinPermisoCompra(int idUsuario)
+        {
+            return _context.MiembroTiendas
+                .Include(m => m.IdRolTiendaNavigation)
+                .Any(m => m.IdUsuario == idUsuario &&
+                          m.IdRolTiendaNavigation.NombreRol != "admin_tienda");
+        }
+
+        private IActionResult RedirigirCompraBloqueada()
+        {
+            TempData["MensajeError"] = "Las cuentas internas de tienda no tienen acceso al módulo de compras del cliente.";
+            return RedirectToAction("Index", "Vendedor");
+        }
 
         public async Task<IActionResult> Index()
         {
+
             var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
 
             if (idUsuario == null)
             {
                 return RedirectToAction("Login", "Auth");
+            }
+
+            if (EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
             }
 
             var pedidos = await _context.Pedidos
@@ -35,6 +54,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         public async Task<IActionResult> Detalle(int? id)
         {
+
             if (id == null)
             {
                 return NotFound();
@@ -47,13 +67,18 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
+            if (EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var pedido = await _context.Pedidos
                 .Include(p => p.IdUsuarioNavigation)
                 .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
                 .Include(p => p.Ventum)
-                    .ThenInclude(v => v.Pago)
+                    .ThenInclude(v => v!.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);
 
             if (pedido == null)
@@ -78,13 +103,18 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
+            if (EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var pedido = await _context.Pedidos
                 .Include(p => p.IdUsuarioNavigation)
                 .Include(p => p.IdTiendaNavigation)
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
                 .Include(p => p.Ventum)
-                    .ThenInclude(v => v.Pago)
+                    .ThenInclude(v => v!.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id && p.IdUsuario == idUsuario.Value);
 
             if (pedido == null)

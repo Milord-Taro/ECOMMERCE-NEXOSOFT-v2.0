@@ -1,15 +1,19 @@
-﻿@model ECOMMERCE_NEXOSOFT.Models.Stock
+﻿@model ECOMMERCE_NEXOSOFT.ViewModels.StockMovimientoViewModel
 
 @{
-    ViewData["Title"] = "Editar Stock";
+    ViewData["Title"] = "Gestionar stock";
 }
 
 <div class="container py-4">
-    <div class="mb-4">
-        <h2 class="fw-bold mb-1">Editar stock</h2>
-        <p class="text-muted mb-0">
-            Producto: <strong>@Model.IdProductoNavigation?.NombreProducto</strong>
-        </p>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Gestionar stock</h2>
+            <p class="text-muted mb-0">Registra movimientos de inventario y actualiza parámetros del stock.</p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver al stock
+        </a>
     </div>
 
     <div class="card shadow-sm border-0 rounded-4">
@@ -21,27 +25,61 @@
                 <input type="hidden" asp-for="CodInventario" />
                 <input type="hidden" asp-for="IdProducto" />
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Precio de compra</label>
-                    <input asp-for="PrecioCompraStock" class="form-control" />
-                    <span asp-validation-for="PrecioCompraStock" class="text-danger"></span>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Producto</label>
+                        <input class="form-control" value="@Model.NombreProducto" readonly />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Stock actual</label>
+                        <input class="form-control" value="@Model.StockActual" readonly />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="StockMinimo" class="form-label fw-semibold">Stock mínimo</label>
+                        <input asp-for="StockMinimo" class="form-control" />
+                        <span asp-validation-for="StockMinimo" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="PrecioCompraStock" class="form-label fw-semibold">Precio compra stock</label>
+                        <input asp-for="PrecioCompraStock" class="form-control" />
+                        <span asp-validation-for="PrecioCompraStock" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="TipoMovimiento" class="form-label fw-semibold">Tipo de movimiento</label>
+                        <select asp-for="TipoMovimiento" class="form-select">
+                            <option value="">Selecciona una opción</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="salida">Salida</option>
+                            <option value="ajuste_positivo">Ajuste positivo</option>
+                            <option value="ajuste_negativo">Ajuste negativo</option>
+                        </select>
+                        <span asp-validation-for="TipoMovimiento" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Cantidad" class="form-label fw-semibold">Cantidad</label>
+                        <input asp-for="Cantidad" class="form-control" />
+                        <span asp-validation-for="Cantidad" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="Motivo" class="form-label fw-semibold">Motivo / observación</label>
+                        <textarea asp-for="Motivo" class="form-control" rows="3" placeholder="Ej: Compra a proveedor, corrección de inventario, salida por venta interna, etc."></textarea>
+                        <span asp-validation-for="Motivo" class="text-danger"></span>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Stock actual</label>
-                    <input asp-for="StockActual" class="form-control" />
-                    <span asp-validation-for="StockActual" class="text-danger"></span>
+                <div class="alert alert-info mt-4 mb-0">
+                    El sistema calcula automáticamente el nuevo stock. No debes escribir el saldo final manualmente.
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Stock mínimo</label>
-                    <input asp-for="StockMinimo" class="form-control" />
-                    <span asp-validation-for="StockMinimo" class="text-danger"></span>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-dark">Guardar cambios</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+                <div class="d-flex gap-2 mt-4 flex-wrap">
+                    <button type="submit" class="btn btn-dark">Guardar movimiento</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
                 </div>
             </form>
         </div>

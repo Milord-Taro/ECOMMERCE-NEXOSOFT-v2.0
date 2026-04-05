@@ -42,6 +42,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             ViewBag.TotalPedidos = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value);
             ViewBag.PedidosPendientes = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "pendiente");
+            ViewBag.PedidosEnPreparacion = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "en preparación");
+            ViewBag.PedidosEnCamino = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "en camino");
             ViewBag.PedidosEntregados = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "entregado");
 
             ViewBag.TotalVentas = await _context.Venta.CountAsync(v => v.IdPedidoNavigation.IdTienda == idTienda.Value);
@@ -97,6 +99,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var totalPedidos = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value);
             var pedidosPendientes = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "pendiente");
+            var pedidosEnPreparacion = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "en preparación");
             var pedidosEnCamino = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "en camino");
             var pedidosEntregados = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "entregado");
             var pedidosCancelados = await _context.Pedidos.CountAsync(p => p.IdTienda == idTienda.Value && p.EstadoPedido == "cancelado");
@@ -157,6 +160,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             ViewBag.TotalPedidos = totalPedidos;
             ViewBag.PedidosPendientes = pedidosPendientes;
+            ViewBag.PedidosEnPreparacion = pedidosEnPreparacion;
             ViewBag.PedidosEnCamino = pedidosEnCamino;
             ViewBag.PedidosEntregados = pedidosEntregados;
             ViewBag.PedidosCancelados = pedidosCancelados;
@@ -184,6 +188,18 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return null;
             }
 
+            // Primero intenta por la nueva estructura: usuario -> miembro_tienda -> tienda
+            var idTiendaPorMiembro = _context.MiembroTiendas
+                .Where(m => m.IdUsuario == idUsuario.Value)
+                .Select(m => (int?)m.IdTienda)
+                .FirstOrDefault();
+
+            if (idTiendaPorMiembro != null)
+            {
+                return idTiendaPorMiembro;
+            }
+
+            // Fallback al flujo actual: usuario -> vendedor -> tienda
             var idTienda = _context.Tiendas
                 .Include(t => t.IdVendedorNavigation)
                 .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value)

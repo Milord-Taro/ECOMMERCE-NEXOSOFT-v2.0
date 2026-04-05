@@ -16,12 +16,39 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? estado, string? buscar)
         {
-            var solicitudes = await _context.SolicitudVendedors
+            var query = _context.SolicitudVendedors
                 .Include(s => s.IdUsuarioNavigation)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(estado))
+            {
+                query = query.Where(s => s.EstadoSolicitud == estado);
+            }
+
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                var texto = buscar.Trim().ToLower();
+
+                query = query.Where(s =>
+                    s.NombreTiendaSolicitada.ToLower().Contains(texto) ||
+                    (s.RazonSocial != null && s.RazonSocial.ToLower().Contains(texto)) ||
+                    (s.NitRut != null && s.NitRut.ToLower().Contains(texto)) ||
+                    (s.IdUsuarioNavigation != null &&
+                        (
+                            s.IdUsuarioNavigation.Nombre.ToLower().Contains(texto) ||
+                            s.IdUsuarioNavigation.Apellido.ToLower().Contains(texto) ||
+                            s.IdUsuarioNavigation.CorreoElectronico.ToLower().Contains(texto)
+                        )));
+            }
+
+            var solicitudes = await query
                 .OrderByDescending(s => s.FechaSolicitud)
                 .ToListAsync();
+
+            ViewBag.EstadoSeleccionado = estado;
+            ViewBag.Busqueda = buscar;
 
             return View(solicitudes);
         }
@@ -127,7 +154,33 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["MensajeExito"] = "Solicitud aprobada correctamente. Se creó el vendedor y la tienda.";
+            var rolAdminTienda = await _context.RolTiendas
+                .FirstOrDefaultAsync(r => r.NombreRol == "admin_tienda");
+
+            if (rolAdminTienda == null)
+            {
+                TempData["MensajeError"] = "No existe el rol interno admin_tienda en la base de datos.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var yaExisteMiembro = await _context.MiembroTiendas
+                .AnyAsync(m => m.IdUsuario == solicitud.IdUsuario && m.IdTienda == tienda.IdTienda);
+
+            if (!yaExisteMiembro)
+            {
+                var miembroFundador = new MiembroTienda
+                {
+                    IdUsuario = solicitud.IdUsuario,
+                    IdTienda = tienda.IdTienda,
+                    IdRolTienda = rolAdminTienda.IdRolTienda,
+                    FechaIngreso = DateTime.Now
+                };
+
+                _context.MiembroTiendas.Add(miembroFundador);
+                await _context.SaveChangesAsync();
+            }
+
+            TempData["MensajeExito"] = "Solicitud aprobada correctamente. Se creó el vendedor, la tienda y el miembro fundador como admin_tienda.";
             return RedirectToAction(nameof(Index));
         }
 

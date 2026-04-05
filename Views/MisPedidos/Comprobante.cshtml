@@ -113,6 +113,16 @@
             margin-top: 30px;
         }
 
+        .estado-pago-reembolsado {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .estado-en-preparacion {
+            background: #0d6efd;
+            color: #fff;
+        }
+
         @@page {
             size: auto;
             margin: 12mm;
@@ -171,19 +181,23 @@
                         <strong>Estado del pedido:</strong>
                         @if (Model.EstadoPedido == "pendiente")
                         {
-                            <span class="estado-badge estado-pendiente">Pendiente</span>
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        }
+                        else if (Model.EstadoPedido == "en preparación")
+                        {
+                            <span class="badge bg-primary">En preparación</span>
                         }
                         else if (Model.EstadoPedido == "en camino")
                         {
-                            <span class="estado-badge estado-en-camino">En camino</span>
+                            <span class="badge bg-info text-dark">En camino</span>
                         }
                         else if (Model.EstadoPedido == "entregado")
                         {
-                            <span class="estado-badge estado-entregado">Entregado</span>
+                            <span class="badge bg-success">Entregado</span>
                         }
                         else
                         {
-                            <span class="estado-badge estado-cancelado">Cancelado</span>
+                            <span class="badge bg-danger">Cancelado</span>
                         }
                     </p>
                 </div>
@@ -218,6 +232,10 @@
                         else if (pago.EstadoPago == "enproceso")
                         {
                             <span class="estado-badge estado-pago-proceso">En proceso</span>
+                        }
+                        else if (pago.EstadoPago == "reembolsado")
+                        {
+                            <span class="estado-badge estado-pago-reembolsado">Reembolsado</span>
                         }
                         else
                         {

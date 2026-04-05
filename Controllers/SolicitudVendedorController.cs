@@ -1,4 +1,5 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Helpers;
 using ECOMMERCE_NEXOSOFT.Models;
 using ECOMMERCE_NEXOSOFT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,15 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
+            model.NombreTiendaSolicitada = InputNormalizer.NormalizeStoreName(model.NombreTiendaSolicitada);
+            model.DescripcionTienda = InputNormalizer.NormalizeText(model.DescripcionTienda);
+            model.RazonSocial = InputNormalizer.NormalizeText(model.RazonSocial);
+            model.NitRut = InputNormalizer.NormalizeIdentificationNumber(model.NitRut);
+            model.NombreRepresentante = InputNormalizer.NormalizeText(model.NombreRepresentante);
+            model.TelefonoContacto = InputNormalizer.NormalizePhone(model.TelefonoContacto);
+            model.CorreoContacto = InputNormalizer.NormalizeEmail(model.CorreoContacto);
+            model.DireccionComercial = InputNormalizer.NormalizeAddress(model.DireccionComercial);
+
             if (!ModelState.IsValid)
             {
                 TempData["MensajeError"] = "Revisa los campos obligatorios de la solicitud.";
@@ -66,7 +76,22 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             if (nombreTiendaExiste)
             {
-                TempData["MensajeError"] = "Ya existe una tienda con ese nombre. Elige otro nombre.";
+                ModelState.AddModelError("NombreTiendaSolicitada", "Ya existe una tienda con ese nombre.");
+            }
+
+            var nitRutExiste = await _context.SolicitudVendedors.AnyAsync(s =>
+                s.NitRut != null &&
+                s.NitRut.ToLower() == model.NitRut.ToLower() &&
+                s.IdUsuario != idUsuario.Value);
+
+            if (nitRutExiste)
+            {
+                ModelState.AddModelError("NitRut", "Ya existe una solicitud registrada con ese NIT.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["MensajeError"] = "Revisa los campos de la solicitud.";
                 return View(model);
             }
 
@@ -76,10 +101,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             {
                 CodSolicitudVendedor = random.Next(100000, 999999),
                 IdUsuario = idUsuario.Value,
-                NombreTiendaSolicitada = model.NombreTiendaSolicitada.Trim(),
-                DescripcionTienda = string.IsNullOrWhiteSpace(model.DescripcionTienda)
-                    ? null
-                    : model.DescripcionTienda.Trim(),
+                NombreTiendaSolicitada = model.NombreTiendaSolicitada,
+                DescripcionTienda = model.DescripcionTienda,
+                RazonSocial = model.RazonSocial,
+                NitRut = model.NitRut,
+                NombreRepresentante = model.NombreRepresentante,
+                TelefonoContacto = model.TelefonoContacto,
+                CorreoContacto = model.CorreoContacto,
+                DireccionComercial = model.DireccionComercial,
                 EstadoSolicitud = "pendiente",
                 FechaSolicitud = DateTime.Now
             };

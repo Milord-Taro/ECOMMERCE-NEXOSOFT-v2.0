@@ -48,6 +48,10 @@
                         {
                             <span class="badge bg-warning text-dark">Pendiente</span>
                         }
+                        else if (estadoActual == "en preparación")
+                        {
+                            <span class="badge bg-primary">En preparación</span>
+                        }
                         else if (estadoActual == "en camino")
                         {
                             <span class="badge bg-info text-dark">En camino</span>
@@ -90,6 +94,10 @@
                         {
                             <span class="badge bg-warning text-dark">En proceso</span>
                         }
+                        else if (pago.EstadoPago == "reembolsado")
+                        {
+                            <span class="badge bg-secondary">Reembolsado</span>
+                        }
                         else
                         {
                             <span class="badge bg-danger">Desaprobado</span>
@@ -120,6 +128,12 @@
                 <p class="text-muted small mt-3 mb-0">
                     Desde administración solo se permite cancelar pedidos pendientes en caso de revisión o moderación.
                 </p>
+            }
+            else if (estadoActual == "en preparación")
+            {
+                <div class="alert alert-info mb-0">
+                    Este pedido está en preparación por parte de la tienda. Desde administración solo puedes supervisar su estado.
+                </div>
             }
             else if (estadoActual == "en camino")
             {

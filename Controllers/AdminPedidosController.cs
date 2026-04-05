@@ -1,5 +1,6 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
 using ECOMMERCE_NEXOSOFT.Filters;
+using ECOMMERCE_NEXOSOFT.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,39 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         public AdminPedidosController(NexosoftDbContext context)
         {
             _context = context;
+        }
+
+        private void RegistrarMovimientoCancelacion(Pedido pedido, int idUsuario)
+        {
+            var detalles = _context.Detallepedidos
+                .Where(d => d.IdPedido == pedido.IdPedido)
+                .ToList();
+
+            foreach (var detalle in detalles)
+            {
+                var stock = _context.Stocks.FirstOrDefault(s => s.IdProducto == detalle.IdProducto);
+
+                if (stock != null)
+                {
+                    int stockAnterior = stock.StockActual;
+                    stock.StockActual += detalle.Cantidad;
+                    int stockNuevo = stock.StockActual;
+
+                    var movimiento = new MovimientoInventario
+                    {
+                        IdProducto = detalle.IdProducto,
+                        IdUsuario = idUsuario,
+                        TipoMovimiento = "cancelacion",
+                        Cantidad = detalle.Cantidad,
+                        StockAnterior = stockAnterior,
+                        StockNuevo = stockNuevo,
+                        Motivo = $"Reversión automática por cancelación del pedido {pedido.CodPedido}.",
+                        FechaMovimiento = DateTime.Now
+                    };
+
+                    _context.MovimientoInventarios.Add(movimiento);
+                }
+            }
         }
 
         public async Task<IActionResult> Index(string? estado, string? buscar)
@@ -60,7 +94,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .Include(p => p.Detallepedidos)
                     .ThenInclude(d => d.IdProductoNavigation)
                 .Include(p => p.Ventum)
-                    .ThenInclude(v => v.Pago)
+                    .ThenInclude(v => v!.Pago)
                 .FirstOrDefaultAsync(p => p.IdPedido == id);
 
             if (pedido == null)
@@ -84,8 +118,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Index");
             }
 
-            var estadoActual = pedido.EstadoPedido?.Trim().ToLower();
-            var accionNormalizada = accion?.Trim().ToLower();
+            var estadoActual = (pedido.EstadoPedido ?? string.Empty).Trim().ToLower();
+            var accionNormalizada = (accion ?? string.Empty).Trim().ToLower();
 
             string? nuevoEstado = null;
 
@@ -101,6 +135,24 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             pedido.EstadoPedido = nuevoEstado;
+
+            if (nuevoEstado == "cancelado")
+            {
+                var idUsuario = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+
+                RegistrarMovimientoCancelacion(pedido, idUsuario);
+
+                var venta = _context.Venta
+                    .Include(v => v.Pago)
+                    .FirstOrDefault(v => v.IdPedido == pedido.IdPedido);
+
+                if (venta?.Pago != null)
+                {
+                    venta.Pago.EstadoPago = "reembolsado";
+                    venta.Pago.Descripcion = "Pago revertido automáticamente por cancelación del pedido.";
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             TempData["MensajeExito"] = "El estado del pedido se actualizó correctamente.";

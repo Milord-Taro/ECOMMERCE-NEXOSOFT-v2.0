@@ -1,8 +1,9 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Filters;
 using ECOMMERCE_NEXOSOFT.Helpers;
 using ECOMMERCE_NEXOSOFT.Models;
-using ECOMMERCE_NEXOSOFT.Filters;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
@@ -18,6 +19,20 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         public CheckoutController(NexosoftDbContext context)
         {
             _context = context;
+        }
+
+        private bool EsCuentaInternaSinPermisoCompra(int idUsuario)
+        {
+            return _context.MiembroTiendas
+                .Include(m => m.IdRolTiendaNavigation)
+                .Any(m => m.IdUsuario == idUsuario &&
+                          m.IdRolTiendaNavigation.NombreRol != "admin_tienda");
+        }
+
+        private IActionResult RedirigirCompraBloqueada()
+        {
+            TempData["MensajeCheckout"] = "Las cuentas internas de tienda no pueden realizar compras en la plataforma.";
+            return RedirectToAction("Index", "Vendedor");
         }
 
         private Cliente ObtenerOCrearClienteComprador(int idUsuario)
@@ -57,6 +72,30 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             HttpContext.Session.Remove(CheckoutMetodoPagoKey);
         }
 
+        private void RegistrarMovimientoInventario(
+            int idProducto,
+            int? idUsuario,
+            string tipoMovimiento,
+            int cantidad,
+            int stockAnterior,
+            int stockNuevo,
+            string motivo)
+        {
+            var movimiento = new MovimientoInventario
+            {
+                IdProducto = idProducto,
+                IdUsuario = idUsuario,
+                TipoMovimiento = tipoMovimiento,
+                Cantidad = cantidad,
+                StockAnterior = stockAnterior,
+                StockNuevo = stockNuevo,
+                Motivo = motivo,
+                FechaMovimiento = DateTime.Now
+            };
+
+            _context.MovimientoInventarios.Add(movimiento);
+        }
+
         private IActionResult ProcesarCompra(string direccionEntrega, string telefonoEntrega, string metodoPago)
         {
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
@@ -71,6 +110,11 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             if (idUsuarioSesion == null)
             {
                 return RedirectToAction("Login", "Auth");
+            }
+
+            if (EsCuentaInternaSinPermisoCompra(idUsuarioSesion.Value))
+            {
+                return RedirigirCompraBloqueada();
             }
 
             if (string.IsNullOrWhiteSpace(direccionEntrega))
@@ -149,6 +193,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             foreach (var grupo in gruposPorTienda)
             {
+                if (grupo.Key == null)
+                {
+                    TempData["MensajeCheckout"] = "Se encontró un producto sin tienda válida asociada.";
+                    return RedirectToAction("Index");
+                }
+
+                var idTiendaGrupo = grupo.Key.Value;
                 var subtotal = grupo.Sum(x => x.Precio * x.Cantidad);
                 var costoEnvio = 0m;
                 var total = subtotal + costoEnvio;
@@ -157,7 +208,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 {
                     CodPedido = random.Next(100000, 999999),
                     IdUsuario = idUsuarioSesion.Value,
-                    IdTienda = grupo.Key,
+                    IdTienda = idTiendaGrupo,
                     FechaCreacion = DateTime.Now,
                     Subtotal = subtotal,
                     CostoEnvio = costoEnvio,
@@ -234,7 +285,18 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                     var stock = _context.Stocks.FirstOrDefault(s => s.IdProducto == item.IdProducto);
                     if (stock != null)
                     {
+                        int stockAnterior = stock.StockActual;
                         stock.StockActual -= item.Cantidad;
+                        int stockNuevo = stock.StockActual;
+
+                        RegistrarMovimientoInventario(
+                            item.IdProducto,
+                            idUsuarioSesion.Value,
+                            "salida",
+                            item.Cantidad,
+                            stockAnterior,
+                            stockNuevo,
+                            $"Salida automática por compra. Pedido {pedido.CodPedido}.");
                     }
                 }
 
@@ -259,9 +321,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
 
-            if (idUsuarioSesion == null)
+            if (idUsuarioSesion != null && EsCuentaInternaSinPermisoCompra(idUsuarioSesion.Value))
             {
-                return RedirectToAction("Login", "Auth");
+                return RedirigirCompraBloqueada();
             }
 
             var usuario = _context.Usuarios.FirstOrDefault(u => u.IdUsuario == idUsuarioSesion.Value);
@@ -301,6 +363,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Confirmar(string direccionEntrega, string telefonoEntrega, string metodoPago)
         {
+            var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuarioSesion != null && EsCuentaInternaSinPermisoCompra(idUsuarioSesion.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             if (string.IsNullOrWhiteSpace(direccionEntrega) ||
                 string.IsNullOrWhiteSpace(telefonoEntrega) ||
                 string.IsNullOrWhiteSpace(metodoPago))
@@ -323,6 +392,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         public IActionResult PasarelaDemo()
         {
+            var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuarioSesion != null && EsCuentaInternaSinPermisoCompra(idUsuarioSesion.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
 
             if (!carrito.Any())
@@ -348,6 +424,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AutorizarPagoDemo(string? titularPago, string? referenciaPago)
         {
+            var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuarioSesion != null && EsCuentaInternaSinPermisoCompra(idUsuarioSesion.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var direccionEntrega = HttpContext.Session.GetString(CheckoutDireccionKey);
             var telefonoEntrega = HttpContext.Session.GetString(CheckoutTelefonoKey);
             var metodoPago = HttpContext.Session.GetString(CheckoutMetodoPagoKey);
@@ -380,6 +463,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CancelarPagoDemo()
         {
+            var idUsuarioSesion = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuarioSesion != null && EsCuentaInternaSinPermisoCompra(idUsuarioSesion.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             LimpiarCheckoutPendiente();
             TempData["MensajeCheckout"] = "El pago demo fue cancelado.";
             return RedirectToAction("Index");
