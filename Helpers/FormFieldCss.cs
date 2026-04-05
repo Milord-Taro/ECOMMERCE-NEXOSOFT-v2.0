@@ -10,6 +10,7 @@
         public const string Store30 = "form-control js-store-30";
         public const string Text100 = "form-control js-text-100";
         public const string Text150 = "form-control js-text-150";
+        public const string Text40 = "form-control js-text-40";
         public const string Barcode13 = "form-control js-barcode-13";
         public const string Sku30 = "form-control js-sku-30";
         public const string Nit10 = "form-control js-id-10";

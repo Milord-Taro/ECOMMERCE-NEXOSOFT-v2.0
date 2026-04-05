@@ -23,5 +23,11 @@
         public const string SkuPattern = @"^[A-Za-z0-9\-]{1,30}$";
 
         public static readonly string[] ValidIdentificationTypes = { "cc", "ti", "ppt", "pasaporte" };
+
+        public const string CategoryOrSubcategoryNamePattern = @"^(?=.{3,40}$)(?=.*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9]).+$";
+
+        public const string CategoryDescriptionPattern = @"^(?=.{3,100}$)(?=.*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9]).+$";
+
+        public const string SubcategoryDescriptionPattern = @"^(?=.{3,150}$)(?=.*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9]).+$";
     }
 }

@@ -80,6 +80,7 @@
     applyTextMaxLength(".js-store-30", 30);
 
     // Textos genéricos
+    applyTextMaxLength(".js-text-40", 40);
     applyTextMaxLength(".js-text-100", 100);
     applyTextMaxLength(".js-text-150", 150);
 
