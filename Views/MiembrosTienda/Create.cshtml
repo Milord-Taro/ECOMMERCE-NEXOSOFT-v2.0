@@ -1,0 +1,107 @@
+﻿@model ECOMMERCE_NEXOSOFT.ViewModels.MiembroTiendaCreateViewModel
+
+@{
+    ViewData["Title"] = "Crear miembro interno";
+    var nombreTienda = ViewBag.NombreTienda as string ?? "Mi tienda";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Crear miembro interno</h2>
+            <p class="text-muted mb-0">Registra una nueva cuenta interna para operar dentro de la tienda.</p>
+            <p class="mb-0 mt-2"><strong>Tienda:</strong> @nombreTienda</p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver a miembros
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label fw-semibold">Nombre</label>
+                        <input asp-for="Nombre" class="form-control js-name-50" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Apellido" class="form-label fw-semibold">Apellido</label>
+                        <input asp-for="Apellido" class="form-control js-name-50" />
+                        <span asp-validation-for="Apellido" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="TipoIdentificacion" class="form-label fw-semibold">Tipo identificación</label>
+                        <select asp-for="TipoIdentificacion" class="form-select">
+                            <option value="">Selecciona</option>
+                            <option value="cc">Cédula</option>
+                            <option value="ti">Tarjeta de identidad</option>
+                            <option value="ppt">PPT</option>
+                            <option value="pasaporte">Pasaporte</option>
+                        </select>
+                        <span asp-validation-for="TipoIdentificacion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="NumeroIdentificacion" class="form-label fw-semibold">Número identificación</label>
+                        <input asp-for="NumeroIdentificacion" class="form-control js-id-10" />
+                        <span asp-validation-for="NumeroIdentificacion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Telefono" class="form-label fw-semibold">Teléfono</label>
+                        <input asp-for="Telefono" class="form-control js-phone-10" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CorreoElectronico" class="form-label fw-semibold">Correo</label>
+                        <input asp-for="CorreoElectronico" class="form-control js-email-100" />
+                        <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Contrasena" class="form-label fw-semibold">Contraseña temporal</label>
+                        <input asp-for="Contrasena" class="form-control" type="password" />
+                        <span asp-validation-for="Contrasena" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmarContrasena" class="form-label fw-semibold">Confirmar contraseña temporal</label>
+                        <input asp-for="ConfirmarContrasena" class="form-control" type="password" />
+                        <span asp-validation-for="ConfirmarContrasena" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="IdRolTienda" class="form-label fw-semibold">Rol interno</label>
+                        <select asp-for="IdRolTienda" class="form-select" asp-items="ViewBag.RolesInternos">
+                            <option value="">Selecciona un rol</option>
+                        </select>
+                        <span asp-validation-for="IdRolTienda" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4 mb-0">
+                    La cuenta se crea directamente por el admin_tienda y queda asociada a esta tienda.
+                </div>
+
+                <div class="d-flex gap-2 mt-4 flex-wrap">
+                    <button type="submit" class="btn btn-dark">Crear miembro</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

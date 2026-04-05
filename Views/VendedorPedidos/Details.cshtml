@@ -48,6 +48,10 @@
                         {
                             <span class="badge bg-warning text-dark">Pendiente</span>
                         }
+                        else if (estadoActual == "en preparación")
+                        {
+                            <span class="badge bg-primary">En preparación</span>
+                        }
                         else if (estadoActual == "en camino")
                         {
                             <span class="badge bg-info text-dark">En camino</span>
@@ -90,6 +94,10 @@
                         {
                             <span class="badge bg-warning text-dark">En proceso</span>
                         }
+                        else if (pago.EstadoPago == "reembolsado")
+                        {
+                            <span class="badge bg-secondary">Reembolsado</span>
+                        }
                         else
                         {
                             <span class="badge bg-danger">Desaprobado</span>
@@ -112,8 +120,8 @@
                     <form asp-action="ActualizarEstado" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="idPedido" value="@Model.IdPedido" />
-                        <input type="hidden" name="accion" value="despachar" />
-                        <button type="submit" class="btn btn-dark">Marcar como en camino</button>
+                        <input type="hidden" name="accion" value="preparar" />
+                        <button type="submit" class="btn btn-dark">Marcar en preparación</button>
                     </form>
 
                     <form asp-action="ActualizarEstado" method="post">
@@ -125,7 +133,29 @@
                 </div>
 
                 <p class="text-muted small mt-3 mb-0">
-                    Solo puedes despachar o cancelar un pedido pendiente.
+                    Un pedido pendiente puede pasar a preparación o cancelarse.
+                </p>
+            }
+            else if (estadoActual == "en preparación")
+            {
+                <div class="d-flex gap-2 flex-wrap">
+                    <form asp-action="ActualizarEstado" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idPedido" value="@Model.IdPedido" />
+                        <input type="hidden" name="accion" value="despachar" />
+                        <button type="submit" class="btn btn-primary">Marcar como en camino</button>
+                    </form>
+
+                    <form asp-action="ActualizarEstado" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idPedido" value="@Model.IdPedido" />
+                        <input type="hidden" name="accion" value="cancelar" />
+                        <button type="submit" class="btn btn-outline-danger">Cancelar pedido</button>
+                    </form>
+                </div>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Un pedido en preparación puede pasar a envío o cancelarse.
                 </p>
             }
             else if (estadoActual == "en camino")
@@ -147,7 +177,7 @@
                 </div>
 
                 <p class="text-muted small mt-3 mb-0">
-                    Un pedido en camino solo puede finalizarse como entregado o cancelado.
+                    Un pedido en camino puede entregarse o cancelarse.
                 </p>
             }
             else if (estadoActual == "entregado")

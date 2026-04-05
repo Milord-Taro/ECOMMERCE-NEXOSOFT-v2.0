@@ -1,41 +1,42 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ECOMMERCE_NEXOSOFT.Helpers;
 
 namespace ECOMMERCE_NEXOSOFT.ViewModels
 {
-    public class RegisterViewModel
+    public class MiembroTiendaCreateViewModel
     {
         [Required(ErrorMessage = "El nombre es obligatorio.")]
-        [RegularExpression(ValidationRules.NamePattern, ErrorMessage = "El nombre debe tener entre 3 y 50 caracteres y solo puede contener letras, espacios simples o guion.")]
+        [StringLength(100, ErrorMessage = "El nombre no puede superar 100 caracteres.")]
         public string Nombre { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El apellido es obligatorio.")]
-        [RegularExpression(ValidationRules.NamePattern, ErrorMessage = "El apellido debe tener entre 3 y 50 caracteres y solo puede contener letras, espacios simples o guion.")]
+        [StringLength(100, ErrorMessage = "El apellido no puede superar 100 caracteres.")]
         public string Apellido { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El tipo de identificación es obligatorio.")]
         public string TipoIdentificacion { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El número de identificación es obligatorio.")]
+        [RegularExpression(@"^\d{6,10}$", ErrorMessage = "El número de identificación debe contener solo números y entre 6 y 10 dígitos.")]
         public string NumeroIdentificacion { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El teléfono es obligatorio.")]
-        [RegularExpression(ValidationRules.PhonePattern, ErrorMessage = "El teléfono debe tener 10 dígitos y comenzar por 3 o 6.")]
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "El teléfono debe contener solo números y 10 dígitos empezando por 3.")]
         public string Telefono { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El correo es obligatorio.")]
-        [EmailAddress(ErrorMessage = "El correo no tiene un formato válido.")]
-        [StringLength(100, ErrorMessage = "El correo no puede superar 100 caracteres.")]
+        [EmailAddress(ErrorMessage = "Correo inválido.")]
+        [RegularExpression(@"^[^0-9].*", ErrorMessage = "El correo no puede iniciar con un número")]
         public string CorreoElectronico { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La contraseña es obligatoria.")]
-        [DataType(DataType.Password)]
-        [RegularExpression(ValidationRules.PasswordPattern, ErrorMessage = "La contraseña debe tener mínimo 8 caracteres, incluir mayúscula, minúscula, número, carácter especial y no contener espacios.")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener entre 8 y 100 caracteres.")]
         public string Contrasena { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Debes confirmar la contraseña.")]
-        [DataType(DataType.Password)]
         [Compare("Contrasena", ErrorMessage = "La confirmación de contraseña no coincide.")]
         public string ConfirmarContrasena { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Debes seleccionar un rol interno.")]
+        public int IdRolTienda { get; set; }
     }
 }

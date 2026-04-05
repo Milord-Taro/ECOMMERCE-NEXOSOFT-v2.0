@@ -1,12 +1,23 @@
 ﻿@using ECOMMERCE_NEXOSOFT.Helpers
 @using ECOMMERCE_NEXOSOFT.Models
 @using Microsoft.AspNetCore.Http
+@using ECOMMERCE_NEXOSOFT.Data
+@inject NexosoftDbContext DbContext
 
 @{
     var usuarioSesion = Context.Session.GetString("Usuario");
     var rolSesion = Context.Session.GetInt32("Rol");
     var carrito = Context.Session.GetObjectFromJson<List<CarritoItem>>("CARRITO") ?? new List<CarritoItem>();
     var cantidadCarrito = CarritoHelper.ObtenerCantidadItems(carrito);
+    var idUsuarioSesion = Context.Session.GetInt32("IdUsuario");
+    var esCuentaInternaSinCompra = false;
+
+    if (idUsuarioSesion != null)
+    {
+        esCuentaInternaSinCompra = DbContext.MiembroTiendas
+            .Any(m => m.IdUsuario == idUsuarioSesion.Value &&
+                      m.IdRolTiendaNavigation.NombreRol != "admin_tienda");
+    }
 }
 
 <!DOCTYPE html>
@@ -118,16 +129,14 @@
                                                     Panel vendedor
                                                 </a>
                                             </li>
-                                            <li>
-                                                <a class="dropdown-item" asp-controller="MiTienda" asp-action="Index">
-                                                    Mi tienda
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" asp-controller="MisPedidos" asp-action="Index">
-                                                    Mis pedidos
-                                                </a>
-                                            </li>
+                                            @if (!esCuentaInternaSinCompra)
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item" asp-controller="MisPedidos" asp-action="Index">
+                                                        Mis pedidos
+                                                    </a>
+                                                </li>
+                                            }
                                         }
 
                                         <li><hr class="dropdown-divider"></li>
@@ -140,7 +149,7 @@
                                     </ul>
                                 </div>
 
-                                @if (rolSesion == 2 || rolSesion == 3)
+                                @if (rolSesion == 2 || (rolSesion == 3 && !esCuentaInternaSinCompra))
                                 {
                                     <a asp-controller="Carrito" asp-action="Index" class="cart-link position-relative" title="Carrito">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
@@ -239,6 +248,7 @@
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/input-guards.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

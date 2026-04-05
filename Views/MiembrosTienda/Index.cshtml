@@ -1,0 +1,121 @@
+﻿@model IEnumerable<ECOMMERCE_NEXOSOFT.Models.MiembroTienda>
+
+@{
+    ViewData["Title"] = "Miembros de la tienda";
+    var nombreTienda = ViewBag.NombreTienda as string ?? "Mi tienda";
+    bool esAdminTienda = ViewBag.EsAdminTienda != null && (bool)ViewBag.EsAdminTienda;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Miembros de la tienda</h2>
+            <p class="text-muted mb-0">Consulta las personas asociadas a la gestión interna de la tienda.</p>
+            <p class="mb-0 mt-2"><strong>Tienda:</strong> @nombreTienda</p>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            @if (esAdminTienda)
+            {
+                <a asp-action="Create" class="btn btn-dark">
+                    Crear miembro
+                </a>
+            }
+
+            <a asp-controller="MiTienda" asp-action="Index" class="btn btn-outline-secondary">
+                ← Volver a mi tienda
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success rounded-4">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger rounded-4">
+            @TempData["MensajeError"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-2">Resumen</h5>
+            <p class="text-muted mb-0">
+                Este módulo muestra los roles internos asociados a la tienda. El admin_tienda puede registrar nuevas cuentas internas para la operación del negocio.
+            </p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Rol interno</th>
+                            <th>Fecha de ingreso</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No hay miembros registrados para esta tienda.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.IdUsuarioNavigation?.Nombre @item.IdUsuarioNavigation?.Apellido</td>
+                                    <td>@item.IdUsuarioNavigation?.CorreoElectronico</td>
+                                    <td>
+                                        @if (item.IdRolTiendaNavigation?.NombreRol == "admin_tienda")
+                                        {
+                                            <span class="badge bg-dark">Admin Tienda</span>
+                                        }
+                                        else if (item.IdRolTiendaNavigation?.NombreRol == "gestor_tienda")
+                                        {
+                                            <span class="badge bg-primary">Gestor Tienda</span>
+                                        }
+                                        else if (item.IdRolTiendaNavigation?.NombreRol == "vendedor_tienda")
+                                        {
+                                            <span class="badge bg-success">Vendedor Tienda</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @(item.IdRolTiendaNavigation?.NombreRol ?? "Sin rol")
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>@item.FechaIngreso.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-center">
+                                        @if (esAdminTienda)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.IdMiembroTienda" class="btn btn-sm btn-dark">
+                                                Editar
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

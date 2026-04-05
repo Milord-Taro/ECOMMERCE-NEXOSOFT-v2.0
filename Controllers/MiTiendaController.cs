@@ -2,6 +2,8 @@
 using ECOMMERCE_NEXOSOFT.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ECOMMERCE_NEXOSOFT.Helpers;
+using System.Text.RegularExpressions;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
@@ -24,9 +26,69 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return null;
             }
 
+            // Primero intenta por la nueva estructura: usuario -> miembro_tienda -> tienda
+            var tiendaPorMiembro = await _context.MiembroTiendas
+                .Include(m => m.IdTiendaNavigation)
+                .Where(m => m.IdUsuario == idUsuario.Value)
+                .Select(m => m.IdTiendaNavigation)
+                .FirstOrDefaultAsync();
+
+            if (tiendaPorMiembro != null)
+            {
+                return tiendaPorMiembro;
+            }
+
+            // Fallback al flujo actual: usuario -> vendedor -> tienda
             return await _context.Tiendas
                 .Include(t => t.IdVendedorNavigation)
                 .FirstOrDefaultAsync(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value);
+        }
+
+        private async Task<string?> ObtenerRolInternoActualAsync(int idTienda)
+        {
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuario == null)
+            {
+                return null;
+            }
+
+            return await _context.MiembroTiendas
+                .Include(m => m.IdRolTiendaNavigation)
+                .Where(m => m.IdUsuario == idUsuario.Value && m.IdTienda == idTienda)
+                .Select(m => m.IdRolTiendaNavigation.NombreRol)
+                .FirstOrDefaultAsync();
+        }
+
+        private void NormalizarTienda(ECOMMERCE_NEXOSOFT.Models.Tienda tienda)
+        {
+            tienda.NombreTienda = InputNormalizer.NormalizeStoreName(tienda.NombreTienda);
+            tienda.Descripcion = string.IsNullOrWhiteSpace(tienda.Descripcion)
+                ? null
+                : InputNormalizer.NormalizeText(tienda.Descripcion);
+
+            tienda.LogoUrl = string.IsNullOrWhiteSpace(tienda.LogoUrl)
+                ? null
+                : InputNormalizer.NormalizeText(tienda.LogoUrl);
+        }
+
+        private void ValidarTienda(ECOMMERCE_NEXOSOFT.Models.Tienda tienda, int idTiendaActual)
+        {
+            if (!Regex.IsMatch(tienda.NombreTienda ?? string.Empty, ValidationRules.StoreNamePattern))
+            {
+                ModelState.AddModelError("NombreTienda", "El nombre de la tienda debe tener entre 2 y 30 caracteres y solo puede contener letras, números, espacios, &, - y .");
+            }
+
+            var nombreNormalizado = (tienda.NombreTienda ?? string.Empty).Trim().ToLower();
+
+            var nombreExiste = _context.Tiendas.Any(t =>
+                t.IdTienda != idTiendaActual &&
+                t.NombreTienda.Trim().ToLower() == nombreNormalizado);
+
+            if (nombreExiste)
+            {
+                ModelState.AddModelError("NombreTienda", "Ya existe una tienda con ese nombre.");
+            }
         }
 
         public async Task<IActionResult> Index()
@@ -52,6 +114,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction("Index", "Vendedor");
             }
 
+            var rolInterno = await ObtenerRolInternoActualAsync(tienda.IdTienda);
+
+            if (rolInterno != "admin_tienda")
+            {
+                TempData["MensajeError"] = "Solo el admin_tienda puede editar la información de la tienda.";
+                return RedirectToAction(nameof(Index));
+            }
+
             return View(tienda);
         }
 
@@ -69,6 +139,17 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             {
                 return NotFound();
             }
+
+            var rolInterno = await ObtenerRolInternoActualAsync(tiendaActual.IdTienda);
+
+            if (rolInterno != "admin_tienda")
+            {
+                TempData["MensajeError"] = "Solo el admin_tienda puede editar la información de la tienda.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            NormalizarTienda(tienda);
+            ValidarTienda(tienda, tiendaActual.IdTienda);
 
             if (!ModelState.IsValid)
             {

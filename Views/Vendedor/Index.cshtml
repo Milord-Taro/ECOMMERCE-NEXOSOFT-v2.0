@@ -46,7 +46,12 @@
                 <div class="card-body">
                     <h6 class="text-muted">Pedidos</h6>
                     <h3 class="fw-bold">@(ViewBag.TotalPedidos ?? 0)</h3>
-                    <small class="text-muted">Pendientes: @(ViewBag.PedidosPendientes ?? 0) | Entregados: @(ViewBag.PedidosEntregados ?? 0)</small>
+                    <small class="text-muted">
+                        Pendientes: @(ViewBag.PedidosPendientes ?? 0) |
+                        En preparación: @(ViewBag.PedidosEnPreparacion ?? 0) |
+                        En camino: @(ViewBag.PedidosEnCamino ?? 0) |
+                        Entregados: @(ViewBag.PedidosEntregados ?? 0)
+                    </small>
                 </div>
             </div>
         </div>
@@ -210,8 +215,10 @@
 
                 <div class="d-flex flex-wrap gap-2">
                     <a asp-controller="MiTienda" asp-action="Index" class="btn btn-outline-dark">Mi perfil tienda</a>
+                    <a asp-controller="MiembrosTienda" asp-action="Index" class="btn btn-outline-dark">Miembros de la tienda</a>
                     <a asp-controller="Producto" asp-action="Index" class="btn btn-outline-dark">Mis productos</a>
                     <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-dark">Mi stock</a>
+                    <a asp-controller="Stock" asp-action="Movimientos" class="btn btn-outline-dark">Movimientos de inventario</a>
                     <a asp-controller="VendedorPedidos" asp-action="Index" class="btn btn-outline-dark">Pedidos de mi tienda</a>
                     <a asp-controller="Vendedor" asp-action="Metricas" class="btn btn-outline-dark">Métricas de mi tienda</a>
                 </div>

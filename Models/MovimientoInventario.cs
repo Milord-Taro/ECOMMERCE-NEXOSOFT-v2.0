@@ -1,0 +1,27 @@
+﻿namespace ECOMMERCE_NEXOSOFT.Models
+{
+    public partial class MovimientoInventario
+    {
+        public int IdMovimiento { get; set; }
+
+        public int IdProducto { get; set; }
+
+        public int? IdUsuario { get; set; }
+
+        public string TipoMovimiento { get; set; } = null!;
+
+        public int Cantidad { get; set; }
+
+        public int StockAnterior { get; set; }
+
+        public int StockNuevo { get; set; }
+
+        public string? Motivo { get; set; }
+
+        public DateTime FechaMovimiento { get; set; }
+
+        public virtual Producto IdProductoNavigation { get; set; } = null!;
+
+        public virtual Usuario? IdUsuarioNavigation { get; set; }
+    }
+}

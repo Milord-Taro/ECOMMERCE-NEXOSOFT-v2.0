@@ -39,6 +39,10 @@
                         {
                             <span class="badge bg-warning text-dark">Pendiente</span>
                         }
+                        else if (Model.EstadoPedido == "en preparación")
+                        {
+                            <span class="badge bg-primary">En preparación</span>
+                        }
                         else if (Model.EstadoPedido == "en camino")
                         {
                             <span class="badge bg-info text-dark">En camino</span>
@@ -80,6 +84,10 @@
                         else if (pago.EstadoPago == "enproceso")
                         {
                             <span class="badge bg-warning text-dark">En proceso</span>
+                        }
+                        else if (pago.EstadoPago == "reembolsado")
+                        {
+                            <span class="badge bg-secondary">Reembolsado</span>
                         }
                         else
                         {

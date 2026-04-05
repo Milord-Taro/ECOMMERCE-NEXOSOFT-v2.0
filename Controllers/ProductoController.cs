@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using ECOMMERCE_NEXOSOFT.Data;
 using ECOMMERCE_NEXOSOFT.Models;
 using ECOMMERCE_NEXOSOFT.Filters;
+using ECOMMERCE_NEXOSOFT.Helpers;
+using System.Text.RegularExpressions;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
@@ -119,6 +121,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var rolInterno = ObtenerRolInternoActual(idTienda.Value);
+
+            if (rolInterno == "vendedor_tienda")
+            {
+                TempData["MensajeError"] = "Tu rol interno no tiene permisos para gestionar productos.";
+                return RedirectToAction(nameof(Index));
+            }
+
             CargarCombosProducto();
             return View();
         }
@@ -134,6 +144,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             ModelState.Remove("Detallepedidos");
             ModelState.Remove("Stock");
 
+            NormalizarProducto(producto);
+            ValidarProducto(producto);
+
             if (ModelState.IsValid)
             {
                 try
@@ -147,6 +160,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                         TempData["MensajeError"] = "No tienes una tienda asociada para crear productos.";
                         CargarCombosProducto(producto.IdCategoria, producto.IdSubcategoria);
                         return View(producto);
+                    }
+
+                    var rolInterno = ObtenerRolInternoActual(idTienda.Value);
+
+                    if (rolInterno == "vendedor_tienda")
+                    {
+                        TempData["MensajeError"] = "Tu rol interno no tiene permisos para gestionar productos.";
+                        return RedirectToAction(nameof(Index));
                     }
 
                     producto.IdTienda = idTienda.Value;
@@ -206,6 +227,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var rolInterno = ObtenerRolInternoActual(idTienda.Value);
+
+            if (rolInterno == "vendedor_tienda")
+            {
+                TempData["MensajeError"] = "Tu rol interno no tiene permisos para gestionar productos.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var producto = await _context.Productos
                 .FirstOrDefaultAsync(p => p.IdProducto == id && p.IdTienda == idTienda.Value);
 
@@ -239,6 +268,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             ModelState.Remove("Detallepedidos");
             ModelState.Remove("Stock");
 
+            NormalizarProducto(producto);
+            ValidarProducto(producto, id);
+
             if (ModelState.IsValid)
             {
                 try
@@ -250,6 +282,14 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                         TempData["MensajeError"] = "No tienes una tienda asociada.";
                         CargarCombosProducto(producto.IdCategoria, producto.IdSubcategoria);
                         return View(producto);
+                    }
+
+                    var rolInterno = ObtenerRolInternoActual(idTienda.Value);
+
+                    if (rolInterno == "vendedor_tienda")
+                    {
+                        TempData["MensajeError"] = "Tu rol interno no tiene permisos para gestionar productos.";
+                        return RedirectToAction(nameof(Index));
                     }
 
                     var productoExistente = await _context.Productos
@@ -299,12 +339,35 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return NotFound();
             }
 
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
+
+            if (idTienda == null)
+            {
+                TempData["MensajeError"] = "No tienes una tienda asociada.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var producto = await _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
-                .FirstOrDefaultAsync(m => m.IdProducto == id);
+                .FirstOrDefaultAsync(m => m.IdProducto == id && m.IdTienda == idTienda.Value);
+
             if (producto == null)
             {
                 return NotFound();
+            }
+
+            if (producto.IdTienda == null)
+            {
+                TempData["MensajeError"] = "El producto no tiene una tienda asociada válida.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var rolInterno = ObtenerRolInternoActual(producto.IdTienda.Value);
+
+            if (rolInterno == "vendedor_tienda")
+            {
+                TempData["MensajeError"] = "Tu rol interno no tiene permisos para ocultar productos.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(producto);
@@ -315,17 +378,88 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var producto = await _context.Productos.FindAsync(id);
+            var idTienda = ObtenerIdTiendaVendedorLogueado();
 
-            if (producto != null)
+            if (idTienda == null)
             {
-                producto.VisiblePublico = false;
-                _context.Update(producto);
-                await _context.SaveChangesAsync();
-                TempData["MensajeExito"] = "Producto ocultado correctamente.";
+                TempData["MensajeError"] = "No tienes una tienda asociada.";
+                return RedirectToAction(nameof(Index));
             }
 
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p => p.IdProducto == id && p.IdTienda == idTienda.Value);
+
+            if (producto == null)
+            {
+                TempData["MensajeError"] = "No se encontró el producto.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (producto.IdTienda == null)
+            {
+                TempData["MensajeError"] = "El producto no tiene una tienda asociada válida.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var rolInterno = ObtenerRolInternoActual(producto.IdTienda.Value);
+
+            if (rolInterno == "vendedor_tienda")
+            {
+                TempData["MensajeError"] = "Tu rol interno no tiene permisos para ocultar productos.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            producto.VisiblePublico = false;
+            _context.Update(producto);
+            await _context.SaveChangesAsync();
+            TempData["MensajeExito"] = "Producto ocultado correctamente.";
+
             return RedirectToAction(nameof(Index));
+        }
+
+        private void NormalizarProducto(Producto producto)
+        {
+            producto.NombreProducto = InputNormalizer.NormalizeText(producto.NombreProducto);
+            producto.DescripcionCorta = InputNormalizer.NormalizeText(producto.DescripcionCorta);
+            producto.MarcaProducto = InputNormalizer.NormalizeText(producto.MarcaProducto);
+            producto.SkuProducto = InputNormalizer.NormalizeText(producto.SkuProducto).ToUpperInvariant();
+            producto.CodigoBarrasProducto = InputNormalizer.NormalizeIdentificationNumber(producto.CodigoBarrasProducto);
+        }
+
+        private void ValidarProducto(Producto producto, int? idProductoActual = null)
+        {
+            if (!Regex.IsMatch(producto.SkuProducto ?? string.Empty, ValidationRules.SkuPattern))
+            {
+                ModelState.AddModelError("SkuProducto", "El SKU solo puede contener letras, números y guion, sin espacios.");
+            }
+
+            if (!Regex.IsMatch(producto.CodigoBarrasProducto ?? string.Empty, ValidationRules.BarcodePattern))
+            {
+                ModelState.AddModelError("CodigoBarrasProducto", "El código de barras debe contener solo números y entre 8 y 13 dígitos.");
+            }
+
+            if (producto.PrecioVentaProducto <= 0)
+            {
+                ModelState.AddModelError("PrecioVentaProducto", "El precio de venta debe ser mayor a 0.");
+            }
+
+            var skuExiste = _context.Productos.Any(p =>
+                p.SkuProducto == producto.SkuProducto &&
+                (!idProductoActual.HasValue || p.IdProducto != idProductoActual.Value));
+
+            if (skuExiste)
+            {
+                ModelState.AddModelError("SkuProducto", "Ya existe un producto con ese SKU.");
+            }
+
+            var codigoBarrasExiste = _context.Productos.Any(p =>
+                p.CodigoBarrasProducto == producto.CodigoBarrasProducto &&
+                (!idProductoActual.HasValue || p.IdProducto != idProductoActual.Value));
+
+            if (codigoBarrasExiste)
+            {
+                ModelState.AddModelError("CodigoBarrasProducto", "Ya existe un producto con ese código de barras.");
+            }
         }
 
         private bool ProductoExists(int id)
@@ -380,6 +514,18 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return null;
             }
 
+            // Primero intenta por la nueva estructura: usuario -> miembro_tienda -> tienda
+            var idTiendaPorMiembro = _context.MiembroTiendas
+                .Where(m => m.IdUsuario == idUsuario.Value)
+                .Select(m => (int?)m.IdTienda)
+                .FirstOrDefault();
+
+            if (idTiendaPorMiembro != null)
+            {
+                return idTiendaPorMiembro;
+            }
+
+            // Fallback al flujo actual: usuario -> vendedor -> tienda
             var idTienda = _context.Tiendas
                 .Include(t => t.IdVendedorNavigation)
                 .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario.Value)
@@ -387,6 +533,22 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .FirstOrDefault();
 
             return idTienda;
+        }
+
+        private string? ObtenerRolInternoActual(int idTienda)
+        {
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
+            if (idUsuario == null)
+            {
+                return null;
+            }
+
+            return _context.MiembroTiendas
+                .Include(m => m.IdRolTiendaNavigation)
+                .Where(m => m.IdUsuario == idUsuario.Value && m.IdTienda == idTienda)
+                .Select(m => m.IdRolTiendaNavigation.NombreRol)
+                .FirstOrDefault();
         }
     }
 }

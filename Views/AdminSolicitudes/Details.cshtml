@@ -8,43 +8,92 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
             <h2 class="fw-bold mb-1">Detalle de solicitud</h2>
-            <p class="text-muted mb-0">Consulta la información completa de la solicitud.</p>
+            <p class="text-muted mb-0">Consulta la información completa registrada por el solicitante.</p>
         </div>
-        <div class="mb-3">
-            <a asp-action="Index" class="btn btn-outline-secondary">← Volver a solicitudes</a>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver a solicitudes
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Solicitud</h6>
+                    <p class="mb-2"><strong>Código:</strong> @Model.CodSolicitudVendedor</p>
+                    <p class="mb-2"><strong>Fecha:</strong> @Model.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-2"><strong>Tienda solicitada:</strong> @Model.NombreTiendaSolicitada</p>
+                    <p class="mb-0">
+                        <strong>Estado:</strong>
+                        @if (Model.EstadoSolicitud == "pendiente")
+                        {
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        }
+                        else if (Model.EstadoSolicitud == "aprobada")
+                        {
+                            <span class="badge bg-success">Aprobada</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Rechazada</span>
+                        }
+                    </p>
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Usuario solicitante</h6>
+                    <p class="mb-2"><strong>Nombre:</strong> @Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</p>
+                    <p class="mb-2"><strong>Correo:</strong> @Model.IdUsuarioNavigation?.CorreoElectronico</p>
+                    <p class="mb-2"><strong>Teléfono:</strong> @Model.IdUsuarioNavigation?.Telefono</p>
+                    <p class="mb-0"><strong>Identificación:</strong> @Model.IdUsuarioNavigation?.TipoIdentificacion @Model.IdUsuarioNavigation?.NumeroIdentificacion</p>
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Respuesta administrativa</h6>
+                    <p class="mb-2"><strong>Fecha respuesta:</strong> @(Model.FechaRespuesta.HasValue? Model.FechaRespuesta.Value.ToString("dd/MM/yyyy HH:mm") : "Sin responder")</p>
+                    <p class="mb-0"><strong>Observación:</strong> @(string.IsNullOrWhiteSpace(Model.ObservacionAdmin) ? "Sin observación" : Model.ObservacionAdmin)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Información comercial</h5>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <p class="mb-2"><strong>Razón social:</strong> @(string.IsNullOrWhiteSpace(Model.RazonSocial) ? "No registrada" : Model.RazonSocial)</p>
+                    <p class="mb-2"><strong>NIT:</strong> @(string.IsNullOrWhiteSpace(Model.NitRut) ? "No registrado" : Model.NitRut)</p>
+                    <p class="mb-0"><strong>Dirección comercial:</strong> @(string.IsNullOrWhiteSpace(Model.DireccionComercial) ? "No registrada" : Model.DireccionComercial)</p>
+                </div>
+
+                <div class="col-md-6">
+                    <p class="mb-2"><strong>Representante:</strong> @(string.IsNullOrWhiteSpace(Model.NombreRepresentante) ? "No registrado" : Model.NombreRepresentante)</p>
+                    <p class="mb-2"><strong>Teléfono contacto:</strong> @(string.IsNullOrWhiteSpace(Model.TelefonoContacto) ? "No registrado" : Model.TelefonoContacto)</p>
+                    <p class="mb-0"><strong>Correo contacto:</strong> @(string.IsNullOrWhiteSpace(Model.CorreoContacto) ? "No registrado" : Model.CorreoContacto)</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body p-4">
-            <dl class="row mb-0">
-                <dt class="col-sm-3">Código</dt>
-                <dd class="col-sm-9">@Model.CodSolicitudVendedor</dd>
-
-                <dt class="col-sm-3">Usuario</dt>
-                <dd class="col-sm-9">@Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</dd>
-
-                <dt class="col-sm-3">Correo</dt>
-                <dd class="col-sm-9">@Model.IdUsuarioNavigation?.CorreoElectronico</dd>
-
-                <dt class="col-sm-3">Tienda solicitada</dt>
-                <dd class="col-sm-9">@Model.NombreTiendaSolicitada</dd>
-
-                <dt class="col-sm-3">Descripción</dt>
-                <dd class="col-sm-9">@Model.DescripcionTienda</dd>
-
-                <dt class="col-sm-3">Estado</dt>
-                <dd class="col-sm-9">@Model.EstadoSolicitud</dd>
-
-                <dt class="col-sm-3">Observación admin</dt>
-                <dd class="col-sm-9">@Model.ObservacionAdmin</dd>
-
-                <dt class="col-sm-3">Fecha solicitud</dt>
-                <dd class="col-sm-9">@Model.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</dd>
-
-                <dt class="col-sm-3">Fecha respuesta</dt>
-                <dd class="col-sm-9">@(Model.FechaRespuesta.HasValue? Model.FechaRespuesta.Value.ToString("dd/MM/yyyy HH:mm") : "-")</dd>
-            </dl>
+            <h5 class="fw-bold mb-3">Descripción de la tienda</h5>
+            <p class="mb-0">@(string.IsNullOrWhiteSpace(Model.DescripcionTienda) ? "No registrada" : Model.DescripcionTienda)</p>
         </div>
     </div>
+
+    @if (Model.EstadoSolicitud == "pendiente")
+    {
+        <div class="d-flex gap-2 mt-4 flex-wrap">
+            <a asp-action="Aprobar" asp-route-id="@Model.IdSolicitudVendedor" class="btn btn-dark">
+                Aprobar solicitud
+            </a>
+            <a asp-action="Rechazar" asp-route-id="@Model.IdSolicitudVendedor" class="btn btn-outline-danger">
+                Rechazar solicitud
+            </a>
+        </div>
+    }
 </div>

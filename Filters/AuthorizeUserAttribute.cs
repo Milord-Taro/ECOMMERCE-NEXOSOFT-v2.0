@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ECOMMERCE_NEXOSOFT.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Filters
 {
@@ -14,15 +16,37 @@ namespace ECOMMERCE_NEXOSOFT.Filters
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var rol = context.HttpContext.Session.GetInt32("Rol");
+            var idUsuario = context.HttpContext.Session.GetInt32("IdUsuario");
 
-            if (rol == null)
+            if (idUsuario == null)
             {
                 context.Result = new RedirectToActionResult("Login", "Auth", null);
                 return;
             }
 
-            if (!_rolesPermitidos.Contains(rol.Value))
+            var dbContext = context.HttpContext.RequestServices.GetService(typeof(NexosoftDbContext)) as NexosoftDbContext;
+
+            if (dbContext == null)
+            {
+                context.Result = new RedirectToActionResult("Login", "Auth", null);
+                return;
+            }
+
+            var usuario = dbContext.Usuarios
+                .AsNoTracking()
+                .FirstOrDefault(u => u.IdUsuario == idUsuario.Value);
+
+            if (usuario == null)
+            {
+                context.HttpContext.Session.Clear();
+                context.Result = new RedirectToActionResult("Login", "Auth", null);
+                return;
+            }
+
+            // Sincroniza el rol actual de BD con la sesión
+            context.HttpContext.Session.SetInt32("Rol", usuario.IdRol);
+
+            if (!_rolesPermitidos.Contains(usuario.IdRol))
             {
                 context.Result = new RedirectToActionResult("Index", "Home", null);
                 return;
