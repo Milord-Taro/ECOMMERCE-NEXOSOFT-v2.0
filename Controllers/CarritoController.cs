@@ -31,6 +31,32 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                           m.IdRolTiendaNavigation.NombreRol != "admin_tienda");
         }
 
+        private bool EsProductoDeMiPropiaTienda(int idUsuario, int? idTiendaProducto)
+        {
+            if (idTiendaProducto == null)
+            {
+                return false;
+            }
+
+            var idTiendaUsuario = _context.MiembroTiendas
+                .Where(m => m.IdUsuario == idUsuario)
+                .Select(m => (int?)m.IdTienda)
+                .FirstOrDefault();
+
+            if (idTiendaUsuario != null)
+            {
+                return idTiendaUsuario.Value == idTiendaProducto.Value;
+            }
+
+            idTiendaUsuario = _context.Tiendas
+                .Include(t => t.IdVendedorNavigation)
+                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario)
+                .Select(t => (int?)t.IdTienda)
+                .FirstOrDefault();
+
+            return idTiendaUsuario != null && idTiendaUsuario.Value == idTiendaProducto.Value;
+        }
+
         private IActionResult RedirigirCompraBloqueada()
         {
             TempData["MensajeError"] = "Las cuentas internas de tienda no pueden realizar compras en la plataforma.";
@@ -54,7 +80,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         {
             var idUsuario = ObtenerIdUsuarioSesion();
 
-            if (idUsuario != null && EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            if (idUsuario == null)
+            {
+                TempData["MensajeLogin"] = "Debes iniciar sesión para agregar productos al carrito.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (EsCuentaInternaSinPermisoCompra(idUsuario.Value))
             {
                 return RedirigirCompraBloqueada();
             }
@@ -66,6 +98,12 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             if (producto == null)
             {
                 return NotFound();
+            }
+
+            if (EsProductoDeMiPropiaTienda(idUsuario.Value, producto.IdTienda))
+            {
+                TempData["MensajeCarrito"] = "No puedes comprar productos de tu propia tienda.";
+                return RedirectToAction("Detalle", "Productos", new { id = id });
             }
 
             if (cantidad < 1)

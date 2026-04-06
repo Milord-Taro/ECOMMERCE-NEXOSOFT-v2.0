@@ -16,12 +16,56 @@
         </div>
     </div>
 
-        @if (TempData["MensajeExito"] != null)
-        {
-            <div class="alert alert-success">
-                @TempData["MensajeExito"]
-            </div>
-        }
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Buscar</label>
+                    <input type="text"
+                           name="buscar"
+                           value="@ViewBag.Buscar"
+                           class="form-control"
+                           placeholder="Código o nombre de categoría" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Visibilidad</label>
+                    <select name="visible" class="form-select">
+                        <option value="">Todas</option>
+                        @if (ViewBag.Visible != null && ViewBag.Visible == true)
+                        {
+                            <option value="true" selected>Visibles</option>
+                        }
+                        else
+                        {
+                            <option value="true">Visibles</option>
+                        }
+
+                        @if (ViewBag.Visible != null && ViewBag.Visible == false)
+                        {
+                            <option value="false" selected>Ocultas</option>
+                        }
+                        else
+                        {
+                            <option value="false">Ocultas</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-dark w-100">Buscar</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body p-0">
@@ -57,24 +101,27 @@
                                     <div class="d-flex justify-content-end flex-wrap gap-2">
                                         <a asp-action="Edit" asp-route-id="@item.IdCategoria" class="btn btn-sm btn-outline-dark">Editar</a>
                                         <a asp-action="Details" asp-route-id="@item.IdCategoria" class="btn btn-sm btn-outline-secondary">Detalle</a>
-                                        <a asp-action="Delete" asp-route-id="@item.IdCategoria" class="btn btn-sm btn-danger">Ocultar</a>
                                     </div>
                                 </td>
-                                
+                            </tr>
+                        }
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    No se encontraron categorías.
+                                </td>
                             </tr>
                         }
                     </tbody>
                 </table>
-
             </div>
         </div>
     </div>
+
     <div class="d-flex flex-wrap gap-4 mt-4">
-        <a asp-action="Create" class="btn btn-dark">
-            Nueva categoría
-        </a>
-        <a asp-controller="Subcategoria" asp-action="Index" class="btn btn-outline-dark">
-            Ir a subcategorías
-        </a>
+        <a asp-action="Create" class="btn btn-dark">Nueva categoría</a>
+        <a asp-controller="Subcategoria" asp-action="Index" class="btn btn-outline-dark">Ir a subcategorías</a>
     </div>
 </div>

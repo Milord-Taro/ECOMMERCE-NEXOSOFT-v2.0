@@ -9,6 +9,7 @@ namespace ECOMMERCE_NEXOSOFT.Models
         public int IdSubcategoria { get; set; }
 
         [Required(ErrorMessage = "El código de la subcategoría es obligatorio.")]
+        [Range(1, 999999999, ErrorMessage = "El código de la subcategoría debe contener solo números y máximo 9 dígitos.")]
         public int CodSubcategoria { get; set; }
 
         [Required(ErrorMessage = "La categoría es obligatoria.")]
@@ -24,7 +25,7 @@ namespace ECOMMERCE_NEXOSOFT.Models
         [RegularExpression(ValidationRules.SubcategoryDescriptionPattern, ErrorMessage = "La descripción de la subcategoría no puede estar vacía ni contener solo símbolos.")]
         public string? Descripcion { get; set; }
 
-        public bool VisiblePublico { get; set; }
+        public bool VisiblePublico { get; set; } = true;
 
         public virtual Categorium IdCategoriaNavigation { get; set; } = null!;
 

@@ -1,4 +1,5 @@
 ﻿@model ECOMMERCE_NEXOSOFT.Models.Categorium
+@using ECOMMERCE_NEXOSOFT.Helpers
 
 @{
     ViewData["Title"] = "Editar categoría";
@@ -10,6 +11,11 @@
         <p class="text-muted mb-0">Actualiza la información de la categoría seleccionada.</p>
     </div>
 
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["MensajeError"]</div>
+    }
+
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body p-4">
             <form asp-action="Edit">
@@ -20,25 +26,25 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label asp-for="CodCategoria" class="form-label fw-semibold">Código</label>
-                        <input asp-for="CodCategoria" class="form-control" />
+                        <input asp-for="CodCategoria" class="@FormFieldCss.Code9" />
                         <span asp-validation-for="CodCategoria" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-8">
                         <label asp-for="NombreCategoria" class="form-label fw-semibold">Nombre</label>
-                        <input asp-for="NombreCategoria" class="form-control" />
+                        <input asp-for="NombreCategoria" class="@FormFieldCss.Text40" />
                         <span asp-validation-for="NombreCategoria" class="text-danger"></span>
+                        <small class="text-muted">Entre 3 y 40 caracteres.</small>
                     </div>
 
                     <div class="col-md-12">
                         <label asp-for="Descripcion" class="form-label fw-semibold">Descripción</label>
-                        <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
+                        <textarea asp-for="Descripcion" class="@FormFieldCss.Text100" rows="4"></textarea>
                         <span asp-validation-for="Descripcion" class="text-danger"></span>
+                        <small class="text-muted">Entre 3 y 100 caracteres.</small>
                     </div>
-                </div>
 
-                <div class="col-md-12">
-                    <div class="form-check mt-2">
+                    <div class="form-check form-switch mt-4">
                         <input class="form-check-input" asp-for="VisiblePublico" />
                         <label class="form-check-label fw-semibold" asp-for="VisiblePublico">
                             Visible públicamente

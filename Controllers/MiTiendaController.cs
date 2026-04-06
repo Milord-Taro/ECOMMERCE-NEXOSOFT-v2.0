@@ -127,7 +127,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("IdTienda,CodTienda,IdVendedor,NombreTienda,Descripcion,LogoUrl,VisiblePublico,FechaRegistro")] ECOMMERCE_NEXOSOFT.Models.Tienda tienda)
+        public async Task<IActionResult> Edit([Bind("IdTienda,CodTienda,IdVendedor,NombreTienda,Descripcion,LogoUrl,VisiblePublico,FechaRegistro,RazonSocial,NitRut,NombreRepresentante,TelefonoContacto,CorreoContacto,DireccionComercial")] ECOMMERCE_NEXOSOFT.Models.Tienda tienda)
         {
             ModelState.Remove("IdVendedorNavigation");
             ModelState.Remove("Pedidos");
@@ -160,6 +160,11 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             tiendaActual.Descripcion = tienda.Descripcion;
             tiendaActual.LogoUrl = tienda.LogoUrl;
             tiendaActual.VisiblePublico = tienda.VisiblePublico;
+            tiendaActual.RazonSocial = tienda.RazonSocial;
+            tiendaActual.NombreRepresentante = tienda.NombreRepresentante;
+            tiendaActual.TelefonoContacto = tienda.TelefonoContacto;
+            tiendaActual.CorreoContacto = tienda.CorreoContacto;
+            tiendaActual.DireccionComercial = tienda.DireccionComercial;
 
             await _context.SaveChangesAsync();
 

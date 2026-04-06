@@ -12,8 +12,12 @@
         public const string Text150 = "form-control js-text-150";
         public const string Text40 = "form-control js-text-40";
         public const string Barcode13 = "form-control js-barcode-13";
-        public const string Sku30 = "form-control js-sku-30";
+        public const string Sku20 = "form-control js-sku-20";
         public const string Nit10 = "form-control js-id-10";
         public const string Password100 = "form-control js-password-100";
+        public const string Code9 = "form-control js-code-9";
+        public const string ProductName50 = "form-control js-text-50";
+        public const string Brand50 = "form-control js-text-50";
+        public const string ProductDescription150 = "form-control js-text-150";
     }
 }

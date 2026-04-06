@@ -1,4 +1,5 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,22 +76,86 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 _ => query.OrderBy(p => p.NombreProducto)
             };
 
-            var productos = await query.ToListAsync();
+            var productos = await query
+    .Select(p => new Producto
+    {
+        IdProducto = p.IdProducto,
+        CodProducto = p.CodProducto,
+        IdCategoria = p.IdCategoria,
+        IdSubcategoria = p.IdSubcategoria,
+        IdTienda = p.IdTienda,
+        NombreProducto = p.NombreProducto ?? string.Empty,
+        DescripcionCorta = p.DescripcionCorta ?? string.Empty,
+        SkuProducto = p.SkuProducto ?? string.Empty,
+        CodigoBarrasProducto = p.CodigoBarrasProducto ?? string.Empty,
+        UnidadMedidaProducto = p.UnidadMedidaProducto ?? string.Empty,
+        MarcaProducto = p.MarcaProducto ?? string.Empty,
+        Favorito = p.Favorito,
+        VisiblePublico = p.VisiblePublico,
+        PrecioVentaProducto = p.PrecioVentaProducto,
+        IdCategoriaNavigation = p.IdCategoriaNavigation == null ? null! : new Categorium
+        {
+            IdCategoria = p.IdCategoriaNavigation.IdCategoria,
+            NombreCategoria = p.IdCategoriaNavigation.NombreCategoria ?? string.Empty,
+            Descripcion = p.IdCategoriaNavigation.Descripcion ?? string.Empty,
+            VisiblePublico = p.IdCategoriaNavigation.VisiblePublico
+        },
+        IdSubcategoriaNavigation = p.IdSubcategoriaNavigation == null ? null : new Subcategorium
+        {
+            IdSubcategoria = p.IdSubcategoriaNavigation.IdSubcategoria,
+            NombreSubcategoria = p.IdSubcategoriaNavigation.NombreSubcategoria ?? string.Empty,
+            Descripcion = p.IdSubcategoriaNavigation.Descripcion ?? string.Empty,
+            VisiblePublico = p.IdSubcategoriaNavigation.VisiblePublico
+        },
+        IdTiendaNavigation = p.IdTiendaNavigation == null ? null : new Tienda
+        {
+            IdTienda = p.IdTiendaNavigation.IdTienda,
+            NombreTienda = p.IdTiendaNavigation.NombreTienda ?? string.Empty,
+            Descripcion = p.IdTiendaNavigation.Descripcion ?? string.Empty,
+            LogoUrl = p.IdTiendaNavigation.LogoUrl ?? string.Empty,
+            VisiblePublico = p.IdTiendaNavigation.VisiblePublico
+        },
+        Stock = p.Stock == null ? null : new Stock
+        {
+            IdInventario = p.Stock.IdInventario,
+            CodInventario = p.Stock.CodInventario,
+            IdProducto = p.Stock.IdProducto,
+            PrecioCompraStock = p.Stock.PrecioCompraStock,
+            StockActual = p.Stock.StockActual,
+            StockMinimo = p.Stock.StockMinimo
+        }
+    })
+    .ToListAsync();
 
             var categorias = await _context.Categoria
-                .OrderBy(c => c.NombreCategoria)
-                .ToListAsync();
+    .Select(c => new Categorium
+    {
+        IdCategoria = c.IdCategoria,
+        CodCategoria = c.CodCategoria,
+        NombreCategoria = c.NombreCategoria ?? string.Empty,
+        Descripcion = c.Descripcion ?? string.Empty,
+        VisiblePublico = c.VisiblePublico
+    })
+    .OrderBy(c => c.NombreCategoria)
+    .ToListAsync();
 
             var subcategorias = await _context.Subcategoria
                 .Where(s => s.VisiblePublico && (!categoria.HasValue || s.IdCategoria == categoria.Value))
+                .Select(s => new Subcategorium
+                {
+                    IdSubcategoria = s.IdSubcategoria,
+                    CodSubcategoria = s.CodSubcategoria,
+                    IdCategoria = s.IdCategoria,
+                    NombreSubcategoria = s.NombreSubcategoria ?? string.Empty,
+                    Descripcion = s.Descripcion ?? string.Empty,
+                    VisiblePublico = s.VisiblePublico
+                })
                 .OrderBy(s => s.NombreSubcategoria)
                 .ToListAsync();
 
             var marcas = await _context.Productos
-                .Where(p => p.VisiblePublico &&
-                            p.MarcaProducto != null &&
-                            p.MarcaProducto != "")
-                .Select(p => p.MarcaProducto!)
+                .Where(p => p.VisiblePublico && p.MarcaProducto != null && p.MarcaProducto != "")
+                .Select(p => p.MarcaProducto ?? string.Empty)
                 .Distinct()
                 .OrderBy(m => m)
                 .ToListAsync();

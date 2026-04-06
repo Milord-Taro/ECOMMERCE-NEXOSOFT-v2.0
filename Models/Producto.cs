@@ -7,6 +7,8 @@ public partial class Producto
 {
     public int IdProducto { get; set; }
 
+    [Required(ErrorMessage = "El código del producto es obligatorio.")]
+    [Range(1, 999999999, ErrorMessage = "El código del producto debe contener solo números y máximo 9 dígitos.")]
     public int CodProducto { get; set; }
 
     [Required(ErrorMessage = "La categoría es obligatoria.")]
@@ -18,6 +20,7 @@ public partial class Producto
 
     [Required(ErrorMessage = "El nombre del producto es obligatorio.")]
     [StringLength(50, MinimumLength = 3, ErrorMessage = "El nombre del producto debe tener entre 3 y 50 caracteres.")]
+    [RegularExpression(ValidationRules.ProductNamePattern, ErrorMessage = "El nombre del producto no puede estar vacío ni contener solo símbolos.")]
     public string NombreProducto { get; set; } = null!;
 
     [Required(ErrorMessage = "La descripción corta es obligatoria.")]
@@ -37,11 +40,12 @@ public partial class Producto
 
     [Required(ErrorMessage = "La marca es obligatoria.")]
     [StringLength(50, MinimumLength = 2, ErrorMessage = "La marca debe tener entre 2 y 50 caracteres.")]
+    [RegularExpression(ValidationRules.BrandPattern, ErrorMessage = "La marca no puede estar vacía ni contener solo símbolos.")]
     public string? MarcaProducto { get; set; }
 
     public bool Favorito { get; set; }
 
-    public bool VisiblePublico { get; set; }
+    public bool VisiblePublico { get; set; } = true;
 
     [Range(typeof(decimal), "0.01", "999999999.99", ErrorMessage = "El precio de venta debe ser mayor a 0.")]
     public decimal PrecioVentaProducto { get; set; }

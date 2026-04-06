@@ -1,4 +1,5 @@
 ﻿@model ECOMMERCE_NEXOSOFT.Models.Subcategorium
+@using ECOMMERCE_NEXOSOFT.Helpers
 
 @{
     ViewData["Title"] = "Nueva subcategoría";
@@ -25,26 +26,30 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label asp-for="CodSubcategoria" class="form-label fw-semibold">Código</label>
-                        <input asp-for="CodSubcategoria" class="form-control" />
+                        <input asp-for="CodSubcategoria" class="@FormFieldCss.Code9" />
                         <span asp-validation-for="CodSubcategoria" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-8">
                         <label asp-for="IdCategoria" class="form-label fw-semibold">Categoría</label>
-                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria"></select>
+                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria">
+                            <option value="">Selecciona una categoría</option>
+                        </select>
                         <span asp-validation-for="IdCategoria" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-12">
                         <label asp-for="NombreSubcategoria" class="form-label fw-semibold">Nombre</label>
-                        <input asp-for="NombreSubcategoria" class="form-control" />
+                        <input asp-for="NombreSubcategoria" class="@FormFieldCss.Text40" />
                         <span asp-validation-for="NombreSubcategoria" class="text-danger"></span>
+                        <small class="text-muted">Entre 3 y 40 caracteres.</small>
                     </div>
 
                     <div class="col-md-12">
                         <label asp-for="Descripcion" class="form-label fw-semibold">Descripción</label>
-                        <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
+                        <textarea asp-for="Descripcion" class="@FormFieldCss.Text150" rows="4"></textarea>
                         <span asp-validation-for="Descripcion" class="text-danger"></span>
+                        <small class="text-muted">Entre 3 y 150 caracteres.</small>
                     </div>
 
                     <div class="col-md-12">

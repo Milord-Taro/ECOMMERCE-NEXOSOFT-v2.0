@@ -72,13 +72,30 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 .ToListAsync();
 
             ViewBag.Categorias = await _context.Categoria
-                .OrderBy(c => c.NombreCategoria)
-                .ToListAsync();
+    .Select(c => new Categorium
+    {
+        IdCategoria = c.IdCategoria,
+        CodCategoria = c.CodCategoria,
+        NombreCategoria = c.NombreCategoria ?? string.Empty,
+        Descripcion = c.Descripcion ?? string.Empty,
+        VisiblePublico = c.VisiblePublico
+    })
+    .OrderBy(c => c.NombreCategoria)
+    .ToListAsync();
 
             ViewBag.Subcategorias = await _context.Subcategoria
-                .Where(s => !categoria.HasValue || s.IdCategoria == categoria.Value)
-                .OrderBy(s => s.NombreSubcategoria)
-                .ToListAsync();
+    .Where(s => !categoria.HasValue || s.IdCategoria == categoria.Value)
+    .Select(s => new Subcategorium
+    {
+        IdSubcategoria = s.IdSubcategoria,
+        CodSubcategoria = s.CodSubcategoria,
+        IdCategoria = s.IdCategoria,
+        NombreSubcategoria = s.NombreSubcategoria ?? string.Empty,
+        Descripcion = s.Descripcion ?? string.Empty,
+        VisiblePublico = s.VisiblePublico
+    })
+    .OrderBy(s => s.NombreSubcategoria)
+    .ToListAsync();
 
             ViewBag.Busqueda = buscar;
             ViewBag.CategoriaSeleccionada = categoria;
@@ -130,7 +147,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             }
 
             CargarCombosProducto();
-            return View();
+            return View(new Producto { VisiblePublico = true });
         }
 
         // POST: Producto/Create
@@ -145,7 +162,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             ModelState.Remove("Stock");
 
             NormalizarProducto(producto);
-            ValidarProducto(producto);
+            await ValidarProductoAsync(producto);
 
             if (ModelState.IsValid)
             {
@@ -269,7 +286,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             ModelState.Remove("Stock");
 
             NormalizarProducto(producto);
-            ValidarProducto(producto, id);
+            await ValidarProductoAsync(producto, producto.IdProducto);
 
             if (ModelState.IsValid)
             {
@@ -303,7 +320,27 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
                     producto.IdTienda = productoExistente.IdTienda;
 
-                    _context.Update(producto);
+                    var productoActual = await _context.Productos
+                        .FirstOrDefaultAsync(p => p.IdProducto == id && p.IdTienda == idTienda.Value);
+
+                    if (productoActual == null)
+                    {
+                        return NotFound();
+                    }
+
+                    productoActual.CodProducto = producto.CodProducto;
+                    productoActual.IdCategoria = producto.IdCategoria;
+                    productoActual.IdSubcategoria = producto.IdSubcategoria;
+                    productoActual.NombreProducto = producto.NombreProducto;
+                    productoActual.DescripcionCorta = producto.DescripcionCorta;
+                    productoActual.SkuProducto = producto.SkuProducto;
+                    productoActual.CodigoBarrasProducto = producto.CodigoBarrasProducto;
+                    productoActual.UnidadMedidaProducto = producto.UnidadMedidaProducto;
+                    productoActual.MarcaProducto = producto.MarcaProducto;
+                    productoActual.Favorito = producto.Favorito;
+                    productoActual.VisiblePublico = producto.VisiblePublico;
+                    productoActual.PrecioVentaProducto = producto.PrecioVentaProducto;
+
                     await _context.SaveChangesAsync();
                     TempData["MensajeExito"] = "Producto actualizado correctamente.";
                 }
@@ -419,42 +456,62 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         private void NormalizarProducto(Producto producto)
         {
-            producto.NombreProducto = InputNormalizer.NormalizeText(producto.NombreProducto);
-            producto.DescripcionCorta = InputNormalizer.NormalizeText(producto.DescripcionCorta);
-            producto.MarcaProducto = InputNormalizer.NormalizeText(producto.MarcaProducto);
-            producto.SkuProducto = InputNormalizer.NormalizeText(producto.SkuProducto).ToUpperInvariant();
-            producto.CodigoBarrasProducto = InputNormalizer.NormalizeIdentificationNumber(producto.CodigoBarrasProducto);
+            producto.NombreProducto = InputNormalizer.NormalizeProductName(producto.NombreProducto);
+            producto.DescripcionCorta = string.IsNullOrWhiteSpace(producto.DescripcionCorta)
+                ? null
+                : InputNormalizer.NormalizeText(producto.DescripcionCorta);
+
+            producto.SkuProducto = InputNormalizer.NormalizeSku(producto.SkuProducto);
+            producto.CodigoBarrasProducto = InputNormalizer.NormalizeBarcode(producto.CodigoBarrasProducto);
+
+            producto.MarcaProducto = string.IsNullOrWhiteSpace(producto.MarcaProducto)
+                ? null
+                : InputNormalizer.NormalizeBrand(producto.MarcaProducto);
+
+            producto.UnidadMedidaProducto = InputNormalizer.NormalizeText(producto.UnidadMedidaProducto).ToLowerInvariant();
         }
 
-        private void ValidarProducto(Producto producto, int? idProductoActual = null)
+        private async Task ValidarProductoAsync(Producto producto, int idActual = 0)
         {
-            if (!Regex.IsMatch(producto.SkuProducto ?? string.Empty, ValidationRules.SkuPattern))
+            if (producto.IdCategoria <= 0)
             {
-                ModelState.AddModelError("SkuProducto", "El SKU solo puede contener letras, números y guion, sin espacios.");
+                ModelState.AddModelError("IdCategoria", "La categoría es obligatoria.");
             }
 
-            if (!Regex.IsMatch(producto.CodigoBarrasProducto ?? string.Empty, ValidationRules.BarcodePattern))
+            if (string.IsNullOrWhiteSpace(producto.NombreProducto))
             {
-                ModelState.AddModelError("CodigoBarrasProducto", "El código de barras debe contener solo números y entre 8 y 13 dígitos.");
+                ModelState.AddModelError("NombreProducto", "El nombre del producto es obligatorio.");
             }
 
-            if (producto.PrecioVentaProducto <= 0)
+            if (string.IsNullOrWhiteSpace(producto.DescripcionCorta))
             {
-                ModelState.AddModelError("PrecioVentaProducto", "El precio de venta debe ser mayor a 0.");
+                ModelState.AddModelError("DescripcionCorta", "La descripción corta es obligatoria.");
             }
 
-            var skuExiste = _context.Productos.Any(p =>
-                p.SkuProducto == producto.SkuProducto &&
-                (!idProductoActual.HasValue || p.IdProducto != idProductoActual.Value));
+            if (string.IsNullOrWhiteSpace(producto.MarcaProducto))
+            {
+                ModelState.AddModelError("MarcaProducto", "La marca es obligatoria.");
+            }
+
+            if (string.IsNullOrWhiteSpace(producto.UnidadMedidaProducto))
+            {
+                ModelState.AddModelError("UnidadMedidaProducto", "La unidad de medida es obligatoria.");
+            }
+
+            var skuExiste = await _context.Productos.AnyAsync(p =>
+                p.IdProducto != idActual &&
+                p.SkuProducto != null &&
+                p.SkuProducto.Trim().ToUpper() == producto.SkuProducto.Trim().ToUpper());
 
             if (skuExiste)
             {
                 ModelState.AddModelError("SkuProducto", "Ya existe un producto con ese SKU.");
             }
 
-            var codigoBarrasExiste = _context.Productos.Any(p =>
-                p.CodigoBarrasProducto == producto.CodigoBarrasProducto &&
-                (!idProductoActual.HasValue || p.IdProducto != idProductoActual.Value));
+            var codigoBarrasExiste = await _context.Productos.AnyAsync(p =>
+                p.IdProducto != idActual &&
+                p.CodigoBarrasProducto != null &&
+                p.CodigoBarrasProducto.Trim() == producto.CodigoBarrasProducto.Trim());
 
             if (codigoBarrasExiste)
             {

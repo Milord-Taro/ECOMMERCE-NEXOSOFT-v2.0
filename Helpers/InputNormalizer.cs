@@ -40,5 +40,27 @@ namespace ECOMMERCE_NEXOSOFT.Helpers
         {
             return NormalizeText(value);
         }
+
+        public static string NormalizeSku(string? value)
+        {
+            var text = NormalizeText(value).ToUpperInvariant();
+            return Regex.Replace(text, @"\s+", "");
+        }
+
+        public static string NormalizeBarcode(string? value)
+        {
+            var text = NormalizeText(value);
+            return Regex.Replace(text, @"\D", "");
+        }
+
+        public static string NormalizeProductName(string? value)
+        {
+            return NormalizeText(value);
+        }
+
+        public static string NormalizeBrand(string? value)
+        {
+            return NormalizeText(value);
+        }
     }
 }

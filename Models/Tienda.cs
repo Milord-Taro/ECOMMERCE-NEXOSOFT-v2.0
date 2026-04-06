@@ -24,6 +24,23 @@ namespace ECOMMERCE_NEXOSOFT.Models
         public bool VisiblePublico { get; set; }
 
         public DateTime FechaRegistro { get; set; }
+        [StringLength(150)]
+        public string? RazonSocial { get; set; }
+
+        [StringLength(10)]
+        public string? NitRut { get; set; }
+
+        [StringLength(100)]
+        public string? NombreRepresentante { get; set; }
+
+        [StringLength(10)]
+        public string? TelefonoContacto { get; set; }
+
+        [StringLength(100)]
+        public string? CorreoContacto { get; set; }
+
+        [StringLength(150)]
+        public string? DireccionComercial { get; set; }
 
         public virtual Vendedor IdVendedorNavigation { get; set; } = null!;
 

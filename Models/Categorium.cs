@@ -9,6 +9,7 @@ namespace ECOMMERCE_NEXOSOFT.Models
         public int IdCategoria { get; set; }
 
         [Required(ErrorMessage = "El código de la categoría es obligatorio.")]
+        [Range(1, 999999999, ErrorMessage = "El código de la categoría debe contener solo números y máximo 9 dígitos.")]
         public int CodCategoria { get; set; }
 
         [Required(ErrorMessage = "El nombre de la categoría es obligatorio.")]
@@ -21,7 +22,7 @@ namespace ECOMMERCE_NEXOSOFT.Models
         [RegularExpression(ValidationRules.CategoryDescriptionPattern, ErrorMessage = "La descripción de la categoría no puede estar vacía ni contener solo símbolos.")]
         public string? Descripcion { get; set; }
 
-        public bool VisiblePublico { get; set; }
+        public bool VisiblePublico { get; set; } = true;
 
         public virtual ICollection<Producto> Productos { get; set; } = new List<Producto>();
 

@@ -61,6 +61,17 @@
         });
     }
 
+    function applyCode9(selector) {
+        document.querySelectorAll(selector).forEach(input => {
+            input.setAttribute("inputmode", "numeric");
+            input.setAttribute("maxlength", "9");
+
+            input.addEventListener("input", function () {
+                this.value = this.value.replace(/\D/g, "").slice(0, 9);
+            });
+        });
+    }
+
     // Nombres y apellidos
     applyTextMaxLength(".js-name-50", 50);
 
@@ -81,14 +92,18 @@
 
     // Textos genéricos
     applyTextMaxLength(".js-text-40", 40);
+    applyTextMaxLength(".js-text-50", 50);
     applyTextMaxLength(".js-text-100", 100);
     applyTextMaxLength(".js-text-150", 150);
+
+    // Codigo de 9 dígitos
+    applyCode9(".js-code-9");
 
     // Código de barras
     applyDigitsOnly(".js-barcode-13", 13);
 
     // SKU
-    applyAlphaNumericNoSpaces(".js-sku-30", 30);
+    applyAlphaNumericNoSpaces(".js-sku-20", 20);
 
     // Contraseñas
     applyMaxLengthSanitizer(".js-password-100", 100);
