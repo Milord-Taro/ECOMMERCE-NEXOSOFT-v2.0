@@ -85,51 +85,60 @@
             }
 
             @{
-                var rolSesion = Context.Session.GetInt32("IdRol");
+                bool tieneStock = Model.Stock != null && Model.Stock.StockActual > 0;
             }
 
-            @if (rolSesion == 2 || rolSesion == 3)
+            @if (TempData["MensajeCarrito"] != null)
             {
-                <form asp-controller="Carrito" asp-action="Agregar" method="get" class="mb-3">
+                <div class="alert alert-warning rounded-4">
+                    @TempData["MensajeCarrito"]
+                </div>
+            }
+
+            @if (tieneStock)
+            {
+                <form asp-controller="Carrito" asp-action="Agregar" method="get" class="mt-3">
                     <input type="hidden" name="id" value="@Model.IdProducto" />
 
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <label for="cantidad" class="fw-bold mb-0">Cantidad:</label>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-sm-4">
+                            <label for="cantidad" class="form-label fw-semibold">Cantidad</label>
+                            <input type="number"
+                                   id="cantidad"
+                                   name="cantidad"
+                                   value="1"
+                                   min="1"
+                                   max="@(Model.Stock?.StockActual ?? 1)"
+                                   class="form-control" />
+                            <small class="text-muted">
+                                Disponible: @(Model.Stock?.StockActual ?? 0)
+                            </small>
+                        </div>
 
-                        <input type="number"
-                               id="cantidad"
-                               name="cantidad"
-                               value="1"
-                               min="1"
-                               max="@(Model.Stock != null ? Model.Stock.StockActual : 1)"
-                               class="form-control"
-                               style="width: 100px;" />
-                    </div>
+                        <div class="col-sm-8 d-grid d-sm-flex gap-2">
+                            <button type="submit" class="btn btn-dark rounded-pill px-4">
+                                Agregar al carrito
+                            </button>
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-danger">
-                            Agregar al carrito
-                        </button>
-
-                        <a asp-controller="Productos"
-                           asp-action="Index"
-                           class="btn btn-outline-secondary">
-                            Volver al catálogo
-                        </a>
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                                Volver al catálogo
+                            </a>
+                        </div>
                     </div>
                 </form>
             }
             else
             {
-                <div class="d-flex gap-2">
-                    <a asp-controller="Productos"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary">
-                        Volver al catálogo
-                    </a>
+                <div class="mt-3">
+                    <span class="badge bg-danger mb-2">Sin stock</span>
+                    <div>
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                            Volver al catálogo
+                        </a>
+                    </div>
                 </div>
             }
-        </div>
 
+        </div>
     </div>
 </section>

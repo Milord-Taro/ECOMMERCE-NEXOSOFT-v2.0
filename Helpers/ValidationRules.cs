@@ -20,7 +20,7 @@
 
         public const string BarcodePattern = @"^\d{8,13}$";
 
-        public const string SkuPattern = @"^[A-Za-z0-9\-]{1,30}$";
+        public const string SkuPattern = @"^[A-Za-z0-9\-]{1,20}$";
 
         public static readonly string[] ValidIdentificationTypes = { "cc", "ti", "ppt", "pasaporte" };
 
@@ -29,5 +29,9 @@
         public const string CategoryDescriptionPattern = @"^(?=.{3,100}$)(?=.*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9]).+$";
 
         public const string SubcategoryDescriptionPattern = @"^(?=.{3,150}$)(?=.*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9]).+$";
+
+        public const string ProductNamePattern = @"^(?=.{3,50}$)(?=.*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9]).+$";
+
+        public const string BrandPattern = @"^(?=.{2,50}$)(?=.*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9]).+$";
     }
 }

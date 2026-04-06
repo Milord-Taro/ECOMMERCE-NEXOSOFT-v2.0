@@ -33,6 +33,36 @@
                         <small class="text-muted">El nombre de la tienda no se puede modificar directamente.</small>
                     </div>
 
+                    <div class="col-md-6">
+                        <label asp-for="RazonSocial" class="form-label fw-semibold"></label>
+                        <input asp-for="RazonSocial" class="form-control js-text-150" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">NIT</label>
+                        <input class="form-control" value="@Model.NitRut" disabled />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="NombreRepresentante" class="form-label fw-semibold"></label>
+                        <input asp-for="NombreRepresentante" class="form-control js-name-50" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="TelefonoContacto" class="form-label fw-semibold"></label>
+                        <input asp-for="TelefonoContacto" class="form-control js-phone-10" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CorreoContacto" class="form-label fw-semibold"></label>
+                        <input asp-for="CorreoContacto" class="form-control js-email-100" />
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="DireccionComercial" class="form-label fw-semibold"></label>
+                        <input asp-for="DireccionComercial" class="form-control js-address-150" />
+                    </div>
+
                     <div class="col-md-12">
                         <label asp-for="Descripcion" class="form-label fw-semibold">Descripción</label>
                         <textarea asp-for="Descripcion" class="form-control js-text-150" rows="4"></textarea>
@@ -46,11 +76,12 @@
                     </div>
 
                     <div class="col-md-12">
-                        <div class="form-check mt-2">
+                        <div class="form-check form-switch mt-2">
                             <input class="form-check-input" asp-for="VisiblePublico" />
-                            <label class="form-check-label fw-semibold" asp-for="VisiblePublico">Visible públicamente</label>
+                            <label class="form-check-label fw-semibold" asp-for="VisiblePublico">
+                                Visible públicamente
+                            </label>
                         </div>
-                    </div>
                 </div>
 
                 <div class="d-flex gap-2 mt-4">

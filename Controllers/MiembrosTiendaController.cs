@@ -5,6 +5,8 @@ using ECOMMERCE_NEXOSOFT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using ECOMMERCE_NEXOSOFT.Helpers;
+using System.Text.RegularExpressions;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
@@ -16,6 +18,72 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         public MiembrosTiendaController(NexosoftDbContext context)
         {
             _context = context;
+        }
+
+        private void NormalizarMiembroCreate(MiembroTiendaCreateViewModel model)
+        {
+            model.Nombre = InputNormalizer.NormalizeText(model.Nombre);
+            model.Apellido = InputNormalizer.NormalizeText(model.Apellido);
+            model.TipoIdentificacion = InputNormalizer.NormalizeText(model.TipoIdentificacion).ToLowerInvariant();
+            model.NumeroIdentificacion = InputNormalizer.NormalizeIdentificationNumber(model.NumeroIdentificacion);
+            model.Telefono = InputNormalizer.NormalizePhone(model.Telefono);
+            model.CorreoElectronico = InputNormalizer.NormalizeEmail(model.CorreoElectronico);
+        }
+
+        private void NormalizarMiembroEdit(MiembroTiendaEditViewModel model)
+        {
+            model.Nombre = InputNormalizer.NormalizeText(model.Nombre);
+            model.Apellido = InputNormalizer.NormalizeText(model.Apellido);
+            model.TipoIdentificacion = InputNormalizer.NormalizeText(model.TipoIdentificacion).ToLowerInvariant();
+            model.NumeroIdentificacion = InputNormalizer.NormalizeIdentificationNumber(model.NumeroIdentificacion);
+            model.Telefono = InputNormalizer.NormalizePhone(model.Telefono);
+            model.CorreoElectronico = InputNormalizer.NormalizeEmail(model.CorreoElectronico);
+
+            if (!string.IsNullOrWhiteSpace(model.NuevaContrasena))
+            {
+                model.NuevaContrasena = model.NuevaContrasena.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.ConfirmarNuevaContrasena))
+            {
+                model.ConfirmarNuevaContrasena = model.ConfirmarNuevaContrasena.Trim();
+            }
+        }
+
+        private void ValidarTipoYNumeroIdentificacion(string tipoIdentificacion, string numeroIdentificacion)
+        {
+            if (string.IsNullOrWhiteSpace(tipoIdentificacion))
+            {
+                ModelState.AddModelError("TipoIdentificacion", "El tipo de identificación es obligatorio.");
+                return;
+            }
+
+            if (!ValidationRules.ValidIdentificationTypes.Contains(tipoIdentificacion))
+            {
+                ModelState.AddModelError("TipoIdentificacion", "El tipo de identificación no es válido.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(numeroIdentificacion))
+            {
+                ModelState.AddModelError("NumeroIdentificacion", "El número de identificación es obligatorio.");
+                return;
+            }
+
+            if (tipoIdentificacion == "pasaporte")
+            {
+                if (!Regex.IsMatch(numeroIdentificacion, ValidationRules.PassportPattern))
+                {
+                    ModelState.AddModelError("NumeroIdentificacion", "El pasaporte debe ser alfanumérico y tener entre 5 y 10 caracteres, sin espacios ni símbolos.");
+                }
+            }
+            else
+            {
+                if (!Regex.IsMatch(numeroIdentificacion, ValidationRules.NumericIdentificationPattern))
+                {
+                    ModelState.AddModelError("NumeroIdentificacion", "El número de identificación debe contener solo números y tener entre 5 y 10 dígitos.");
+                }
+            }
         }
 
         private async Task<Tienda?> ObtenerTiendaActualAsync()
@@ -207,12 +275,15 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (await _context.Usuarios.AnyAsync(u => u.CorreoElectronico == model.CorreoElectronico.Trim()))
+            NormalizarMiembroCreate(model);
+            ValidarTipoYNumeroIdentificacion(model.TipoIdentificacion, model.NumeroIdentificacion);
+
+            if (await _context.Usuarios.AnyAsync(u => u.CorreoElectronico == model.CorreoElectronico))
             {
                 ModelState.AddModelError("CorreoElectronico", "Ya existe un usuario con ese correo.");
             }
 
-            if (await _context.Usuarios.AnyAsync(u => u.NumeroIdentificacion == model.NumeroIdentificacion.Trim()))
+            if (await _context.Usuarios.AnyAsync(u => u.NumeroIdentificacion == model.NumeroIdentificacion))
             {
                 ModelState.AddModelError("NumeroIdentificacion", "Ya existe un usuario con ese número de identificación.");
             }
@@ -247,12 +318,12 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             {
                 CodUsuario = nuevoCodUsuario,
                 IdRol = 3,
-                Nombre = model.Nombre.Trim(),
-                Apellido = model.Apellido.Trim(),
-                TipoIdentificacion = model.TipoIdentificacion.Trim(),
-                NumeroIdentificacion = model.NumeroIdentificacion.Trim(),
-                Telefono = model.Telefono.Trim(),
-                CorreoElectronico = model.CorreoElectronico.Trim(),
+                Nombre = model.Nombre,
+                Apellido = model.Apellido,
+                TipoIdentificacion = model.TipoIdentificacion,
+                NumeroIdentificacion = model.NumeroIdentificacion,
+                Telefono = model.Telefono,
+                CorreoElectronico = model.CorreoElectronico,
                 Contrasena = BCrypt.Net.BCrypt.HashPassword(model.Contrasena),
                 FechaRegistro = DateOnly.FromDateTime(DateTime.Now)
             };
@@ -346,6 +417,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            NormalizarMiembroEdit(model);
+            ValidarTipoYNumeroIdentificacion(model.TipoIdentificacion, model.NumeroIdentificacion);
+
             var miembro = await ObtenerMiembroEditableAsync(model.IdMiembroTienda, tienda.IdTienda);
 
             if (miembro == null)
@@ -381,8 +455,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 ModelState.AddModelError("IdRolTienda", "No está permitido asignar Admin Tienda desde este módulo.");
             }
 
-            var correoNormalizado = model.CorreoElectronico.Trim();
-            var identificacionNormalizada = model.NumeroIdentificacion.Trim();
+            var correoNormalizado = model.CorreoElectronico;
+            var identificacionNormalizada = model.NumeroIdentificacion;
 
             var existeCorreo = await _context.Usuarios
                 .AnyAsync(u => u.CorreoElectronico == correoNormalizado && u.IdUsuario != model.IdUsuario);
@@ -427,11 +501,11 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             miembro.IdRolTienda = model.IdRolTienda;
 
-            miembro.IdUsuarioNavigation.Nombre = model.Nombre.Trim();
-            miembro.IdUsuarioNavigation.Apellido = model.Apellido.Trim();
-            miembro.IdUsuarioNavigation.TipoIdentificacion = model.TipoIdentificacion.Trim();
+            miembro.IdUsuarioNavigation.Nombre = model.Nombre;
+            miembro.IdUsuarioNavigation.Apellido = model.Apellido;
+            miembro.IdUsuarioNavigation.TipoIdentificacion = model.TipoIdentificacion;
             miembro.IdUsuarioNavigation.NumeroIdentificacion = identificacionNormalizada;
-            miembro.IdUsuarioNavigation.Telefono = model.Telefono.Trim();
+            miembro.IdUsuarioNavigation.Telefono = model.Telefono;
             miembro.IdUsuarioNavigation.CorreoElectronico = correoNormalizado;
 
             if (!string.IsNullOrWhiteSpace(model.NuevaContrasena))

@@ -49,11 +49,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             ViewBag.TotalVentas = await _context.Venta.CountAsync(v => v.IdPedidoNavigation.IdTienda == idTienda.Value);
             ViewBag.TotalPagosAprobados = await _context.Pagos.CountAsync(p =>
                 p.EstadoPago == "aprobado" &&
-                p.IdVentaNavigation.IdPedidoNavigation.IdTienda == idTienda.Value);
+                p.IdVentaNavigation.IdPedidoNavigation.IdTienda == idTienda.Value &&
+                p.IdVentaNavigation.IdPedidoNavigation.EstadoPedido != "cancelado");
 
             ViewBag.TotalRecaudado = await _context.Pagos
                 .Where(p => p.EstadoPago == "aprobado" &&
-                            p.IdVentaNavigation.IdPedidoNavigation.IdTienda == idTienda.Value)
+                            p.IdVentaNavigation.IdPedidoNavigation.IdTienda == idTienda.Value &&
+                            p.IdVentaNavigation.IdPedidoNavigation.EstadoPedido != "cancelado")
                 .SumAsync(p => (decimal?)p.MontoPagado) ?? 0m;
 
             ViewBag.StockCritico = await _context.Stocks
@@ -116,7 +118,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var pagosAprobados = await _context.Pagos.CountAsync(p =>
                 p.EstadoPago == "aprobado" &&
-                p.IdVentaNavigation.IdPedidoNavigation.IdTienda == idTienda.Value);
+                p.IdVentaNavigation.IdPedidoNavigation.IdTienda == idTienda.Value &&
+                p.IdVentaNavigation.IdPedidoNavigation.EstadoPedido != "cancelado");
 
             var pagosEnProceso = await _context.Pagos.CountAsync(p =>
                 p.EstadoPago == "enproceso" &&
@@ -128,7 +131,8 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             var totalRecaudado = await _context.Pagos
                 .Where(p => p.EstadoPago == "aprobado" &&
-                            p.IdVentaNavigation.IdPedidoNavigation.IdTienda == idTienda.Value)
+                p.IdVentaNavigation.IdPedidoNavigation.IdTienda == idTienda.Value &&
+                p.IdVentaNavigation.IdPedidoNavigation.EstadoPedido != "cancelado")
                 .SumAsync(p => (decimal?)p.MontoPagado) ?? 0m;
 
             var topProductos = await _context.Detallepedidos
