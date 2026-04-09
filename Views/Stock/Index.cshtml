@@ -1,32 +1,46 @@
 ﻿@model IEnumerable<ECOMMERCE_NEXOSOFT.Models.Stock>
 
 @{
-    ViewData["Title"] = "Inventario";
-    string busqueda = ViewBag.Busqueda as string ?? "";
-    bool soloStockBajo = ViewBag.SoloStockBajo != null && (bool)ViewBag.SoloStockBajo;
+    ViewData["Title"] = "Stock de mi tienda";
+    var busqueda = ViewBag.Busqueda as string;
+    var soloStockBajo = ViewBag.SoloStockBajo as bool?;
 }
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
-            <h2 class="fw-bold mb-1">Inventario / Stock</h2>
-            <p class="text-muted mb-0">Administra cantidades disponibles de tus productos.</p>
+            <h2 class="fw-bold mb-1">Stock de mi tienda</h2>
+            <p class="text-muted mb-0">Consulta el inventario actual y registra movimientos de stock.</p>
         </div>
-        <a asp-controller="Producto" asp-action="Index" class="btn btn-outline-dark">
-            Ir a productos
-        </a>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-controller="Stock" asp-action="Movimientos" class="btn btn-outline-dark">
+                Ver movimientos
+            </a>
+
+            <a asp-controller="Vendedor" asp-action="Index" class="btn btn-outline-secondary">
+                ← Volver al panel vendedor
+            </a>
+        </div>
     </div>
 
     @if (TempData["MensajeExito"] != null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success rounded-4">
             @TempData["MensajeExito"]
+        </div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger rounded-4">
+            @TempData["MensajeError"]
         </div>
     }
 
     <div class="card shadow-sm border-0 rounded-4 mb-4">
         <div class="card-body p-4">
-            <form asp-action="Index" method="get">
+            <form method="get">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-5">
                         <label class="form-label fw-semibold">Buscar producto</label>
@@ -44,20 +58,16 @@
                                    name="soloStockBajo"
                                    value="true"
                                    id="soloStockBajo"
-                                   @(soloStockBajo ? "checked" : "") />
-                            <label class="form-check-label fw-semibold" for="soloStockBajo">
-                                Solo stock bajo
+                                   @(soloStockBajo == true ? "checked" : null) />
+                            <label class="form-check-label" for="soloStockBajo">
+                                Mostrar solo stock bajo
                             </label>
                         </div>
                     </div>
 
-                    <div class="col-md-4 d-flex gap-2">
-                        <button type="submit" class="btn btn-dark">
-                            Filtrar
-                        </button>
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            Limpiar filtros
-                        </a>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-dark">Filtrar</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
                     </div>
                 </div>
             </form>
@@ -72,40 +82,57 @@
                         <tr>
                             <th>Producto</th>
                             <th>Categoría</th>
-                            <th>Precio compra</th>
+                            <th>Precio compra (unidad)</th>
                             <th>Stock actual</th>
                             <th>Stock mínimo</th>
                             <th>Estado</th>
-                            <th></th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @if (Model == null || !Model.Any())
                         {
-                            bool stockBajo = item.StockActual <= item.StockMinimo;
-
-                            <tr class="@(stockBajo ? "table-warning" : "")">
-                                <td>@item.IdProductoNavigation?.NombreProducto</td>
-                                <td>@item.IdProductoNavigation?.IdCategoriaNavigation?.NombreCategoria</td>
-                                <td>@item.PrecioCompraStock.ToString("C")</td>
-                                <td>@item.StockActual</td>
-                                <td>@item.StockMinimo</td>
-                                <td>
-                                    @if (stockBajo)
-                                    {
-                                        <span class="badge bg-warning text-dark">Stock bajo</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success">Disponible</span>
-                                    }
-                                </td>
-                                <td>
-                                    <a asp-action="Edit" asp-route-id="@item.IdInventario" class="btn btn-sm btn-dark">
-                                        Editar stock
-                                    </a>
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No se encontraron registros de stock con los filtros seleccionados.
                                 </td>
                             </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                var stockBajo = item.StockActual <= item.StockMinimo;
+
+                                <tr class="@(stockBajo ? "table-warning" : "")">
+                                    <td>@item.IdProductoNavigation?.NombreProducto</td>
+                                    <td>@item.IdProductoNavigation?.IdCategoriaNavigation?.NombreCategoria</td>
+                                    <td>@item.PrecioCompraStock.ToString("C")</td>
+                                    <td>@item.StockActual</td>
+                                    <td>@item.StockMinimo</td>
+                                    <td>
+                                        @if (item.StockActual == 0)
+                                        {
+                                            <span class="badge bg-danger">Agotado</span>
+                                        }
+                                        else if (stockBajo)
+                                        {
+                                            <span class="badge bg-warning text-dark">Stock bajo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Normal</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.IdInventario"
+                                           class="btn btn-dark">
+                                            Gestionar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>

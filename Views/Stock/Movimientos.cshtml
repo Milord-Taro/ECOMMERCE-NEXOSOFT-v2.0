@@ -1,0 +1,195 @@
+﻿@model IEnumerable<ECOMMERCE_NEXOSOFT.Models.MovimientoInventario>
+
+@{
+    ViewData["Title"] = "Movimientos de inventario";
+    var busqueda = ViewBag.Busqueda as string;
+    var tipoSeleccionado = ViewBag.TipoSeleccionado as string;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Movimientos de inventario</h2>
+            <p class="text-muted mb-0">Consulta el historial de entradas, salidas y ajustes de tu tienda.</p>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-secondary">
+                ← Volver al stock
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success rounded-4">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger rounded-4">
+            @TempData["MensajeError"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold">Buscar producto</label>
+                        <input type="text"
+                               name="buscar"
+                               value="@busqueda"
+                               class="form-control"
+                               placeholder="Nombre del producto" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Tipo de movimiento</label>
+                        <select name="tipo" class="form-select">
+                            <option value="">Todos</option>
+
+                            @if (tipoSeleccionado == "entrada")
+                            {
+                                <option value="entrada" selected>Entrada</option>
+                            }
+                            else
+                            {
+                                <option value="entrada">Entrada</option>
+                            }
+
+                            @if (tipoSeleccionado == "salida")
+                            {
+                                <option value="salida" selected>Salida</option>
+                            }
+                            else
+                            {
+                                <option value="salida">Salida</option>
+                            }
+
+                            @if (tipoSeleccionado == "ajuste_positivo")
+                            {
+                                <option value="ajuste_positivo" selected>Ajuste positivo</option>
+                            }
+                            else
+                            {
+                                <option value="ajuste_positivo">Ajuste positivo</option>
+                            }
+
+                            @if (tipoSeleccionado == "ajuste_negativo")
+                            {
+                                <option value="ajuste_negativo" selected>Ajuste negativo</option>
+                            }
+                            else
+                            {
+                                <option value="ajuste_negativo">Ajuste negativo</option>
+                            }
+
+                            @if (tipoSeleccionado == "devolucion")
+                            {
+                                <option value="devolucion" selected>Devolución</option>
+                            }
+                            else
+                            {
+                                <option value="devolucion">Devolución</option>
+                            }
+
+                            @if (tipoSeleccionado == "cancelacion")
+                            {
+                                <option value="cancelacion" selected>Cancelación</option>
+                            }
+                            else
+                            {
+                                <option value="cancelacion">Cancelación</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-dark">Filtrar</button>
+                        <a asp-action="Movimientos" class="btn btn-outline-secondary">Limpiar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Producto</th>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Stock antes</th>
+                            <th>Stock después</th>
+                            <th>Usuario</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    No se encontraron movimientos con los filtros seleccionados.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.FechaMovimiento.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.IdProductoNavigation?.NombreProducto</td>
+                                    <td>
+                                        @if (item.TipoMovimiento == "entrada")
+                                        {
+                                            <span class="badge bg-success">Entrada</span>
+                                        }
+                                        else if (item.TipoMovimiento == "salida")
+                                        {
+                                            <span class="badge bg-danger">Salida</span>
+                                        }
+                                        else if (item.TipoMovimiento == "ajuste_positivo")
+                                        {
+                                            <span class="badge bg-primary">Ajuste positivo</span>
+                                        }
+                                        else if (item.TipoMovimiento == "ajuste_negativo")
+                                        {
+                                            <span class="badge bg-warning text-dark">Ajuste negativo</span>
+                                        }
+                                        else if (item.TipoMovimiento == "devolucion")
+                                        {
+                                            <span class="badge bg-info text-dark">Devolución</span>
+                                        }
+                                        else if (item.TipoMovimiento == "cancelacion")
+                                        {
+                                            <span class="badge bg-secondary">Cancelación</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-dark">Otro</span>
+                                        }
+                                    </td>
+                                    <td>@item.Cantidad</td>
+                                    <td>@item.StockAnterior</td>
+                                    <td>@item.StockNuevo</td>
+                                    <td>@(item.IdUsuarioNavigation?.Nombre + " " + item.IdUsuarioNavigation?.Apellido)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Motivo) ? "Sin observación" : item.Motivo)</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

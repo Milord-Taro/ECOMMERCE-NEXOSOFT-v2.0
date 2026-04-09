@@ -25,11 +25,18 @@ public partial class Usuario
 
     public string Contrasena { get; set; } = null!;
 
+
     public DateOnly? FechaRegistro { get; set; }
 
     public virtual Cliente? Cliente { get; set; }
 
+    public virtual Vendedor? Vendedor { get; set; }
+
     public virtual Rol IdRolNavigation { get; set; } = null!;
 
     public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
+
+    public virtual ICollection<SolicitudVendedor> SolicitudVendedors { get; set; } = new List<SolicitudVendedor>();
+
+    public virtual ICollection<MiembroTienda> MiembroTiendas { get; set; } = new List<MiembroTienda>();
 }

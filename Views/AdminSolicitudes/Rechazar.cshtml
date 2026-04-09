@@ -1,0 +1,44 @@
+﻿@model ECOMMERCE_NEXOSOFT.Models.SolicitudVendedor
+
+@{
+    ViewData["Title"] = "Rechazar solicitud";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Rechazar solicitud</h2>
+            <p class="text-muted mb-0">Indica una observación para dejar trazabilidad de la decisión.</p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver a solicitudes
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <p class="mb-2"><strong>Usuario:</strong> @Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellido</p>
+            <p class="mb-2"><strong>Tienda:</strong> @Model.NombreTiendaSolicitada</p>
+            <p class="mb-0"><strong>Razón social:</strong> @(string.IsNullOrWhiteSpace(Model.RazonSocial) ? "No registrada" : Model.RazonSocial)</p>
+        </div>
+    </div>
+
+    <form asp-action="Rechazar" method="post">
+        <input type="hidden" asp-for="IdSolicitudVendedor" />
+        @Html.AntiForgeryToken()
+
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <label class="form-label fw-semibold">Observación del administrador</label>
+                <textarea name="observacionAdmin" class="form-control" rows="4"
+                          placeholder="Ej: Falta información comercial, documentos incompletos, validación rechazada, etc."></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-outline-danger">Confirmar rechazo</button>
+            <a asp-action="Details" asp-route-id="@Model.IdSolicitudVendedor" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

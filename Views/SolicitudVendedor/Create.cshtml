@@ -1,0 +1,107 @@
+﻿@model ECOMMERCE_NEXOSOFT.ViewModels.SolicitudVendedorViewModel
+
+@{
+    ViewData["Title"] = "Solicitud para vender";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Solicitud para vender</h2>
+            <p class="text-muted mb-0">Completa la información de tu negocio para que el administrador evalúe tu solicitud.</p>
+        </div>
+
+        <a asp-action="MisSolicitudes" class="btn btn-outline-secondary">
+            ← Ver mis solicitudes
+        </a>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success">@TempData["MensajeExito"]</div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["MensajeError"]</div>
+    }
+
+    <form asp-action="Create" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Información de la tienda</h5>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="NombreTiendaSolicitada" class="form-label fw-semibold">Nombre de la tienda</label>
+                        <input asp-for="NombreTiendaSolicitada" class="form-control js-store-30" />
+                        <span asp-validation-for="NombreTiendaSolicitada" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="RazonSocial" class="form-label fw-semibold">Razón social</label>
+                        <input asp-for="RazonSocial" class="form-control js-text-150" />
+                        <span asp-validation-for="RazonSocial" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="NitRut" class="form-label fw-semibold">NIT</label>
+                        <input asp-for="NitRut" class="form-control js-id-10" />
+                        <span asp-validation-for="NitRut" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DireccionComercial" class="form-label fw-semibold">Dirección comercial</label>
+                        <input asp-for="DireccionComercial" class="form-control js-address-150" />
+                        <span asp-validation-for="DireccionComercial" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="DescripcionTienda" class="form-label fw-semibold">Descripción de la tienda</label>
+                        <textarea asp-for="DescripcionTienda" class="form-control js-text-150" rows="3"></textarea>
+                        <span asp-validation-for="DescripcionTienda" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Información del representante</h5>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="NombreRepresentante" class="form-label fw-semibold">Nombre del representante</label>
+                        <input asp-for="NombreRepresentante" class="form-control js-name-50" />
+                        <span asp-validation-for="NombreRepresentante" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="TelefonoContacto" class="form-label fw-semibold">Teléfono de contacto</label>
+                        <input asp-for="TelefonoContacto" class="form-control js-phone-10" />
+                        <span asp-validation-for="TelefonoContacto" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="CorreoContacto" class="form-label fw-semibold">Correo de contacto</label>
+                        <input asp-for="CorreoContacto" class="form-control js-email-100" />
+                        <span asp-validation-for="CorreoContacto" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-dark">Enviar solicitud</button>
+            <a asp-controller="Perfil" asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

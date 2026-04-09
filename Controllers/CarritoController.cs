@@ -1,10 +1,13 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Filters;
 using ECOMMERCE_NEXOSOFT.Helpers;
 using ECOMMERCE_NEXOSOFT.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
+    [AuthorizeUser(2, 3)]
     public class CarritoController : Controller
     {
         private readonly NexosoftDbContext _context;
@@ -15,20 +18,92 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             _context = context;
         }
 
+        private int? ObtenerIdUsuarioSesion()
+        {
+            return HttpContext.Session.GetInt32("IdUsuario");
+        }
+
+        private bool EsCuentaInternaSinPermisoCompra(int idUsuario)
+        {
+            return _context.MiembroTiendas
+                .Include(m => m.IdRolTiendaNavigation)
+                .Any(m => m.IdUsuario == idUsuario &&
+                          m.IdRolTiendaNavigation.NombreRol != "admin_tienda");
+        }
+
+        private bool EsProductoDeMiPropiaTienda(int idUsuario, int? idTiendaProducto)
+        {
+            if (idTiendaProducto == null)
+            {
+                return false;
+            }
+
+            var idTiendaUsuario = _context.MiembroTiendas
+                .Where(m => m.IdUsuario == idUsuario)
+                .Select(m => (int?)m.IdTienda)
+                .FirstOrDefault();
+
+            if (idTiendaUsuario != null)
+            {
+                return idTiendaUsuario.Value == idTiendaProducto.Value;
+            }
+
+            idTiendaUsuario = _context.Tiendas
+                .Include(t => t.IdVendedorNavigation)
+                .Where(t => t.IdVendedorNavigation.IdUsuario == idUsuario)
+                .Select(t => (int?)t.IdTienda)
+                .FirstOrDefault();
+
+            return idTiendaUsuario != null && idTiendaUsuario.Value == idTiendaProducto.Value;
+        }
+
+        private IActionResult RedirigirCompraBloqueada()
+        {
+            TempData["MensajeError"] = "Las cuentas internas de tienda no pueden realizar compras en la plataforma.";
+            return RedirectToAction("Index", "Vendedor");
+        }
+
         public IActionResult Index()
         {
+            var idUsuario = ObtenerIdUsuarioSesion();
+
+            if (idUsuario != null && EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
             return View(carrito);
         }
 
         public IActionResult Agregar(int id, int cantidad = 1)
         {
+            var idUsuario = ObtenerIdUsuarioSesion();
+
+            if (idUsuario == null)
+            {
+                TempData["MensajeLogin"] = "Debes iniciar sesión para agregar productos al carrito.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var producto = _context.Productos
+                .Include(p => p.IdTiendaNavigation)
                 .FirstOrDefault(p => p.IdProducto == id);
 
             if (producto == null)
             {
                 return NotFound();
+            }
+
+            if (EsProductoDeMiPropiaTienda(idUsuario.Value, producto.IdTienda))
+            {
+                TempData["MensajeCarrito"] = "No puedes comprar productos de tu propia tienda.";
+                return RedirectToAction("Detalle", "Productos", new { id = id });
             }
 
             if (cantidad < 1)
@@ -79,7 +154,9 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                     NombreProducto = producto.NombreProducto,
                     Precio = producto.PrecioVentaProducto,
                     Cantidad = cantidadFinal,
-                    ImagenUrl = "/img/producto-default.jpg"
+                    ImagenUrl = "/img/producto-default.jpg",
+                    IdTienda = producto.IdTienda,
+                    NombreTienda = producto.IdTiendaNavigation?.NombreTienda
                 });
             }
 
@@ -90,6 +167,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         public IActionResult Eliminar(int id)
         {
+            var idUsuario = ObtenerIdUsuarioSesion();
+
+            if (idUsuario != null && EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
 
             var item = carrito.FirstOrDefault(p => p.IdProducto == id);
@@ -106,6 +190,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         public IActionResult Aumentar(int id)
         {
+            var idUsuario = ObtenerIdUsuarioSesion();
+
+            if (idUsuario != null && EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
 
             var item = carrito.FirstOrDefault(p => p.IdProducto == id);
@@ -132,6 +223,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         public IActionResult Disminuir(int id)
         {
+            var idUsuario = ObtenerIdUsuarioSesion();
+
+            if (idUsuario != null && EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             var carrito = HttpContext.Session.GetObjectFromJson<List<CarritoItem>>(CarritoKey) ?? new List<CarritoItem>();
 
             var item = carrito.FirstOrDefault(p => p.IdProducto == id);
@@ -153,6 +251,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
         public IActionResult Vaciar()
         {
+            var idUsuario = ObtenerIdUsuarioSesion();
+
+            if (idUsuario != null && EsCuentaInternaSinPermisoCompra(idUsuario.Value))
+            {
+                return RedirigirCompraBloqueada();
+            }
+
             HttpContext.Session.Remove(CarritoKey);
             return RedirectToAction("Index");
         }

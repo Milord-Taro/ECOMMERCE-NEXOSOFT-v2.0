@@ -1,12 +1,23 @@
 ﻿@using ECOMMERCE_NEXOSOFT.Helpers
 @using ECOMMERCE_NEXOSOFT.Models
 @using Microsoft.AspNetCore.Http
+@using ECOMMERCE_NEXOSOFT.Data
+@inject NexosoftDbContext DbContext
 
 @{
     var usuarioSesion = Context.Session.GetString("Usuario");
     var rolSesion = Context.Session.GetInt32("Rol");
     var carrito = Context.Session.GetObjectFromJson<List<CarritoItem>>("CARRITO") ?? new List<CarritoItem>();
     var cantidadCarrito = CarritoHelper.ObtenerCantidadItems(carrito);
+    var idUsuarioSesion = Context.Session.GetInt32("IdUsuario");
+    var esCuentaInternaSinCompra = false;
+
+    if (idUsuarioSesion != null)
+    {
+        esCuentaInternaSinCompra = DbContext.MiembroTiendas
+            .Any(m => m.IdUsuario == idUsuarioSesion.Value &&
+                      m.IdRolTiendaNavigation.NombreRol != "admin_tienda");
+    }
 }
 
 <!DOCTYPE html>
@@ -23,9 +34,6 @@
     <header>
         <div class="top-bar text-white py-2">
             <div class="container text-center">
-                <div class="big fw-semibold">
-                    Envío gratis en compras superiores a $150.000
-                </div>
             </div>
         </div>
 
@@ -53,38 +61,106 @@
                         </form>
                     </div>
 
+                    <!-- LOGIN / CARRITO -->
                     <div class="col-12 col-md-3">
-                        <div class="d-flex align-items-center gap-4">
+                        <div class="d-flex align-items-center gap-3 ms-auto">
                             @if (string.IsNullOrEmpty(usuarioSesion))
                             {
-                                <a asp-controller="Auth" asp-action="Login" class="text-decoration-none text-dark">Mi cuenta</a>
-                                <a asp-controller="Auth" asp-action="Login" class="text-decoration-none text-dark">Mis pedidos</a>
+                                <a asp-controller="Auth" asp-action="Login" class="header-link">Ingresar</a>
+
+                                <a asp-controller="Carrito" asp-action="Index" class="cart-link position-relative" title="Carrito">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .49.402L2.89 3H14.5a.5.5 0 0 1 .49.598l-1.5 7A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.49-.402L1.61 2H.5A.5.5 0 0 1 0 1.5M3.102 4l1.313 6h8.184l1.286-6z" />
+                                        <path d="M5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m0 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7-1a2 2 0 1 0 0 4 2 2 0 0 0 0-4m0 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+                                    </svg>
+
+                                    @if (cantidadCarrito > 0)
+                                    {
+                                        <span class="cart-badge">@cantidadCarrito</span>
+                                    }
+                                </a>
                             }
                             else
                             {
-                                <a asp-controller="Perfil" asp-action="Index" class="text-decoration-none text-dark fw-semibold">
-                                    Hola, @usuarioSesion
-                                </a>
+                                <div class="dropdown">
+                                    <a class="header-link fw-semibold dropdown-toggle"
+                                       href="#"
+                                       role="button"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        Hola, @usuarioSesion
+                                    </a>
 
-                                @if (rolSesion == 1)
-                                {
-                                    <a asp-controller="Admin" asp-action="Index" class="text-decoration-none text-dark">Panel admin</a>
-                                }
-                                else if (rolSesion == 2)
-                                {
-                                    <a asp-controller="MisPedidos" asp-action="Index" class="text-decoration-none text-dark">Mis pedidos</a>
-                                }
-                                else if (rolSesion == 3)
-                                {
-                                    <a asp-controller="Vendedor" asp-action="Index" class="text-decoration-none text-dark">Panel vendedor</a>
-                                }
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Perfil" asp-action="Index">
+                                                Mi perfil
+                                            </a>
+                                        </li>
 
-                                <a asp-controller="Auth" asp-action="Logout" class="text-decoration-none text-danger">Cerrar sesión</a>
+                                        @if (rolSesion == 1)
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
+                                                    Panel admin
+                                                </a>
+                                            </li>
+                                        }
+                                        else if (rolSesion == 2)
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Cliente" asp-action="Index">
+                                                    Mi cuenta
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="MisPedidos" asp-action="Index">
+                                                    Mis pedidos
+                                                </a>
+                                            </li>
+                                        }
+                                        else if (rolSesion == 3)
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Vendedor" asp-action="Index">
+                                                    Panel vendedor
+                                                </a>
+                                            </li>
+                                            @if (!esCuentaInternaSinCompra)
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item" asp-controller="MisPedidos" asp-action="Index">
+                                                        Mis pedidos
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-controller="Auth" asp-action="Logout">
+                                                Cerrar sesión
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                @if (rolSesion == 2 || (rolSesion == 3 && !esCuentaInternaSinCompra))
+                                {
+                                    <a asp-controller="Carrito" asp-action="Index" class="cart-link position-relative" title="Carrito">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .49.402L2.89 3H14.5a.5.5 0 0 1 .49.598l-1.5 7A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.49-.402L1.61 2H.5A.5.5 0 0 1 0 1.5M3.102 4l1.313 6h8.184l1.286-6z" />
+                                            <path d="M5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m0 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7-1a2 2 0 1 0 0 4 2 2 0 0 0 0-4m0 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+                                        </svg>
+
+                                        @if (cantidadCarrito > 0)
+                                        {
+                                            <span class="cart-badge">@cantidadCarrito</span>
+                                        }
+                                    </a>
+                                }
                             }
-
-                            <a asp-controller="Carrito" asp-action="Index" class="text-decoration-none text-dark">
-                                Carrito (@cantidadCarrito)
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -95,11 +171,11 @@
             <div class="container">
                 <ul class="nav nav-pills flex-nowrap overflow-auto py-2 category-menu justify-content-center">
                     <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Categoria" asp-action="Index">Categorías</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Productos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Ofertas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Nosotros</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Categorias">Categorías</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Productos" asp-action="Index">Productos</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Ofertas">Ofertas</a>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Nosotros">Nosotros</a>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Contacto">Contacto</a>
                 </ul>
             </div>
         </nav>
@@ -169,6 +245,7 @@
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/input-guards.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

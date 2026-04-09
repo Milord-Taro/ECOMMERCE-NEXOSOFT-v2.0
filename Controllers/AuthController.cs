@@ -1,7 +1,10 @@
 ﻿using ECOMMERCE_NEXOSOFT.Data;
+using ECOMMERCE_NEXOSOFT.Helpers;
 using ECOMMERCE_NEXOSOFT.Models;
 using ECOMMERCE_NEXOSOFT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace ECOMMERCE_NEXOSOFT.Controllers
 {
@@ -12,6 +15,28 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         public AuthController(NexosoftDbContext context)
         {
             _context = context;
+        }
+
+        private bool EsTipoIdentificacionValido(string? tipo)
+        {
+            if (string.IsNullOrWhiteSpace(tipo))
+                return false;
+
+            return ValidationRules.ValidIdentificationTypes.Contains(tipo.Trim().ToLowerInvariant());
+        }
+
+        private bool EsNumeroIdentificacionValido(string? tipo, string? numero)
+        {
+            if (string.IsNullOrWhiteSpace(tipo) || string.IsNullOrWhiteSpace(numero))
+                return false;
+
+            tipo = tipo.Trim().ToLowerInvariant();
+            numero = InputNormalizer.NormalizeIdentificationNumber(numero);
+
+            if (tipo == "pasaporte")
+                return Regex.IsMatch(numero, ValidationRules.PassportPattern);
+
+            return Regex.IsMatch(numero, ValidationRules.NumericIdentificationPattern);
         }
 
         // ================= LOGIN =================
@@ -25,25 +50,21 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var errores = ModelState.Values.SelectMany(v => v.Errors);
-                foreach (var e in errores)
-                {
-                    Console.WriteLine(e.ErrorMessage);
-                }
-
                 return View(model);
             }
+
+            model.CorreoElectronico = InputNormalizer.NormalizeEmail(model.CorreoElectronico);
 
             var usuario = _context.Usuarios
                 .FirstOrDefault(u => u.CorreoElectronico == model.CorreoElectronico);
 
             if (usuario == null)
             {
-                ViewBag.Error = "Usuario o contraseña incorrectos";
+                ViewBag.Error = "Usuario o contraseña incorrectos.";
                 return View(model);
             }
 
-            bool passwordValida = false;
+            bool passwordValida;
 
             try
             {
@@ -56,17 +77,15 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
 
             if (!passwordValida)
             {
-                ViewBag.Error = "Usuario o contraseña incorrectos";
+                ViewBag.Error = "Usuario o contraseña incorrectos.";
                 return View(model);
             }
 
-            // Guardar sesión
             HttpContext.Session.SetString("Usuario", usuario.Nombre);
             HttpContext.Session.SetString("Correo", usuario.CorreoElectronico);
             HttpContext.Session.SetInt32("Rol", usuario.IdRol);
             HttpContext.Session.SetInt32("IdUsuario", usuario.IdUsuario);
 
-            // Redirección por rol
             return usuario.IdRol switch
             {
                 1 => RedirectToAction("Index", "Admin"),
@@ -83,69 +102,123 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // ================= REGISTER =================
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
 
-        // 🔹 GET (mostrar vista)
+        // ================= FORGOTPASSWORD =================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            model.CorreoElectronico = InputNormalizer.NormalizeEmail(model.CorreoElectronico);
+
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.CorreoElectronico == model.CorreoElectronico);
+
+            if (usuario == null)
+            {
+                ViewBag.Error = "No existe una cuenta con ese correo.";
+                return View(model);
+            }
+
+            return RedirectToAction("ResetPassword", new { correo = model.CorreoElectronico });
+        }
+
+        public IActionResult ResetPassword(string correo)
+        {
+            if (string.IsNullOrWhiteSpace(correo))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                CorreoElectronico = InputNormalizer.NormalizeEmail(correo)
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            model.CorreoElectronico = InputNormalizer.NormalizeEmail(model.CorreoElectronico);
+
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.CorreoElectronico == model.CorreoElectronico);
+
+            if (usuario == null)
+            {
+                ViewBag.Error = "No existe una cuenta con ese correo.";
+                return View(model);
+            }
+
+            usuario.Contrasena = BCrypt.Net.BCrypt.HashPassword(model.NuevaContrasena.Trim());
+
+            _context.Update(usuario);
+            _context.SaveChanges();
+
+            TempData["MensajeExito"] = "La contraseña fue actualizada correctamente.";
+
+            return RedirectToAction("Login");
+        }
+
+        // ================= REGISTER =================
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // 🔹 POST (procesar registro)
         [HttpPost]
         public IActionResult Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            // 🔹 NORMALIZAR
-            model.CorreoElectronico = model.CorreoElectronico.Trim().ToLower();
-            model.Nombre = model.Nombre.Trim();
-            model.Apellido = model.Apellido.Trim();
+            model.Nombre = InputNormalizer.NormalizeText(model.Nombre);
+            model.Apellido = InputNormalizer.NormalizeText(model.Apellido);
+            model.TipoIdentificacion = InputNormalizer.NormalizeText(model.TipoIdentificacion).ToLowerInvariant();
+            model.NumeroIdentificacion = InputNormalizer.NormalizeIdentificationNumber(model.NumeroIdentificacion);
+            model.Telefono = InputNormalizer.NormalizePhone(model.Telefono);
+            model.CorreoElectronico = InputNormalizer.NormalizeEmail(model.CorreoElectronico);
 
-            // ❌ Correo no inicia con número
-            if (char.IsDigit(model.CorreoElectronico[0]))
+            if (!EsTipoIdentificacionValido(model.TipoIdentificacion))
             {
-                ModelState.AddModelError("CorreoElectronico", "El correo no puede iniciar con número");
-                return View(model);
+                ModelState.AddModelError("TipoIdentificacion", "Debes seleccionar un tipo de identificación válido.");
             }
 
-            // ❌ Correo inválido tipo gmi.com
-            if (model.CorreoElectronico.Contains("@gmi.com"))
+            if (!EsNumeroIdentificacionValido(model.TipoIdentificacion, model.NumeroIdentificacion))
             {
-                ModelState.AddModelError("CorreoElectronico", "Dominio de correo inválido");
-                return View(model);
+                ModelState.AddModelError("NumeroIdentificacion", "El número de identificación no cumple el formato permitido para el tipo seleccionado.");
             }
 
-            // ❌ Validar teléfono colombiano
-            if (!model.Telefono.StartsWith("3") || model.Telefono.Length != 10)
+            if (_context.Usuarios.Any(u => u.CorreoElectronico == model.CorreoElectronico))
             {
-                ModelState.AddModelError("Telefono", "Teléfono inválido");
-                return View(model);
+                ModelState.AddModelError("CorreoElectronico", "El correo ya está registrado.");
             }
 
-            // ❌ Validar documento
-            if (model.NumeroIdentificacion.Length != 10)
+            if (_context.Usuarios.Any(u => u.NumeroIdentificacion == model.NumeroIdentificacion))
             {
-                ModelState.AddModelError("NumeroIdentificacion", "Debe tener 10 dígitos");
-                return View(model);
+                ModelState.AddModelError("NumeroIdentificacion", "El número de identificación ya está registrado.");
             }
 
-            // ❌ Verificar si ya existe
-            var existe = _context.Usuarios
-                .Any(u => u.CorreoElectronico == model.CorreoElectronico);
-
-            if (existe)
-            {
-                ModelState.AddModelError("CorreoElectronico", "El correo ya está registrado");
+            if (!ModelState.IsValid)
                 return View(model);
-            }
 
-            // 🔐 HASH
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(model.Contrasena);
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(model.Contrasena.Trim());
 
-            // 🔹 Código único
             var random = new Random();
             int codigo;
             do
@@ -153,8 +226,7 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 codigo = random.Next(1000, 9999);
             } while (_context.Usuarios.Any(u => u.CodUsuario == codigo));
 
-            // 🔹 Crear usuario
-            Usuario nuevoUsuario = new Usuario
+            var nuevoUsuario = new Usuario
             {
                 CodUsuario = codigo,
                 IdRol = 2,
@@ -165,13 +237,13 @@ namespace ECOMMERCE_NEXOSOFT.Controllers
                 Telefono = model.Telefono,
                 CorreoElectronico = model.CorreoElectronico,
                 Contrasena = passwordHash,
-                FechaRegistro = DateOnly.FromDateTime(DateTime.UtcNow)
+                FechaRegistro = DateOnly.FromDateTime(DateTime.Now)
             };
 
             _context.Usuarios.Add(nuevoUsuario);
             _context.SaveChanges();
 
-            TempData["Success"] = "Registro exitoso";
+            TempData["Success"] = "Registro exitoso.";
 
             return RedirectToAction("Login");
         }

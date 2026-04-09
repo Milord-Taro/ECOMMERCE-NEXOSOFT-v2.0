@@ -1,100 +1,171 @@
 ﻿@model List<ECOMMERCE_NEXOSOFT.Models.CarritoItem>
+@using System.Linq
 
 @{
     ViewData["Title"] = "Carrito";
     decimal total = Model.Sum(x => x.Precio * x.Cantidad);
+
+    var gruposPorTienda = Model
+        .GroupBy(x => new { x.IdTienda, x.NombreTienda })
+        .ToList();
 }
 
 <section class="container py-5">
-    <h2 class="section-title mb-4">Carrito de compras</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="section-title mb-1">Carrito de compras</h2>
+            <p class="text-muted mb-0">Revisa tus productos antes de continuar con el pago.</p>
+        </div>
+    </div>
 
     @if (TempData["MensajeCarrito"] != null)
     {
-        <div class="alert alert-warning">
+        <div class="alert alert-warning rounded-4">
             @TempData["MensajeCarrito"]
         </div>
     }
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">
-            Tu carrito está vacío.
-        </div>
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-5 text-center">
+                <h4 class="fw-bold mb-2">Tu carrito está vacío</h4>
+                <p class="text-muted mb-4">Aún no has agregado productos. Explora el catálogo y encuentra lo que necesitas.</p>
 
-        <a asp-controller="Productos" asp-action="Index" class="btn btn-danger">
-            Ir al catálogo
-        </a>
+                <a asp-controller="Productos" asp-action="Index" class="btn btn-danger">
+                    Ir al catálogo
+                </a>
+            </div>
+        </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Precio</th>
-                        <th>Cantidad</th>
-                        <th>Subtotal</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.NombreProducto</td>
-                            <td>$@item.Precio.ToString("N2")</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <a asp-controller="Carrito"
-                                       asp-action="Disminuir"
-                                       asp-route-id="@item.IdProducto"
-                                       class="btn btn-sm btn-outline-secondary">
-                                        -
-                                    </a>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                @foreach (var grupo in gruposPorTienda)
+                {
+                    decimal subtotalTienda = grupo.Sum(x => x.Precio * x.Cantidad);
 
-                                    <span>@item.Cantidad</span>
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                                <div>
+                                    <h5 class="fw-bold mb-1">
+                                        @(string.IsNullOrWhiteSpace(grupo.Key.NombreTienda)
+                                                                        ? "Tienda no identificada"
+                                                                        : grupo.Key.NombreTienda)
+                            </h5>
+                            <p class="text-muted mb-0">
+                                @grupo.Count() producto(s) en esta tienda
+                            </p>
+                        </div>
 
-                                    <a asp-controller="Carrito"
-                                       asp-action="Aumentar"
-                                       asp-route-id="@item.IdProducto"
-                                       class="btn btn-sm btn-outline-secondary">
-                                        +
-                                    </a>
+                                <div class="text-end">
+                                    <span class="text-muted d-block">Subtotal tienda</span>
+                                    <strong>$@subtotalTienda.ToString("N2")</strong>
                                 </div>
-                            </td>
-                            <td>$@((item.Precio * item.Cantidad).ToString("N2"))</td>
-                            <td>
-                                <a asp-controller="Carrito"
-                                   asp-action="Eliminar"
-                                   asp-route-id="@item.IdProducto"
-                                   class="btn btn-sm btn-outline-danger">
-                                    Eliminar
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                            </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-4">
-            <div>
-                <a asp-controller="Productos" asp-action="Index" class="btn btn-outline-secondary">
-                    Seguir comprando
-                </a>
+                    @foreach (var item in grupo)
+                            {
+                                var subtotalItem = item.Precio * item.Cantidad;
 
-                <a asp-controller="Carrito" asp-action="Vaciar" class="btn btn-outline-danger ms-2">
-                    Vaciar carrito
-                </a>
+                                <div class="border rounded-4 p-3 mb-3">
+                                    <div class="row align-items-center g-3">
+                                        <div class="col-md-2 col-4">
+                                            <img src="@(string.IsNullOrWhiteSpace(item.ImagenUrl) ? "/img/producto-default.jpg" : item.ImagenUrl)"
+                                                 alt="@item.NombreProducto"
+                                                 class="img-fluid rounded-3 border"
+                                                 style="width: 100%; max-height: 110px; object-fit: cover;" />
+                                        </div>
 
-                <a asp-controller="Checkout" asp-action="Index" class="btn btn-danger ms-2">
-                    Continuar compra
-                </a>
+                                        <div class="col-md-4 col-8">
+                                            <h6 class="fw-bold mb-1">@item.NombreProducto</h6>
+                                            <p class="text-muted mb-0">Producto agregado al carrito</p>
+                                        </div>
+
+                                        <div class="col-md-2 col-6">
+                                            <span class="text-muted d-block small">Precio</span>
+                                            <strong>$@item.Precio.ToString("N2")</strong>
+                                        </div>
+
+                                        <div class="col-md-2 col-6">
+                                            <span class="text-muted d-block small mb-1">Cantidad</span>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a asp-controller="Carrito"
+                                                   asp-action="Disminuir"
+                                                   asp-route-id="@item.IdProducto"
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    -
+                                                </a>
+
+                                                <span class="fw-semibold">@item.Cantidad</span>
+
+                                                <a asp-controller="Carrito"
+                                                   asp-action="Aumentar"
+                                                   asp-route-id="@item.IdProducto"
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    +
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-12 text-md-end">
+                                            <span class="text-muted d-block small">Subtotal</span>
+                                            <strong class="d-block mb-2">$@subtotalItem.ToString("N2")</strong>
+
+                                            <a asp-controller="Carrito"
+                                               asp-action="Eliminar"
+                                               asp-route-id="@item.IdProducto"
+                                               class="btn btn-sm btn-outline-danger">
+                                                Eliminar
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
             </div>
 
-            <div class="text-md-end">
-                <h4 class="mb-0">Total: $@total.ToString("N2")</h4>
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 rounded-4 position-sticky" style="top: 100px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Resumen de compra</h5>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Productos</span>
+                            <strong>@Model.Sum(x => x.Cantidad)</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Envío</span>
+                            <strong>$0.00</strong>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="fw-semibold">Total</span>
+                            <h4 class="mb-0">$@total.ToString("N2")</h4>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a asp-controller="Checkout" asp-action="Index" class="btn btn-danger">
+                                Continuar compra
+                            </a>
+
+                            <a asp-controller="Productos" asp-action="Index" class="btn btn-outline-secondary">
+                                Seguir comprando
+                            </a>
+
+                            <a asp-controller="Carrito" asp-action="Vaciar" class="btn btn-outline-danger">
+                                Vaciar carrito
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     }

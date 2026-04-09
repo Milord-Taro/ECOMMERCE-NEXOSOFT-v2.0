@@ -1,4 +1,5 @@
 ﻿@model ECOMMERCE_NEXOSOFT.Models.Producto
+@using ECOMMERCE_NEXOSOFT.Helpers
 
 @{
     ViewData["Title"] = "Editar producto";
@@ -10,6 +11,11 @@
         <p class="text-muted mb-0">Actualiza la información del producto seleccionado.</p>
     </div>
 
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["MensajeError"]</div>
+    }
+
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body p-4">
             <form asp-action="Edit">
@@ -19,71 +25,79 @@
 
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label asp-for="CodProducto" class="form-label fw-semibold"></label>
-                        <input asp-for="CodProducto" class="form-control" />
+                        <label asp-for="CodProducto" class="form-label fw-semibold">Código</label>
+                        <input asp-for="CodProducto" class="@FormFieldCss.Code9" />
                         <span asp-validation-for="CodProducto" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-8">
-                        <label asp-for="NombreProducto" class="form-label fw-semibold"></label>
-                        <input asp-for="NombreProducto" class="form-control" />
-                        <span asp-validation-for="NombreProducto" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-12">
-                        <label asp-for="DescripcionCorta" class="form-label fw-semibold"></label>
-                        <textarea asp-for="DescripcionCorta" class="form-control" rows="3"></textarea>
-                        <span asp-validation-for="DescripcionCorta" class="text-danger"></span>
+                    <div class="col-md-4">
+                        <label asp-for="IdCategoria" class="form-label fw-semibold">Categoría</label>
+                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria">
+                            <option value="">Selecciona una categoría</option>
+                        </select>
+                        <span asp-validation-for="IdCategoria" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="SkuProducto" class="form-label fw-semibold"></label>
-                        <input asp-for="SkuProducto" class="form-control" />
+                        <label asp-for="IdSubcategoria" class="form-label fw-semibold">Subcategoría</label>
+                        <select asp-for="IdSubcategoria" class="form-select" asp-items="ViewBag.IdSubcategoria">
+                            <option value="">Selecciona una subcategoría</option>
+                        </select>
+                        <span asp-validation-for="IdSubcategoria" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="NombreProducto" class="form-label fw-semibold">Nombre</label>
+                        <input asp-for="NombreProducto" class="@FormFieldCss.ProductName50" />
+                        <span asp-validation-for="NombreProducto" class="text-danger"></span>
+                        <small class="text-muted">Entre 3 y 50 caracteres.</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="MarcaProducto" class="form-label fw-semibold">Marca</label>
+                        <input asp-for="MarcaProducto" class="@FormFieldCss.Brand50" />
+                        <span asp-validation-for="MarcaProducto" class="text-danger"></span>
+                        <small class="text-muted">Entre 2 y 50 caracteres.</small>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="DescripcionCorta" class="form-label fw-semibold">Descripción corta</label>
+                        <textarea asp-for="DescripcionCorta" class="@FormFieldCss.ProductDescription150" rows="4"></textarea>
+                        <span asp-validation-for="DescripcionCorta" class="text-danger"></span>
+                        <small class="text-muted">Entre 3 y 150 caracteres.</small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="SkuProducto" class="form-label fw-semibold">SKU</label>
+                        <input asp-for="SkuProducto" class="@FormFieldCss.Sku20" />
                         <span asp-validation-for="SkuProducto" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="CodigoBarrasProducto" class="form-label fw-semibold"></label>
-                        <input asp-for="CodigoBarrasProducto" class="form-control" />
+                        <label asp-for="CodigoBarrasProducto" class="form-label fw-semibold">Código de barras</label>
+                        <input asp-for="CodigoBarrasProducto" class="@FormFieldCss.Barcode13" />
                         <span asp-validation-for="CodigoBarrasProducto" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="UnidadMedidaProducto" class="form-label fw-semibold"></label>
-                        <select asp-for="UnidadMedidaProducto" class="form-select" asp-items="ViewBag.UnidadMedidaProducto"></select>
+                        <label asp-for="UnidadMedidaProducto" class="form-label fw-semibold">Unidad de medida</label>
+                        <select asp-for="UnidadMedidaProducto" class="form-select" asp-items="ViewBag.UnidadMedidaProducto">
+                            <option value="">Selecciona una unidad</option>
+                        </select>
                         <span asp-validation-for="UnidadMedidaProducto" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="MarcaProducto" class="form-label fw-semibold"></label>
-                        <input asp-for="MarcaProducto" class="form-control" />
-                        <span asp-validation-for="MarcaProducto" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label asp-for="PrecioVentaProducto" class="form-label fw-semibold"></label>
-                        <input asp-for="PrecioVentaProducto" class="form-control" />
+                        <label asp-for="PrecioVentaProducto" class="form-label fw-semibold">Precio de venta</label>
+                        <input asp-for="PrecioVentaProducto" class="form-control" type="number" min="0.01" step="0.01" />
                         <span asp-validation-for="PrecioVentaProducto" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-4">
-                        <label asp-for="IdCategoria" class="form-label fw-semibold"></label>
-                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria"></select>
-                        <span asp-validation-for="IdCategoria" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" asp-for="Favorito" />
-                            <label class="form-check-label fw-semibold" asp-for="Favorito"></label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" asp-for="VisiblePublico" />
-                            <label class="form-check-label fw-semibold" asp-for="VisiblePublico"></label>
-                        </div>
+                    <div class="form-check form-switch md-4">
+                        <input class="form-check-input" asp-for="VisiblePublico" />
+                        <label class="form-check-label fw-semibold" asp-for="VisiblePublico">
+                            Visible públicamente
+                        </label>
                     </div>
                 </div>
 
@@ -100,4 +114,38 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        const categoriaSelect = document.getElementById("IdCategoria");
+        const subcategoriaSelect = document.getElementById("IdSubcategoria");
+        const selectedSubcategoria = "@Model.IdSubcategoria";
+
+        categoriaSelect.addEventListener("change", function () {
+            const idCategoria = this.value;
+
+            subcategoriaSelect.innerHTML = '<option value="">Selecciona una subcategoría</option>';
+
+            if (!idCategoria) return;
+
+            fetch(`/Producto/ObtenerSubcategorias?idCategoria=${idCategoria}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(item => {
+                        const option = document.createElement("option");
+                        option.value = item.idSubcategoria;
+                        option.text = item.nombreSubcategoria;
+
+                        if (selectedSubcategoria && selectedSubcategoria == item.idSubcategoria.toString()) {
+                            option.selected = true;
+                        }
+
+                        subcategoriaSelect.appendChild(option);
+                    });
+                });
+        });
+
+        if (categoriaSelect.value) {
+            categoriaSelect.dispatchEvent(new Event("change"));
+        }
+    </script>
 }

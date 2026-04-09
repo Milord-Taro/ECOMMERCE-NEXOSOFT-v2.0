@@ -5,66 +5,175 @@
 }
 
 <div class="container py-4">
-    <div class="mb-4">
-        <h2 class="fw-bold mb-1">Mi perfil</h2>
-        <p class="text-muted mb-0">Consulta y actualiza tu información personal.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Mi perfil personal</h2>
+            <p class="text-muted mb-0">Consulta y actualiza tu información personal.</p>
+        </div>
+
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver
+        </a>
     </div>
 
     @if (TempData["MensajeExito"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["MensajeExito"]
-        </div>
+        <div class="alert alert-success">@TempData["MensajeExito"]</div>
     }
 
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
-            <form asp-action="Index" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["MensajeError"]</div>
+    }
 
-                <input type="hidden" asp-for="IdUsuario" />
-                <input type="hidden" asp-for="IdRol" />
+    <form asp-action="Index" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <input type="hidden" asp-for="IdUsuario" />
+        <input type="hidden" asp-for="IdRol" />
+        <input type="hidden" asp-for="EsCuentaInternaTienda" />
+
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Datos personales</h5>
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label asp-for="Nombre" class="form-label fw-semibold"></label>
-                        <input asp-for="Nombre" class="form-control" />
+                        <label asp-for="Nombre" class="form-label fw-semibold">Nombre</label>
+                        <input asp-for="Nombre" class="form-control js-name-50" />
                         <span asp-validation-for="Nombre" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="Apellido" class="form-label fw-semibold"></label>
-                        <input asp-for="Apellido" class="form-control" />
+                        <label asp-for="Apellido" class="form-label fw-semibold">Apellido</label>
+                        <input asp-for="Apellido" class="form-control js-name-50" />
                         <span asp-validation-for="Apellido" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-6">
-                        <label asp-for="Telefono" class="form-label fw-semibold"></label>
-                        <input asp-for="Telefono" class="form-control" />
+                    <div class="col-md-4">
+                        <label asp-for="TipoIdentificacion" class="form-label fw-semibold">Tipo de identificación</label>
+                        <select asp-for="TipoIdentificacion" class="form-select">
+                            <option value="cc">Cédula</option>
+                            <option value="ti">Tarjeta de identidad</option>
+                            <option value="ppt">PPT</option>
+                            <option value="pasaporte">Pasaporte</option>
+                        </select>
+                        <span asp-validation-for="TipoIdentificacion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="NumeroIdentificacion" class="form-label fw-semibold">Número de identificación</label>
+                        <input asp-for="NumeroIdentificacion" class="form-control js-id-10" />
+                        <span asp-validation-for="NumeroIdentificacion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Telefono" class="form-label fw-semibold">Teléfono</label>
+                        <input asp-for="Telefono" class="form-control js-phone-10" />
                         <span asp-validation-for="Telefono" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-6">
-                        <label asp-for="CorreoElectronico" class="form-label fw-semibold"></label>
-                        <input asp-for="CorreoElectronico" class="form-control" />
+                    <div class="col-md-8">
+                        <label asp-for="CorreoElectronico" class="form-label fw-semibold">Correo electrónico</label>
+                        <input asp-for="CorreoElectronico" class="form-control js-email-100" />
                         <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="form-label fw-semibold">Rol</label>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Rol global</label>
                         <input class="form-control"
                                value="@(Model.IdRol == 1 ? "Administrador" : Model.IdRol == 2 ? "Cliente" : Model.IdRol == 3 ? "Vendedor" : "Sin rol")"
                                disabled />
                     </div>
                 </div>
-
-                <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-dark">Guardar cambios</button>
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Volver</a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        @if (!Model.EsCuentaInternaTienda)
+        {
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Direcciones de entrega</h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label asp-for="Direccion1" class="form-label fw-semibold">Dirección 1</label>
+                            <input asp-for="Direccion1" class="form-control js-address-150" />
+                            <span asp-validation-for="Direccion1" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="Direccion2" class="form-label fw-semibold">Dirección 2</label>
+                            <input asp-for="Direccion2" class="form-control js-address-150" />
+                            <span asp-validation-for="Direccion2" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="Direccion3" class="form-label fw-semibold">Dirección 3</label>
+                            <input asp-for="Direccion3" class="form-control js-address-150" />
+                            <span asp-validation-for="Direccion3" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Cambiar contraseña</h5>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="NuevaContrasena" class="form-label fw-semibold">Nueva contraseña</label>
+                        <input asp-for="NuevaContrasena" type="password" class="form-control js-password-100" />
+                        <span asp-validation-for="NuevaContrasena" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmarNuevaContrasena" class="form-label fw-semibold">Confirmar nueva contraseña</label>
+                        <input asp-for="ConfirmarNuevaContrasena" type="password" class="form-control js-password-100" />
+                        <span asp-validation-for="ConfirmarNuevaContrasena" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4 mb-0">
+                    Deja estos campos vacíos si no deseas cambiar tu contraseña.
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-dark">Guardar cambios</button>
+
+            @if (Model.IdRol == 2)
+            {
+                <a asp-controller="SolicitudVendedor" asp-action="MisSolicitudes" class="btn btn-outline-dark">
+                    Mis solicitudes de vendedor
+                </a>
+                <a asp-controller="SolicitudVendedor" asp-action="Create" class="btn btn-outline-dark">
+                    Quiero vender
+                </a>
+            }
+
+            @if (Model.IdRol == 3)
+            {
+                <a asp-controller="MiTienda" asp-action="Index" class="btn btn-outline-dark">
+                    Mi perfil tienda
+                </a>
+
+                @if (!Model.EsCuentaInternaTienda)
+                {
+                    <a asp-controller="MisPedidos" asp-action="Index" class="btn btn-outline-dark">
+                        Mis pedidos
+                    </a>
+                }
+
+                <a asp-controller="Vendedor" asp-action="Index" class="btn btn-outline-dark">
+                    Panel vendedor
+                </a>
+            }
+        </div>
+    </form>
 </div>
 
 @section Scripts {

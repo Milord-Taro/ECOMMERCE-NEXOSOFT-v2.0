@@ -1,0 +1,156 @@
+﻿@model IEnumerable<ECOMMERCE_NEXOSOFT.Models.SolicitudVendedor>
+
+@{
+    ViewData["Title"] = "Solicitudes de vendedor";
+    var estadoSeleccionado = ViewBag.EstadoSeleccionado as string;
+    var busqueda = ViewBag.Busqueda as string;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Solicitudes de vendedor</h2>
+            <p class="text-muted mb-0">Revisa, aprueba o rechaza las solicitudes de ingreso al módulo vendedor.</p>
+        </div>
+
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver al panel admin
+        </a>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success">@TempData["MensajeExito"]</div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["MensajeError"]</div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold">Buscar</label>
+                        <input type="text" name="buscar" value="@busqueda" class="form-control"
+                               placeholder="Tienda, razón social, NIT o usuario" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">Todos</option>
+                            @if (estadoSeleccionado == "pendiente")
+                            {
+                                <option value="pendiente" selected>Pendiente</option>
+                            }
+                            else
+                            {
+                                <option value="pendiente">Pendiente</option>
+                            }
+
+                            @if (estadoSeleccionado == "aprobada")
+                            {
+                                <option value="aprobada" selected>Aprobada</option>
+                            }
+                            else
+                            {
+                                <option value="aprobada">Aprobada</option>
+                            }
+
+                            @if (estadoSeleccionado == "rechazada")
+                            {
+                                <option value="rechazada" selected>Rechazada</option>
+                            }
+                            else
+                            {
+                                <option value="rechazada">Rechazada</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-dark">Filtrar</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Usuario</th>
+                            <th>Tienda</th>
+                            <th>Razón social</th>
+                            <th>NIT</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No se encontraron solicitudes con los filtros seleccionados.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.IdUsuarioNavigation?.Nombre @item.IdUsuarioNavigation?.Apellido</td>
+                                    <td>@item.NombreTiendaSolicitada</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.RazonSocial) ? "No registrada" : item.RazonSocial)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.NitRut) ? "No registrado" : item.NitRut)</td>
+                                    <td>
+                                        @if (item.EstadoSolicitud == "pendiente")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        }
+                                        else if (item.EstadoSolicitud == "aprobada")
+                                        {
+                                            <span class="badge bg-success">Aprobada</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Rechazada</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                            <a asp-action="Details" asp-route-id="@item.IdSolicitudVendedor" class="btn btn-sm btn-dark">
+                                                Gestionar
+                                            </a>
+
+                                            @if (item.EstadoSolicitud == "pendiente")
+                                            {
+                                                <a asp-action="Aprobar" asp-route-id="@item.IdSolicitudVendedor" class="btn btn-sm btn-dark">
+                                                    Aprobar
+                                                </a>
+                                                <a asp-action="Rechazar" asp-route-id="@item.IdSolicitudVendedor" class="btn btn-sm btn-outline-danger">
+                                                    Rechazar
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

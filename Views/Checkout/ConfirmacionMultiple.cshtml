@@ -1,0 +1,89 @@
+﻿@model List<ECOMMERCE_NEXOSOFT.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Compra confirmada";
+    decimal totalGeneral = Model.Sum(x => x.Total);
+}
+
+<section class="container py-5">
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="alert alert-success border-0 rounded-4 mb-0">
+                <h2 class="fw-bold mb-2">¡Compra confirmada!</h2>
+                <p class="mb-0">
+                    Tu compra fue procesada correctamente. Se generó un pedido por cada tienda involucrada.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info rounded-4">
+            No se encontraron pedidos asociados a esta compra.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código pedido</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pedido in Model)
+                            {
+                                <tr>
+                                    <td>@pedido.CodPedido</td>
+                                    <td>@pedido.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>$@pedido.Total.ToString("N2")</td>
+                                    <td>
+                                        @if (pedido.EstadoPedido == "pendiente")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        }
+                                        else if (pedido.EstadoPedido == "en camino")
+                                        {
+                                            <span class="badge bg-info text-dark">En camino</span>
+                                        }
+                                        else if (pedido.EstadoPedido == "entregado")
+                                        {
+                                            <span class="badge bg-success">Entregado</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Cancelado</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h4 class="mb-0">Total general: $@totalGeneral.ToString("N2")</h4>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-controller="MisPedidos" asp-action="Index" class="btn btn-danger">
+                    Ver mis pedidos
+                </a>
+
+                <a asp-controller="Productos" asp-action="Index" class="btn btn-outline-secondary">
+                    Seguir comprando
+                </a>
+            </div>
+        </div>
+    }
+</section>

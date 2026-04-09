@@ -2,23 +2,42 @@
 
 @{
     ViewData["Title"] = "Panel administrador";
-
-    var stockCritico = ViewBag.StockCritico as List<Stock> ?? new List<Stock>();
     var ultimosPedidos = ViewBag.UltimosPedidos as List<Pedido> ?? new List<Pedido>();
 }
 
 <div class="container py-4">
     <div class="mb-4">
         <h2 class="fw-bold mb-1">Panel administrador</h2>
-        <p class="text-muted mb-0">Resumen general del sistema y accesos rápidos.</p>
+        <p class="text-muted mb-0">Resumen general del marketplace y accesos de gestión.</p>
     </div>
 
     <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Usuarios</h6>
+                    <h3 class="fw-bold">@ViewBag.TotalUsuarios</h3>
+                    <small class="text-muted">Clientes: @ViewBag.TotalClientes | Vendedores: @ViewBag.TotalVendedores</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Tiendas</h6>
+                    <h3 class="fw-bold">@ViewBag.TotalTiendas</h3>
+                    <small class="text-muted">Visibles: @ViewBag.TiendasVisibles | Ocultas: @ViewBag.TiendasOcultas</small>
+                </div>
+            </div>
+        </div>
+
         <div class="col-md-3">
             <div class="card shadow-sm border-0 rounded-4 h-100">
                 <div class="card-body">
                     <h6 class="text-muted">Productos</h6>
                     <h3 class="fw-bold">@ViewBag.TotalProductos</h3>
+                    <small class="text-muted">Publicados: @ViewBag.ProductosPublicados | Ocultos: @ViewBag.ProductosOcultos</small>
                 </div>
             </div>
         </div>
@@ -26,126 +45,50 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 rounded-4 h-100">
                 <div class="card-body">
-                    <h6 class="text-muted">Publicados</h6>
-                    <h3 class="fw-bold text-success">@ViewBag.ProductosPublicados</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted">Stock bajo</h6>
-                    <h3 class="fw-bold text-warning">@ViewBag.TotalStockBajo</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted">Pedidos</h6>
-                    <h3 class="fw-bold">@ViewBag.TotalPedidos</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted">Clientes</h6>
-                    <h3 class="fw-bold">@ViewBag.TotalClientes</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted">Vendedores</h6>
-                    <h3 class="fw-bold">@ViewBag.TotalVendedores</h3>
+                    <h6 class="text-muted">Solicitudes pendientes</h6>
+                    <h3 class="fw-bold text-warning">@ViewBag.SolicitudesPendientes</h3>
+                    <small class="text-muted">Solicitudes de vendedor por revisar</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3">Productos con stock crítico</h5>
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Últimos pedidos del marketplace</h5>
 
-                    @if (!stockCritico.Any())
-                    {
-                        <p class="text-muted mb-0">No hay alertas de stock.</p>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Actual</th>
-                                        <th>Mínimo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in stockCritico)
-                                    {
-                                        bool stockBajo = item.StockActual <= item.StockMinimo;
-
-                                        <tr class="@(stockBajo ? "table-warning" : "")">
-                                            <td>@item.IdProductoNavigation?.NombreProducto</td>
-                                            <td>@item.StockActual</td>
-                                            <td>@item.StockMinimo</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
+            @if (!ultimosPedidos.Any())
+            {
+                <p class="text-muted mb-0">No hay pedidos registrados.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Tienda</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pedido in ultimosPedidos)
+                            {
+                                <tr>
+                                    <td>@pedido.CodPedido</td>
+                                    <td>@pedido.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@pedido.IdUsuarioNavigation?.Nombre @pedido.IdUsuarioNavigation?.Apellido</td>
+                                    <td>@(pedido.IdTiendaNavigation?.NombreTienda ?? "Sin tienda")</td>
+                                    <td>@pedido.Total.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3">Últimos pedidos</h5>
-
-                    @if (!ultimosPedidos.Any())
-                    {
-                        <p class="text-muted mb-0">No hay pedidos registrados.</p>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Código</th>
-                                        <th>Fecha</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var pedido in ultimosPedidos)
-                                    {
-                                        <tr>
-                                            <td>@pedido.CodPedido</td>
-                                            <td>@pedido.FechaCreacion.ToString("dd/MM/yyyy")</td>
-                                            <td>@pedido.Total.ToString("C")</td>
-                                            <td>@pedido.EstadoPedido</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                </div>
-            </div>
+            }
         </div>
     </div>
 
@@ -154,9 +97,12 @@
             <h5 class="fw-bold mb-3">Accesos rápidos</h5>
 
             <div class="d-flex flex-wrap gap-2">
-                <a asp-controller="Producto" asp-action="Index" class="btn btn-dark">Administrar productos</a>
-                <a asp-controller="Stock" asp-action="Index" class="btn btn-outline-dark">Administrar stock</a>
-                <a asp-controller="MisPedidos" asp-action="Index" class="btn btn-outline-secondary">Ver pedidos</a>
+                <a asp-controller="AdminSolicitudes" asp-action="Index" class="btn btn-outline-dark">Gestionar solicitudes</a>
+                <a asp-controller="Categoria" asp-action="Index" class="btn btn-outline-dark">Categorías</a>
+                <a asp-controller="Subcategoria" asp-action="Index" class="btn btn-outline-dark">Subcategorías</a>
+                <a asp-controller="AdminPedidos" asp-action="Index" class="btn btn-outline-dark">Pedidos marketplace</a>
+                <a asp-controller="Home" asp-action="Categorias" class="btn btn-outline-dark">Catálogo público</a>
+                <a asp-controller="Admin" asp-action="Metricas" class="btn btn-outline-dark">Métricas marketplace</a>
             </div>
         </div>
     </div>

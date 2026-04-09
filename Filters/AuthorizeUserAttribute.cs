@@ -1,34 +1,58 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ECOMMERCE_NEXOSOFT.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECOMMERCE_NEXOSOFT.Filters
 {
     public class AuthorizeUserAttribute : ActionFilterAttribute
     {
-        private readonly int[] _roles;
+        private readonly int[] _rolesPermitidos;
 
-        public AuthorizeUserAttribute(params int[] roles)
+        public AuthorizeUserAttribute(params int[] rolesPermitidos)
         {
-            _roles = roles;
+            _rolesPermitidos = rolesPermitidos;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var session = context.HttpContext.Session;
+            var idUsuario = context.HttpContext.Session.GetInt32("IdUsuario");
 
-            var usuario = session.GetString("Usuario");
-            var rol = session.GetInt32("Rol");
-
-            if (usuario == null || rol == null)
+            if (idUsuario == null)
             {
                 context.Result = new RedirectToActionResult("Login", "Auth", null);
                 return;
             }
 
-            if (_roles.Length > 0 && !_roles.Contains(rol.Value))
+            var dbContext = context.HttpContext.RequestServices.GetService(typeof(NexosoftDbContext)) as NexosoftDbContext;
+
+            if (dbContext == null)
             {
                 context.Result = new RedirectToActionResult("Login", "Auth", null);
+                return;
             }
+
+            var usuario = dbContext.Usuarios
+                .AsNoTracking()
+                .FirstOrDefault(u => u.IdUsuario == idUsuario.Value);
+
+            if (usuario == null)
+            {
+                context.HttpContext.Session.Clear();
+                context.Result = new RedirectToActionResult("Login", "Auth", null);
+                return;
+            }
+
+            // Sincroniza el rol actual de BD con la sesión
+            context.HttpContext.Session.SetInt32("Rol", usuario.IdRol);
+
+            if (!_rolesPermitidos.Contains(usuario.IdRol))
+            {
+                context.Result = new RedirectToActionResult("Index", "Home", null);
+                return;
+            }
+
+            base.OnActionExecuting(context);
         }
     }
 }
