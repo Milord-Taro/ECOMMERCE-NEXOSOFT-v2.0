@@ -2,6 +2,10 @@
 
 Aplicación web desarrollada en ASP.NET Core MVC para la gestión integral de tiendas ferreteras, orientada a pequeñas y medianas empresas en Colombia.
 
+## Objetivo del proyecto
+
+Este proyecto fue desarrollado como parte del proceso formativo en el SENA, aplicando buenas prácticas de desarrollo, arquitectura MVC y gestión de base de datos relacional.
+
 ## Tecnologías usadas
 
 - C#
