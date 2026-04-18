@@ -56,5 +56,5 @@ Incluye:
 
 ## Autores
 
-Efrain Arturo Manotas
-Gabriel Arturo Moreno
+- Efrain Arturo Manotas
+- Gabriel Arturo Moreno
